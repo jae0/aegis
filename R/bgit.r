@@ -1,11 +1,11 @@
 
-bgit = function( project="bio.base", action="status", ... ) {
+bgit = function( project="ecmenv", action="status", ... ) {
   #\\ interact with bio.* tools to interpoate with git
   # NOTE:: default is to return to branch "develop"
 
   wd.start = getwd()
 
-  reploc = bio.base::project.codedirectory( project )
+  reploc = ecmenv::project.codedirectory( project )
   setwd( reploc )
 
   if (action=="status" ) {

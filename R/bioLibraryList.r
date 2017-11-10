@@ -2,9 +2,9 @@
 bioLibraryList = function() {
 
   elibs = data.frame( rbind(
-    cbind( "bio.base", "jae0/bio.base"),
-    cbind( "bio.polygons", "jae0/bio.polygons"),
-    cbind( "ecmei", "jae0/ecmei"),
+    cbind( "ecmenv", "jae0/ecmenv"),
+    cbind( "ecmgis", "jae0/ecmgis"),
+    cbind( "emei", "jae0/emei"),
     cbind( "bio.taxonomy", "jae0/bio.taxonomy"),
     cbind( "bio.utilities", "jae0/bio.utilities"),
     cbind( "bio.groundfish", "jae0/bio.groundfish"),
