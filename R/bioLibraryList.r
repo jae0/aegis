@@ -6,7 +6,6 @@ bioLibraryList = function() {
     cbind( "emgis", "jae0/emgis"),
     cbind( "emei", "jae0/emei"),
     cbind( "bio.taxonomy", "jae0/bio.taxonomy"),
-    cbind( "bio.utilities", "jae0/bio.utilities"),
     cbind( "bio.groundfish", "jae0/bio.groundfish"),
     cbind( "netmensuration", "jae0/netmensuration"),
     cbind( "bio.snowcrab", "jae0/bio.snowcrab")
