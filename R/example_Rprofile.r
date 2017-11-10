@@ -44,17 +44,15 @@ tmpdir = file.path( homedir, "tmp")
 bc = bio.install = function(bio.dir="/home/jae/bio", ...) {
   mylibs = data.frame( rbind(
     cbind( "emenv", file.path(bio.dir, "emenv")),
-    cbind( "bio.utilities", file.path(bio.dir, "bio.utilities")),
     cbind( "emgis", file.path(bio.dir, "emgis")),
+    cbind( "emei", file.path(bio.dir, "emei")),
     cbind( "bio.taxonomy", file.path(bio.dir, "bio.taxonomy")),
-    cbind( "emgis", file.path(bio.dir, "emgis")),
     cbind( "bio.models", file.path(bio.dir, "bio.models")),
     cbind( "bio.groundfish", file.path(bio.dir, "bio.groundfish")),
     cbind( "bio.snowcrab", file.path(bio.dir, "bio.snowcrab")),
     cbind( "netmensuration", file.path(bio.dir, "netmensuration")),
     cbind( "LaplacesDemon", file.path(bio.dir, "LaplacesDemon")),
-    cbind( "LaplacesDemonCpp", file.path(bio.dir, "LaplacesDemonCpp")),
-    cbind( "emei", file.path(bio.dir, "emei"))
+    cbind( "LaplacesDemonCpp", file.path(bio.dir, "LaplacesDemonCpp"))
   ), stringsAsFactors=FALSE)
 
   names(mylibs) = c( "libname", "gitLoc" )
@@ -73,13 +71,11 @@ bc = bio.install = function(bio.dir="/home/jae/bio", ...) {
 bio.install.github = function(...) {
   mylibs = c(
     "jae0/emenv", 
-    "jae0/bio.utilities",
+    "jae0/emgis", 
+    "jae0/emei", 
     "jae0/LaplacesDemon", 
     "jae0/LaplacesDemonCpp", 
-    "jae0/emei", 
-    "jae0/emgis", 
     "jae0/bio.taxonomy", 
-    "jae0/emgis", 
     "jae0/bio.models", 
     "jae0/netmensuration", 
     "jae0/bio.groundfish", 
