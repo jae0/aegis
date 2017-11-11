@@ -1,11 +1,11 @@
 
-bgit = function( project="emenv", action="status", ... ) {
+bgit = function( project="stmenv", action="status", ... ) {
   #\\ interact with bio.* tools to interpoate with git
   # NOTE:: default is to return to branch "develop"
 
   wd.start = getwd()
 
-  reploc = emenv::project.codedirectory( project )
+  reploc = stmenv::project.codedirectory( project )
   setwd( reploc )
 
   if (action=="status" ) {
