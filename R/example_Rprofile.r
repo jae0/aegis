@@ -43,8 +43,8 @@ tmpdir = file.path( homedir, "tmp")
 
 bc = bio.install = function(bio.dir="/home/jae/bio", ...) {
   mylibs = data.frame( rbind(
-    cbind( "stmenv", file.path(bio.dir, "stmenv")),
-    cbind( "stmdat", file.path(bio.dir, "stmdat")),
+    cbind( "emaf_base", file.path(bio.dir, "emaf_base")),
+    cbind( "emaf", file.path(bio.dir, "emaf")),
     cbind( "stm", file.path(bio.dir, "stm")),
     cbind( "bio.taxonomy", file.path(bio.dir, "bio.taxonomy")),
     cbind( "bio.models", file.path(bio.dir, "bio.models")),
@@ -70,8 +70,8 @@ bc = bio.install = function(bio.dir="/home/jae/bio", ...) {
 
 bio.install.github = function(...) {
   mylibs = c(
-    "jae0/stmenv", 
-    "jae0/stmdat", 
+    "jae0/emaf_base", 
+    "jae0/emaf", 
     "jae0/stm", 
     "jae0/LaplacesDemon", 
     "jae0/LaplacesDemonCpp", 

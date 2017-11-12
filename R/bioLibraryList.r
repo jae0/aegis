@@ -2,8 +2,8 @@
 bioLibraryList = function() {
 
   elibs = data.frame( rbind(
-    cbind( "stmenv", "jae0/stmenv"),
-    cbind( "stmdat", "jae0/stmdat"),
+    cbind( "emaf_base", "jae0/emaf_base"),
+    cbind( "emaf", "jae0/emaf"),
     cbind( "stm", "jae0/stm"),
     cbind( "bio.taxonomy", "jae0/bio.taxonomy"),
     cbind( "bio.groundfish", "jae0/bio.groundfish"),
