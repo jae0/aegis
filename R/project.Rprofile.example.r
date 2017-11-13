@@ -1,4 +1,3 @@
-
 if (0) {
 # example Rprofile
 
@@ -6,7 +5,7 @@ options(
   repos = c(CRAN = "http://mirror.its.dal.ca/cran/"),
   papersize = "letter",
   width = 120, 
-  browser = "/usr/bin/flashpeak-slimjet",
+  browser = "/usr/bin/flashpeak=slimjet",
   mc.cores = parallel::detectCores(), 
   # browserNLdisabled = TRUE, 
   deparse.max.lines = 2,
@@ -40,7 +39,3 @@ tmpdir = file.path( homedir, "tmp")
   project_root = file.path( homedir, "bio" )   ### replace with correct path
   data_root = file.path( homedir, "bio.data" )   ### replace with correct path
 
-
-
-
-}

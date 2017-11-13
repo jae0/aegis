@@ -1,12 +1,12 @@
 
-emaf_help = function( h="emaf_help", filepattern="\\.r$") {
-  #// emaf_help( "emaf function name" ) - searches for help inside a function
+project.help = function( h="project.help", filepattern="\\.r$") {
+  #// project.help( "emaf function name" ) - searches for help inside a function
 
-  fn.docs = file.path( emaf_workdir, "emaf_help.docs.rdata")
-  fn.code = file.path( emaf_workdir, "emaf_help.sourcecode.rdata" )
+  fn.docs = file.path( emaf_workdir, "project.help.docs.rdata")
+  fn.code = file.path( emaf_workdir, "project.help.sourcecode.rdata" )
 
   if (h=="refresh") {
-    #// emaf_help( "refresh" ) - refresh list of functions available locally
+    #// project.help( "refresh" ) - refresh list of functions available locally
     print( "Refreshing locally available list of function names ... ")
     fl = NULL
     fl = list.files( path=project_root, pattern=filepattern, full.names=TRUE,
@@ -30,11 +30,11 @@ emaf_help = function( h="emaf_help", filepattern="\\.r$") {
     print( paste( "Local help files saved to ", emaf_workdir ))
   }
 
-  if ( !file.exists( fn.docs) | !file.exists( fn.code) ) emaf_help( "refresh" )
+  if ( !file.exists( fn.docs) | !file.exists( fn.code) ) project.help( "refresh" )
   load( fn.docs )
 
   mm = grep( h, names( docs), ignore.case=TRUE )
-  if (length(mm) == 0) return( "Function not found. Try refreshing local help with: emaf_help('refresh')) ")
+  if (length(mm) == 0) return( "Function not found. Try refreshing local help with: project.help('refresh')) ")
 
   fname = paste(tempfile(), "hmtl", sep=".")
   fn = file(fname, "w")

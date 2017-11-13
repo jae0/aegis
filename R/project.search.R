@@ -1,15 +1,15 @@
 
-emaf_search = function(  h="emaf_help", ... ) {
-  #// emaf_search ( "keyword", ... )  -- '...' are grep options
-  #// emaf_search ( "^eco.*" )  -- keyword can be REGEX .. start a line with "eco"
+project.search = function(  h="project.help", ... ) {
+  #// project.search ( "keyword", ... )  -- '...' are grep options
+  #// project.search ( "^eco.*" )  -- keyword can be REGEX .. start a line with "eco"
 
-  if ( h=="emaf_help" ) {
-    emaf_help( "emaf_search" )
+  if ( h=="project.help" ) {
+    project.help( "project.search" )
     return("Pass keyword or a regular expression (?regex)")
   }
 
-  fn.code = file.path( emaf_workdir, "emaf_help.sourcecode.rdata" )
-  if ( !file.exists( fn.code) ) emaf_help( "refresh" )
+  fn.code = file.path( emaf_workdir, "project.help.sourcecode.rdata" )
+  if ( !file.exists( fn.code) ) project.help( "refresh" )
   load( fn.code )
 
     extractData = function(X, h, ... ) {
