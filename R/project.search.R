@@ -8,7 +8,7 @@ project.search = function(  h="project.help", ... ) {
     return("Pass keyword or a regular expression (?regex)")
   }
 
-  fn.code = file.path( emaf_workdir, "project.help.sourcecode.rdata" )
+  fn.code = file.path( work_root, "project.help.sourcecode.rdata" )
   if ( !file.exists( fn.code) ) project.help( "refresh" )
   load( fn.code )
 

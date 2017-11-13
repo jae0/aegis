@@ -36,8 +36,8 @@ if (0) {
 
 
     # bio.* related things
-      emaf_workdir = file.path( homedir, "tmp" )     ### replace with correct path
-      project_root = file.path( homedir, "bio" )   ### replace with correct path
+      work_root = file.path( homedir, "tmp" )     ### replace with correct path
+      code_root = file.path( homedir, "bio" )   ### replace with correct path
       data_root = file.path( homedir, "bio.data" )   ### replace with correct path
 
 }

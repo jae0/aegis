@@ -2,14 +2,14 @@
 project.help = function( h="project.help", filepattern="\\.r$") {
   #// project.help( "emaf function name" ) - searches for help inside a function
 
-  fn.docs = file.path( emaf_workdir, "project.help.docs.rdata")
-  fn.code = file.path( emaf_workdir, "project.help.sourcecode.rdata" )
+  fn.docs = file.path( work_root, "project.help.docs.rdata")
+  fn.code = file.path( work_root, "project.help.sourcecode.rdata" )
 
   if (h=="refresh") {
     #// project.help( "refresh" ) - refresh list of functions available locally
     print( "Refreshing locally available list of function names ... ")
     fl = NULL
-    fl = list.files( path=project_root, pattern=filepattern, full.names=TRUE,
+    fl = list.files( path=code_root, pattern=filepattern, full.names=TRUE,
                      recursive=TRUE,  ignore.case=TRUE, include.dirs=FALSE )
     code = list()
     docs = list()
@@ -27,7 +27,7 @@ project.help = function( h="project.help", filepattern="\\.r$") {
     }
     save( docs, file=fn.docs, compress=TRUE )
     save( code, file=fn.code, compress=TRUE )
-    print( paste( "Local help files saved to ", emaf_workdir ))
+    print( paste( "Local help files saved to ", work_root ))
   }
 
   if ( !file.exists( fn.docs) | !file.exists( fn.code) ) project.help( "refresh" )

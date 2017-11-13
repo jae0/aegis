@@ -1,7 +1,7 @@
 
 
 project.datadirectory = function(...) {
-  if (!exists("project_root")) stop("Define 'data_root' in your Rprofile...")  
+  if (!exists("data_root")) stop("Define 'data_root' in your Rprofile...")  
   sep = .Platform$file.sep
   dirs = paste0( c(...) , collapse=sep ) 
   pd = file.path( data_root, dirs )
