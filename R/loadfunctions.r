@@ -7,8 +7,7 @@
     keydirectories=c("r", "\\.r", "\\_r", "rfunctions", "\\.rfunctions", "\\_rfunctions" ),
     toignore = c("retired", "_archive", "archive", "orphan", "request", "example" ),
     filepattern="\\.r$",
-    directory=NULL,
-    alternate.directory=NULL ) {
+    directory=NULL ) {
 
     # used to load local functions conveniently
     # sequence slightly important ... modify with care
@@ -20,7 +19,7 @@
 
     for (pn in projectname ) {
 
-      projectdirectory = project.codedirectory( directory, pn, alternate.directory=alternate.directory )
+      projectdirectory = project.codedirectory( directory, pn )
 
       for (searchdirectory in c( file.path( projectdirectory, RcodeDirectory ), projectdirectory ) ) {  # first try in RcodeDirectory and then the project if not found in first pass
 
@@ -76,11 +75,6 @@
         }
       }
 
-    }
-
-    if ( exists( "bio.startupfiles" ) ) {
-      # add bio-startup files to permit replication of environment in parallel runs
-      filestosource = unique( c( bio.startupfiles, filestosource ) )
     }
 
     LoadFiles( filestosource )

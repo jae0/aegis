@@ -1,6 +1,6 @@
 
-bgit = function( project="emaf_base", action="status", ... ) {
-  #\\ interact with bio.* tools to interpoate with git
+gp = function( project="emaf_base", action="status", ... ) {
+  #\\ interact with emaf_* tools and git
   # NOTE:: default is to return to branch "develop"
 
   wd.start = getwd()

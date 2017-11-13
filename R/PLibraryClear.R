@@ -1,4 +1,4 @@
-bioLibraryClear = function(...) {
+PLibraryClear = function(...) {
   #\\ clear a library from memory (namespace)
   #\\ used when developing code and there are conflicts in namespace
   pkgsLoaded = .packages()

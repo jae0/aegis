@@ -1,15 +1,15 @@
 
-bio.search = function(  h="bio.help", ... ) {
-  #// bio.search ( "keyword", ... )  -- '...' are grep options
-  #// bio.search ( "^eco.*" )  -- keyword can be REGEX .. start a line with "eco"
+emaf_search = function(  h="emaf_help", ... ) {
+  #// emaf_search ( "keyword", ... )  -- '...' are grep options
+  #// emaf_search ( "^eco.*" )  -- keyword can be REGEX .. start a line with "eco"
 
-  if ( h=="bio.help" ) {
-    bio.help( "bio.search" )
+  if ( h=="emaf_help" ) {
+    emaf_help( "emaf_search" )
     return("Pass keyword or a regular expression (?regex)")
   }
 
-  fn.code = file.path( bio.workdirectory, "bio.help.sourcecode.rdata" )
-  if ( !file.exists( fn.code) ) bio.help( "refresh" )
+  fn.code = file.path( emaf_workdir, "emaf_help.sourcecode.rdata" )
+  if ( !file.exists( fn.code) ) emaf_help( "refresh" )
   load( fn.code )
 
     extractData = function(X, h, ... ) {

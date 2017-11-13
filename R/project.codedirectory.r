@@ -1,20 +1,19 @@
 
-
-project.codedirectory = function(..., alternate.directory=NULL) {
-
+project.codedirectory = function(...) {
   ## this function is required to bootstrap the other project level functions
-  ## probably should make this cleaner one day .. :)
-
-  # determine project directory string
+  if (!exists("project_root")) stop("Define 'project_root' in your Rprofile...")  
   sep = .Platform$file.sep
   dirs = paste0( c(...) , collapse=sep )
-  if (is.null(alternate.directory)) dirpath = bio.directory else dirpath = alternate.directory
-  pd = file.path( dirpath, dirs )
+  pd = file.path( project_root, dirs )
   pd = gsub( paste( sep, "$", sep=""), "", pd) # strip last path element
-
-  # nonexistant directories
   if (! file.exists( pd)) {
-      warning( paste("Directory: ", pd, " was not found." ))
+    mk.Dir = readline(paste("Directory", pd, "not found, create it? Yes/No (Default No) : "))
+    if ( mk.Dir =="Yes" ) {
+      dir.create( pd, recursive=TRUE) 
+      print( paste("The directory -- ",  pd, " -- has been created") )
+    } else {
+      warning( paste("Directory: ", pd, " was not found." )) 
+    }
   }
   return ( pd )
 }
