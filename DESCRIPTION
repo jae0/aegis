@@ -1,4 +1,4 @@
-Package: emafbase
+Package: emaf.base
 Title: Base tools to bootstrap and interoperate with 'em*' and associated projects. 
 Version: 0.1
 Authors@R: c( person("Jae", "Choi", email="choijaeseok@gmail.com", role=c("aut", "cre")) ) 
@@ -11,6 +11,6 @@ Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 License: MIT
 LazyData: true
-URL: https://github.com/jae0/emafbase/
+URL: https://github.com/jae0/emaf.base/
 
 

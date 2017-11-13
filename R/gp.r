@@ -1,11 +1,11 @@
 
-gp = function( project="emaf_base", action="status", ... ) {
+gp = function( project="emaf.base", action="status", ... ) {
   #\\ interact with emaf_* tools and git
   # NOTE:: default is to return to branch "develop"
 
   wd.start = getwd()
 
-  reploc = emaf_base::project.codedirectory( project )
+  reploc = emaf.base::project.codedirectory( project )
   setwd( reploc )
 
   if (action=="status" ) {
