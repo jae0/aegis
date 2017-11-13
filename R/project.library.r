@@ -1,6 +1,6 @@
-project.library = function(...) {
+project.library = function(code_root=code_root, ...) {
   
-  mylibs = project.libraryList()
+  mylibs = project.libraryList(code_root)
   pkgsLoaded = .packages()
   pkgsInstalled = .packages(all.available = TRUE)
 
@@ -27,7 +27,6 @@ project.library = function(...) {
     print( "Missing some bio dependencies...")
     n = readline(prompt="Install them? (local/github/no): ")
     if (n %in% c("local", "github") ) {
-      if ( ! "devtools" %in% pkgsInstalled ) install.packages( "devtools", dependencies=TRUE )
       for ( nf in notfound ) {
         oo = which( mylibs$libname == nf )
         if (n=="local") try( devtools::install_git( mylibs$gitLoc[oo[1]], dependencies=FALSE, ... ) )
