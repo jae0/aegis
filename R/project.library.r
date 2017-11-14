@@ -1,6 +1,6 @@
-project.library = function(code_root=code_root, ...) {
+project.library = function( ... ) {
   
-  mylibs = project.libraryList(code_root)
+  mylibs = project.libraryList()
   pkgsLoaded = .packages()
   pkgsInstalled = .packages(all.available = TRUE)
 

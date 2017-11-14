@@ -1,6 +1,6 @@
 
 
-project.libraryList = function(code_root) {
+project.libraryList = function() {
     mylibs = data.frame( rbind(
       cbind( "LaplacesDemon", file.path(code_root, "LaplacesDemon"),"jae0/LaplacesDemon" ),
       cbind( "LaplacesDemonCpp", file.path(code_root, "LaplacesDemonCpp"), "jae0/LaplacesDemonCpp"),
