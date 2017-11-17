@@ -14,10 +14,10 @@ project.library = function( ... ) {
   found = intersect( pkgsInstalled, ll )
   if (length(found) > 0 ) {
     for ( pkg in found ) {
-      if ( pkg %in% pkgsLoaded ) {
-        message("Reloading installed ", pkg )
-        detach( paste("package", pkg, sep=":"), unload=TRUE, character.only=TRUE, force=TRUE )
-      }
+      # if ( pkg %in% pkgsLoaded ) {
+      #   message("Reloading installed ", pkg )
+      #   detach( paste("package", pkg, sep=":"), unload=TRUE, character.only=TRUE, force=TRUE )
+      # }
       require( pkg, character.only = TRUE )
     }
   }
@@ -32,10 +32,10 @@ project.library = function( ... ) {
         if (n=="local") try( devtools::install_git( mylibs$gitLoc[oo[1]], dependencies=FALSE, ... ) )
         if (n=="github") try( devtools::install_github( mylibs$githubLoc[oo[1]], ... ) )
         pkg = mylibs$libname[oo]
-        if ( pkg %in% pkgsLoaded ) {
-          message("Reloading installed ", pkg )
-          detach( paste("package", pkg, sep=":"), unload=TRUE, character.only=TRUE, force=TRUE )
-        }
+        # if ( pkg %in% pkgsLoaded ) {
+        #   message("Reloading installed ", pkg )
+        #   detach( paste("package", pkg, sep=":"), unload=TRUE, character.only=TRUE, force=TRUE )
+        # }
         require( pkg, character.only = TRUE )
       }
     }
