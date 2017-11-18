@@ -1,11 +1,11 @@
 
-gp = function( project="aegis.base", action="status", ... ) {
+gp = function( project="aegis.env", action="status", ... ) {
   #\\ interact with aegis_* tools and git
   # NOTE:: default is to return to branch "develop"
 
   wd.start = getwd()
 
-  reploc = aegis.base::project.codedirectory( project )
+  reploc = aegis.env::project.codedirectory( project )
   setwd( reploc )
 
   if (action=="status" ) {
