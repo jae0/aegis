@@ -4,8 +4,8 @@ project.libraryList = function() {
     mylibs = data.frame( rbind(
       cbind( "LaplacesDemon", file.path(code_root, "LaplacesDemon"),"jae0/LaplacesDemon" ),
       cbind( "LaplacesDemonCpp", file.path(code_root, "LaplacesDemonCpp"), "jae0/LaplacesDemonCpp"),
-      cbind( "emaf.base", file.path(code_root, "emaf.base"), "jae0/emaf.base"),
-      cbind( "emaf", file.path(code_root, "emaf"), "jae0/emaf"),
+      cbind( "aegis.base", file.path(code_root, "aegis.base"), "jae0/aegis.base"),
+      cbind( "aegis", file.path(code_root, "aegis"), "jae0/aegis"),
       cbind( "stm", file.path(code_root, "stm"), "jae0/stm"),
       cbind( "netmensuration", file.path(code_root, "netmensuration"), "jae0/netmensuration" ),
       cbind( "bio.taxonomy", file.path(code_root, "bio.taxonomy"), "jae0/bio.taxonomy"),

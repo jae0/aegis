@@ -1,11 +1,11 @@
 
-gp = function( project="emaf.base", action="status", ... ) {
-  #\\ interact with emaf_* tools and git
+gp = function( project="aegis.base", action="status", ... ) {
+  #\\ interact with aegis_* tools and git
   # NOTE:: default is to return to branch "develop"
 
   wd.start = getwd()
 
-  reploc = emaf.base::project.codedirectory( project )
+  reploc = aegis.base::project.codedirectory( project )
   setwd( reploc )
 
   if (action=="status" ) {

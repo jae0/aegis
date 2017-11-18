@@ -1,6 +1,6 @@
 
 project.help = function( h="project.help", filepattern="\\.r$") {
-  #// project.help( "emaf function name" ) - searches for help inside a function
+  #// project.help( "aegis function name" ) - searches for help inside a function
 
   fn.docs = file.path( work_root, "project.help.docs.rdata")
   fn.code = file.path( work_root, "project.help.sourcecode.rdata" )
