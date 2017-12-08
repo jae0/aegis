@@ -1,12 +1,17 @@
 #'  Run a parallel process .. wrapper for snow/parallel. Expectation of all relevant parameters in a list 'p'.
 
-parallel.run = function( FUNC, p, INDEX,  
+parallel_run = function( p,  FUNC, runindex=NULL,   
   clusters=NULL, clustertype=NULL, clusterexport=NULL, rndseed=NULL, ... ) {
 
   require(parallel)
 
-  nvars = length(INDEX)  # INDEX must be a list
-  p$runs = expand.grid(INDEX)
+  if (is.null(runindex)) if (exists("runindex", p)) runindex = p$runindex
+  if (is.null(runindex)) {
+    stop( "'runindex' was not defined" )
+  }  
+
+  nvars = length(runindex)  # runindex must be a list
+  p$runs = expand.grid(runindex)
   p$nruns = nrow( p$runs )
   p$runs_uid = do.call(paste, c(p$runs, sep="~"))
   
@@ -19,7 +24,7 @@ parallel.run = function( FUNC, p, INDEX,
   if (is.null(clustertype)) if (exists("clustertype", p)) clustertype=p$clustertype 
   if (is.null(clustertype)) {
     clustertype = "PSOCK"
-    message( "'clustertype' was not defined, using PSOCK connections as default." )
+    message( "'clustertype' was not defined, using PSOCK connections." )
   }
     
   if (is.null(rndseed)) if (exists("rndseed", p)) rndseed=p$rndseed 
