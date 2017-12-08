@@ -15,42 +15,42 @@ parallel_run = function( p,  FUNC, runindex=NULL,
   p$nruns = nrow( p$runs )
   p$runs_uid = do.call(paste, c(p$runs, sep="~"))
   
-  if (is.null(clusters)) if (exists("clusters", p)) clusters = p$clusters
-  if (is.null(clusters)) {
-    clusters = "localhost"
-    message( "'clusters' were not defined, using serial mode" )
+  if (!is.null(clusters)) p$clusters = clusters
+  if (!exists("clusters", p)) {
+    p$clusters = "localhost"
+    warning( "'clusters' were not defined, using serial mode" )
   }  
   
-  if (is.null(clustertype)) if (exists("clustertype", p)) clustertype=p$clustertype 
-  if (is.null(clustertype)) {
-    clustertype = "PSOCK"
-    message( "'clustertype' was not defined, using PSOCK connections." )
+  if (!is.null(clustertype)) p$clustertype = clustertype 
+  if (!exists("clustertype", p)) {
+    p$clustertype = "PSOCK"
+    warning( "'clustertype' was not defined, using PSOCK connections." )
   }
     
-  if (is.null(rndseed)) if (exists("rndseed", p)) rndseed=p$rndseed 
-  if (is.null(rndseed)) {
-      rndseed = 1
+  if (!is.null(rndseed)) p$rndseed = rndseed 
+  if (!exists("rndseed", p))  {
+      p$rndseed = 1
       message( "'rndseed' was not defined, using rndseed=1 as the default." )
   }
     
   message( "The processes are being run on:")
-  message(  paste( unlist( clusters), collapse=" ") )
+  message(  paste( unlist( p$clusters), collapse=" ") )
 
   out = NULL
-  if ( length(clusters) == 1 | nruns==1 ) {
+  if ( length(p$clusters) == 1 | p$nruns==1 ) {
     out = suppressMessages( FUNC( p=p, ... ) )
-  } else if ( nruns < length(clusters) ) {
-    clusters = sample( clusters, nruns )  # if very few runs, use only what is required
+  } else if ( p$nruns < length( p$clusters ) ) {
+    p$clusters = sample( p$clusters, p$nruns )  # if very few runs, use only what is required
   }
   
-  if ( length(clusters) > 1 ) {
-    cl = makeCluster( spec=clusters, type=clustertype ) # SOCK works well but does not load balance as MPI
+  if ( length(p$clusters) > 1 ) {
+    cl = makeCluster( spec=p$clusters, type=p$clustertype ) # SOCK works well but does not load balance as MPI
     RNGkind("L'Ecuyer-CMRG")  # multiple streams of pseudo-random numbers.
-    clusterSetRNGStream(cl, iseed=rndseed )
+    clusterSetRNGStream(cl, iseed=p$rndseed )
     if ( !is.null(clusterexport)) clusterExport( cl, clusterexport )
     uv = unique(p$runs_uid)
     uvl = length(uv)
-    lc = length(clusters)
+    lc = length(p$clusters)
     lci = 1:lc
     ssplt = list()
     for(j in 1:uvl) ssplt[[j]]  = which(p$runs_uid == uv[j])
