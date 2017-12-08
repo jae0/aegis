@@ -87,7 +87,7 @@ gp = function( project="aegis.env", action="status", ... ) {
   setwd( wd.start )
   print( paste0( "Returning working directory to initial location: ", wd.start ) )
 
-  invisible()
+  return(NULL)
 }
 
 
