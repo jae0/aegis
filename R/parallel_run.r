@@ -1,7 +1,7 @@
 #'  Run a parallel process .. wrapper for snow/parallel. Expectation of all relevant parameters in a list 'p'.
 
 parallel_run = function( p,  FUNC, runindex=NULL,   
-  clusters=NULL, clustertype=NULL, clusterexport=NULL, rndseed=NULL, ... ) {
+  clusters=NULL, clustertype=NULL, clusterexport=NULL, rndseed=NULL, verbose=FALSE, ... ) {
 
   require(parallel)
 
@@ -18,24 +18,26 @@ parallel_run = function( p,  FUNC, runindex=NULL,
   if (!is.null(clusters)) p$clusters = clusters
   if (!exists("clusters", p)) {
     p$clusters = "localhost"
-    warning( "'clusters' were not defined, using serial mode" )
+    if (verbose) message( "'clusters' were not defined, using serial mode" )
   }  
   
   if (!is.null(clustertype)) p$clustertype = clustertype 
   if (!exists("clustertype", p)) {
     p$clustertype = "PSOCK"
-    warning( "'clustertype' was not defined, using PSOCK connections." )
+    if (verbose) message( "'clustertype' was not defined, using PSOCK connections." )
   }
     
   if (!is.null(rndseed)) p$rndseed = rndseed 
   if (!exists("rndseed", p))  {
       p$rndseed = 1
-      message( "'rndseed' was not defined, using rndseed=1 as the default." )
+      if (verbose) message( "'rndseed' was not defined, using rndseed=1 as the default." )
   }
     
-  message( "The processes are being run on:")
-  message(  paste( unlist( p$clusters), collapse=" ") )
-
+  if (verbose) {
+    message( "The processes are being run on:")
+    message(  paste( unlist( p$clusters), collapse=" ") )
+  }
+  
   out = NULL
   if ( length(p$clusters) == 1 | p$nruns==1 ) {
     out = suppressMessages( FUNC( p=p, ... ) )
