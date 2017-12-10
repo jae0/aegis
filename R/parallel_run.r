@@ -1,6 +1,6 @@
 #'  Run a parallel process .. wrapper for snow/parallel. Expectation of all relevant parameters in a list 'p'.
 
-parallel_run = function( p,  FUNC, runindex=NULL,   
+parallel_run = function( p, FUNC=NULL, runindex=NULL,   
   clusters=NULL, clustertype=NULL, clusterexport=NULL, rndseed=NULL, verbose=FALSE, ... ) {
 
   require(parallel)
@@ -32,7 +32,9 @@ parallel_run = function( p,  FUNC, runindex=NULL,
       p$rndseed = 1
       if (verbose) message( "'rndseed' was not defined, using rndseed=1 as the default." )
   }
-    
+  
+  if (is.null(FUNC)) return(p)  # FUNC is NULL means no running just return params 
+  
   if (verbose) {
     message( "The processes are being run on:")
     message(  paste( unlist( p$clusters), collapse=" ") )
