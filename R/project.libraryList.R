@@ -2,7 +2,7 @@
 
 project.libraryList = function( DS="default" ) {
 
-  if (DS %in% c("default", "snowcrab" ) {
+  if (DS %in% c("default", "snowcrab" )  ){
     mylibs = data.frame( rbind(
       cbind( "aegis.env", file.path(code_root, "aegis.env"), "jae0/aegis.env"),
       cbind( "aegis", file.path(code_root, "aegis"), "jae0/aegis"),
