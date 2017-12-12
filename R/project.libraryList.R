@@ -5,7 +5,7 @@ project.libraryList = function( DS="default" ) {
     mylibs = data.frame( rbind(
       cbind( "aegis.env", file.path(code_root, "aegis.env"), "jae0/aegis.env"),
       cbind( "aegis", file.path(code_root, "aegis"), "jae0/aegis"),
-      cbind( "stm", file.path(code_root, "stm"), "jae0/stm"),
+      cbind( "stmv", file.path(code_root, "stmv"), "jae0/stmv"),
       cbind( "netmensuration", file.path(code_root, "netmensuration"), "jae0/netmensuration" ),
       cbind( "bio.taxonomy", file.path(code_root, "bio.taxonomy"), "jae0/bio.taxonomy"),
       cbind( "bio.snowcrab", file.path(code_root, "bio.snowcrab"), "jae0/bio.snowcrab")
@@ -21,8 +21,8 @@ project.libraryList = function( DS="default" ) {
       cbind( "LaplacesDemonCpp", file.path(code_root, "LaplacesDemonCpp"), "jae0/LaplacesDemonCpp"),
       cbind( "aegis.env", file.path(code_root, "aegis.env"), "jae0/aegis.env"),
       cbind( "aegis", file.path(code_root, "aegis"), "jae0/aegis"),
-      cbind( "stm", file.path(code_root, "stm"), "jae0/stm"),
-      cbind( "stmr", file.path(code_root, "stmr"), "jae0/stm"),
+      cbind( "stmv", file.path(code_root, "stmv"), "jae0/stmv"),
+      cbind( "stmr", file.path(code_root, "stmr"), "jae0/stmv"),
       cbind( "netmensuration", file.path(code_root, "netmensuration"), "jae0/netmensuration" ),
       cbind( "bio.taxonomy", file.path(code_root, "bio.taxonomy"), "jae0/bio.taxonomy"),
       cbind( "bio.models", file.path(code_root, "bio.models"), "jae0/bio.models"),
