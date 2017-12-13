@@ -37,5 +37,5 @@ If you have a local git clone of the required packages, you can install with:
 
 ```
 
-For usage, examples can be found in https://github.com/jae0/aegis/inst/scripts/. 
+For usage, examples can be found in https://github.com/jae0/aegis/tree/master/inst/scripts/. 
 
