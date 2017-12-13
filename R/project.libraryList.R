@@ -2,6 +2,19 @@
 
 project.libraryList = function( DS="default" ) {
 
+  if (DS %in% c("default" )  ){
+    mylibs = data.frame( rbind(
+      cbind( "aegis.env", file.path(code_root, "aegis.env"), "jae0/aegis.env"),
+      cbind( "aegis", file.path(code_root, "aegis"), "jae0/aegis"),
+      cbind( "stmv", file.path(code_root, "stmv"), "jae0/stmv"),
+      cbind( "netmensuration", file.path(code_root, "netmensuration"), "jae0/netmensuration" ),
+      cbind( "bio.taxonomy", file.path(code_root, "bio.taxonomy"), "jae0/bio.taxonomy")
+    ), stringsAsFactors=FALSE)
+
+    names(mylibs) = c( "libname", "gitLoc", "githubLoc" )
+    return(mylibs)
+  }
+
   if (DS %in% c("default", "snowcrab" )  ){
     mylibs = data.frame( rbind(
       cbind( "aegis.env", file.path(code_root, "aegis.env"), "jae0/aegis.env"),

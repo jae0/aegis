@@ -1,4 +1,4 @@
-Basic environment for using aegis*, bio*, and stmv* packages. This provides the required functions to bootstrap and interact with each package.
+Basic environment for using aegis*, bio*, and stm* packages. This provides the required functions to bootstrap and interact with each package.
 
 To install you need to bootstrap from github directly: 
 
@@ -36,3 +36,6 @@ If you have a local git clone of the required packages, you can install with:
   aegis.env::project.libraryInstall(local=TRUE)  
 
 ```
+
+For usage, examples can be found in https://github.com/jae0/aegis/inst/scripts/. 
+
