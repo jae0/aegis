@@ -17,6 +17,7 @@ RLibrary = function( ... ) {
   notfound = setdiff( ll, pkgs )
   if (length(notfound) > 0) {
     print( "Missing some dependencies...")
+    print( notfound )
     n = readline(prompt="Install them? (y/n): ")
     if ( tolower(n) %in% c("y", "yes") ) {
       for ( nf in notfound ) {
@@ -25,10 +26,10 @@ RLibrary = function( ... ) {
       }
     }
   }
-
+  
   if ( "INLA" %in% notfound ) {
-    try( install.packages("INLA", repos="https://www.math.ntnu.no/inla/R/stable") )
-    try( require( "INLA", character.only = TRUE ))
+    print( "To install INLA:")
+    print( '  install.packages("INLA", repos="https://www.math.ntnu.no/inla/R/stable") ' )
   }
 
   return( ll )
