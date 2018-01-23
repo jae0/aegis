@@ -7,7 +7,7 @@ parallel_run = function( p, FUNC=NULL, runindex=NULL,
 
   if (is.null(runindex)) if (exists("runindex", p)) runindex = p$runindex
   if (is.null(runindex)) {
-    stop( "'runindex' was not defined" )
+    stop( "'runindex' needs to be defined" )
   }  
 
   nvars = length(runindex)  # runindex must be a list
@@ -40,9 +40,10 @@ parallel_run = function( p, FUNC=NULL, runindex=NULL,
     message(  paste( unlist( p$clusters), collapse=" ") )
   }
   
-  out = NULL
+  p$out = NULL
+  
   if ( length(p$clusters) == 1 | p$nruns==1 ) {
-    out = suppressMessages( FUNC( p=p, ... ) )
+    p$out = FUNC( p=p, ... ) 
   } else if ( p$nruns < length( p$clusters ) ) {
     p$clusters = sample( p$clusters, p$nruns )  # if very few runs, use only what is required
   }
@@ -67,8 +68,9 @@ parallel_run = function( p, FUNC=NULL, runindex=NULL,
       }
     }
     ssplt = NULL
-    out = suppressMessages( clusterApply( cl, clustertasklist, FUNC, p=p, ... ) )
-    stopCluster( cl )
+    p$cl = cl
+    p$out = clusterApply( cl, clustertasklist, FUNC, p=p, ... ) 
+    message( "Run: 'stopCluster( p$cl )' to fully stop  all parallel processes")
   }
-  return(  out  )
+  return( p )
 }
