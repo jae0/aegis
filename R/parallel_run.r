@@ -11,7 +11,7 @@ parallel_run = function( p, FUNC=NULL, runindex=NULL,
   }  
 
   nvars = length(runindex)  # runindex must be a list
-  p$runs = expand.grid(runindex)
+  p$runs = expand.grid(runindex, stringsAsFactors=FALSE, KEEP.OUT.ATTRS=FALSE)
   p$nruns = nrow( p$runs )
   p$runs_uid = do.call(paste, c(p$runs, sep="~"))
   
