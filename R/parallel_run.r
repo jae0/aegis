@@ -68,9 +68,8 @@ parallel_run = function( p, FUNC=NULL, runindex=NULL,
       }
     }
     ssplt = NULL
-    p$cl = cl
     p$out = clusterApply( cl, clustertasklist, FUNC, p=p, ... ) 
-    message( "Run: 'stopCluster( p$cl )' to fully stop  all parallel processes")
+    stopCluster( cl )
   }
   return( p )
 }
