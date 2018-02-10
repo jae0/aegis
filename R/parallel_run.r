@@ -69,7 +69,7 @@ parallel_run = function( p, FUNC=NULL, runindex=NULL,
     }
     ssplt = NULL
     p$out = clusterApply( cl, clustertasklist, FUNC, p=p, ... )
-    # stopCluster( cl )
+    stopCluster( cl )
   }
   return( p )
 }
