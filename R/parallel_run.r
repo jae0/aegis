@@ -1,7 +1,8 @@
 #'  Run a parallel process .. wrapper for snow/parallel. Expectation of all relevant parameters in a list 'p'.
 
 parallel_run = function( p, FUNC=NULL, runindex=NULL,
-  clusters=NULL, clustertype=NULL, clusterexport=NULL, rndseed=NULL, verbose=FALSE, ... ) {
+  clusters=NULL, clustertype=NULL, clusterexport=NULL, 
+  rndseed=NULL, verbose=FALSE, ... ) {
 
   require(parallel)
 
@@ -40,10 +41,10 @@ parallel_run = function( p, FUNC=NULL, runindex=NULL,
     message(  paste( unlist( p$clusters), collapse=" ") )
   }
 
-  p$out = NULL
+  out = NULL
 
   if ( length(p$clusters) == 1 | p$nruns==1 ) {
-    p$out = FUNC( p=p, ... )
+    out = FUNC( p=p, ... )
   } else if ( p$nruns < length( p$clusters ) ) {
     p$clusters = sample( p$clusters, p$nruns )  # if very few runs, use only what is required
   }
@@ -68,8 +69,8 @@ parallel_run = function( p, FUNC=NULL, runindex=NULL,
       }
     }
     ssplt = NULL
-    p$out = clusterApply( cl, clustertasklist, FUNC, p=p, ... )
+    out = clusterApply( cl, clustertasklist, FUNC, p=p, ... )
     stopCluster( cl )
   }
-  return( p )
+  return ( out )
 }
