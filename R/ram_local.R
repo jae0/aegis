@@ -13,7 +13,7 @@ ram_local = function( returnall=FALSE) {
   }
 
   if (os=="Linux") {
-    x = system2('free', args='-m', stdout=TRUE)
+    x = system2('free', args='-g', stdout=TRUE)
     y = x[ grepl("total", x) ]
     y = unlist( strsplit( y, "[[:space:]]+") )
     y[1] = "dummy"
