@@ -48,9 +48,10 @@ parallel_run = function( p, FUNC=NULL, runindex=NULL,
   } else if ( p$nruns < length( p$clusters ) ) {
     p$clusters = sample( p$clusters, p$nruns )  # if very few runs, use only what is required
   }
+  
 
   if ( length(p$clusters) > 1 ) {
-    cl = makeCluster( spec=p$clusters, type=p$clustertype ) # SOCK works well but does not load balance as MPI
+    cl = makeCluster( spec=p$clusters, type=p$clustertype, nnode=length(p$clusters) ) # SOCK works well but does not load balance as MPI
     RNGkind("L'Ecuyer-CMRG")  # multiple streams of pseudo-random numbers.
     clusterSetRNGStream(cl, iseed=p$rndseed )
     if ( !is.null(clusterexport)) clusterExport( cl, clusterexport )
