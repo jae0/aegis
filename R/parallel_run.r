@@ -1,7 +1,7 @@
 #'  Run a parallel process .. wrapper for snow/parallel. Expectation of all relevant parameters in a list 'p'.
 
 parallel_run = function( p, FUNC=NULL, runindex=NULL,
-  clusters=NULL, clustertype=NULL, clusterexport=NULL, 
+  clusters=NULL, clustertype=NULL, clusterexport=NULL,
   rndseed=NULL, verbose=FALSE, ... ) {
 
   require(parallel)
@@ -25,7 +25,7 @@ parallel_run = function( p, FUNC=NULL, runindex=NULL,
   if (!is.null(clustertype)) p$clustertype = clustertype
   if (!exists("clustertype", p)) {
     p$clustertype = "PSOCK"
-    if (verbose) message( "'clustertype' was not defined, using PSOCK connections." )
+    if (verbose) message( "'clustertype' was not defined, using PSOCK as a default." )
   }
 
   if (!is.null(rndseed)) p$rndseed = rndseed
@@ -48,10 +48,15 @@ parallel_run = function( p, FUNC=NULL, runindex=NULL,
   } else if ( p$nruns < length( p$clusters ) ) {
     p$clusters = sample( p$clusters, p$nruns )  # if very few runs, use only what is required
   }
-  
+
+
 
   if ( length(p$clusters) > 1 ) {
-    cl = makeCluster( spec=p$clusters, type=p$clustertype, nnode=length(p$clusters) ) # SOCK works well but does not load balance as MPI
+    if ( !exists("nnode", p) ) {
+      message("nnode not given, using no cpus in 'clusters'")
+      p$nnode = length( p$clusters)
+    }
+    cl = makeCluster( spec=p$clusters, type=p$clustertype, nnode=p$nnode ) # SOCK works well but does not load balance as MPI
     RNGkind("L'Ecuyer-CMRG")  # multiple streams of pseudo-random numbers.
     clusterSetRNGStream(cl, iseed=p$rndseed )
     if ( !is.null(clusterexport)) clusterExport( cl, clusterexport )
@@ -73,5 +78,6 @@ parallel_run = function( p, FUNC=NULL, runindex=NULL,
     out = clusterApply( cl, clustertasklist, FUNC, p=p, ... )
     stopCluster( cl )
   }
+
   return ( out )
 }
