@@ -52,11 +52,8 @@ parallel_run = function( p, FUNC=NULL, runindex=NULL,
 
 
   if ( length(p$clusters) > 1 ) {
-    if ( !exists("nnodes", p) ) {
-      message("nnodes not given, using no cpus in 'clusters'")
-      p$nnodes = length( p$clusters)
-    }
-    cl = makeCluster( spec=p$clusters, type=p$clustertype, nnodes=p$nnodes ) # SOCK works well but does not load balance as MPI
+    if ( p$clustertype=="FORK" ) p$clusters = length( p$clusters)
+    cl = makeCluster( spec=p$clusters, type=p$clustertype ) # SOCK works well but does not load balance as MPI
     RNGkind("L'Ecuyer-CMRG")  # multiple streams of pseudo-random numbers.
     clusterSetRNGStream(cl, iseed=p$rndseed )
     if ( !is.null(clusterexport)) clusterExport( cl, clusterexport )
