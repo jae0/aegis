@@ -1,4 +1,4 @@
-ram_local = function( returnall=FALSE) {
+ram_local = function( returnvalue="ram", ram_main=NULL, ram_process=NULL ) {
   os = Sys.info()[["sysname"]]
   if (os == "Windows"){
     x = try( memory.size(max = FALSE))
@@ -7,9 +7,8 @@ ram_local = function( returnall=FALSE) {
       x <- x[grepl("FreePhysicalMemory", x)]
       x <- gsub("FreePhysicalMemory=", "", x, fixed = TRUE)
       x <- gsub("\r", "", x, fixed = TRUE)
-      x = as.integer(x)
+      out = as.integer(x)
     }
-    return(x)
   }
 
   if (os=="Linux") {
@@ -23,7 +22,14 @@ ram_local = function( returnall=FALSE) {
     z[1] = NA
     z = as.numeric(z)
     names(z) = y
-    if (returnall) return(z)
-    return(z["total"])
+    out = z["total"]
+  }
+
+  if (returnvalue=="ram") return (out)   
+
+  if (returnvalue=="ncores") {
+    ncores_total = parallel::detectCores() 
+    ncores_required = floor( (out - ram_main) / ram_process ) 
+    return( min( ncores_total, ncores_required ) )
   }
 }
