@@ -6,6 +6,25 @@ To install you need to bootstrap from github directly:
   devtools::install_github( "jae0/aegis.env" )
 ```
 
+or you can add the following into your Rprofile:
+
+```
+pkgsInstalled = .packages(all.available = TRUE)
+if (!"aegis.env" %in% pkgsInstalled ) {
+  message( "The package, aegis.env is missing, please install")
+  message( "Install right now? (y/n):")
+  o = readline()
+  if (o=="y"){
+    if (!"devtools" %in% pkgsInstalled ) {
+      install.packages("devtools", dependencies=TRUE, ask=FALSE)
+    }
+    require( devtools)
+    install_github( "jae0/aegis.env")
+  }
+}
+```
+
+
 Then, you need to have an Rprofile set up properly such as:
 
 ```.
