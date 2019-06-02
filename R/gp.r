@@ -1,11 +1,11 @@
 
-gp = function( project="aegis.env", action="status", ... ) {
+gp = function( project="aegis.base", action="status", ... ) {
   #\\ interact with aegis_* tools and git
   # NOTE:: default is to return to branch "develop"
 
   wd.start = getwd()
 
-  reploc = aegis.env::project.codedirectory( project )
+  reploc = aegis.base::project.codedirectory( project )
   setwd( reploc )
 
   if (action=="status" ) {
@@ -53,13 +53,13 @@ gp = function( project="aegis.env", action="status", ... ) {
    }
 
 
-  if (action=="push.to.github" ) {
+  if (action=="push.to.gitlab" ) {
     system2( "git", "checkout master" )
     system2( "git", "push" )
     system2( "git", "checkout develop" )
   }
 
-  if (action=="update.github" ) {
+  if (action=="update.gitlab" ) {
     if ( length(c(...))==0 ) stop( "Need to send a comment as a third element for the commit.")
     system2( "git",  paste("commit -am '", c(...), "'" ) )
     system2( "git", "checkout master" )

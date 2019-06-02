@@ -40,6 +40,6 @@ if (0) {
       code_root = file.path( homedir, "bio" )   ### replace with correct path
       data_root = file.path( homedir, "bio.data" )   ### replace with correct path
     
-    require(aegis.env)
+    require(aegis.base)
 
 }

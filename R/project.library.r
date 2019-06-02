@@ -25,12 +25,12 @@ project.library = function( ... ) {
   notfound = setdiff( ll, pkgsInstalled )
   if (length(notfound) > 0) {
     print( "Missing some bio dependencies...")
-    n = readline(prompt="Install them? (local/github/no): ")
-    if (n %in% c("local", "github") ) {
+    n = readline(prompt="Install them? (local/gitlab/no): ")
+    if (n %in% c("local", "gitlab") ) {
       for ( nf in notfound ) {
         oo = which( mylibs$libname == nf )
         if (n=="local") try( devtools::install_git( mylibs$gitLoc[oo[1]], dependencies=FALSE, ... ) )
-        if (n=="github") try( devtools::install_github( mylibs$githubLoc[oo[1]], ... ) )
+        if (n=="gitlab") try( devtools::install_gitlab( mylibs$gitlabLoc[oo[1]], ... ) )
         pkg = mylibs$libname[oo]
         # if ( pkg %in% pkgsLoaded ) {
         #   message("Reloading installed ", pkg )

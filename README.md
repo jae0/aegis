@@ -1,17 +1,17 @@
 Basic environment for using aegis*, bio*, and stm* packages. This provides the required functions to bootstrap and interact with each package.
 
-To install you need to bootstrap from github directly: 
+To install you need to bootstrap from gitlab directly: 
 
 ```
-  devtools::install_github( "jae0/aegis.env" )
+  devtools::install_gitlab( "jae0/aegis.base" )
 ```
 
 or you can add the following into your Rprofile:
 
 ```
 pkgsInstalled = .packages(all.available = TRUE)
-if (!"aegis.env" %in% pkgsInstalled ) {
-  message( "The package, aegis.env is missing, please install")
+if (!"aegis.base" %in% pkgsInstalled ) {
+  message( "The package, aegis.base is missing, please install")
   message( "Install right now? (y/n):")
   o = readline()
   if (o=="y"){
@@ -19,7 +19,7 @@ if (!"aegis.env" %in% pkgsInstalled ) {
       install.packages("devtools", dependencies=TRUE, ask=FALSE)
     }
     require( devtools)
-    install_github( "jae0/aegis.env")
+    install_gitlab( "jae0/aegis.base")
   }
 }
 ```
@@ -39,22 +39,22 @@ data_root = file.path( homedir, "bio.data" )   ### replace with correct path to 
 passwords = file.path( homedir, ".passwords" )
 if (file.exists(passwords)) source( passwords )
 
-require( aegis.env ) 
+require( aegis.base ) 
 ```
 
 
 Thereafter, you can used the bootstrapped environment to install the other basic tools: 
 
 ```
-  aegis.env::project.libraryInstall()
+  aegis.base::project.libraryInstall()
 ```
 
 If you have a local git clone of the required packages, you can install with:
 
 ```
-  aegis.env::project.libraryInstall(local=TRUE)  
+  aegis.base::project.libraryInstall(local=TRUE)  
 
 ```
 
-For usage, examples can be found in https://github.com/jae0/aegis/tree/master/inst/scripts/. 
+For usage, examples can be found in https://gitlab.com/jae0/aegis.*/tree/master/inst/scripts/. 
 
