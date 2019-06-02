@@ -3,7 +3,7 @@ Basic environment for using aegis*, bio*, and stm* packages. This provides the r
 To install you need to bootstrap from gitlab directly: 
 
 ```
-  devtools::install_gitlab( "jae0/aegis.base" )
+  devtools::install_gitlab( "ecomod/aegis.base" )
 ```
 
 or you can add the following into your Rprofile:
@@ -19,7 +19,7 @@ if (!"aegis.base" %in% pkgsInstalled ) {
       install.packages("devtools", dependencies=TRUE, ask=FALSE)
     }
     require( devtools)
-    install_gitlab( "jae0/aegis.base")
+    install_gitlab( "ecomod/aegis.base")
   }
 }
 ```
@@ -56,5 +56,5 @@ If you have a local git clone of the required packages, you can install with:
 
 ```
 
-For usage, examples can be found in https://gitlab.com/jae0/aegis.*/tree/master/inst/scripts/. 
+For usage, examples can be found in https://bitbucket.org/ecomod/aegis.*/tree/master/inst/scripts/. 
 
