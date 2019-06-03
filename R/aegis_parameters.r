@@ -41,6 +41,7 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
     # generic stmv settings space AND time interp (and not just spatial)
 
     p$libs = RLibrary( unique( c( p$libs, "stmv" ) ) )
+
     if (!exists("storage.backend", p)) p$storage.backend="bigmemory.ram"
     if (!exists("clusters", p)) p$clusters = rep("localhost", detectCores() )
     if (!exists("boundary", p)) p$boundary = FALSE
@@ -104,7 +105,7 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
   if ( DS=="stmv_spatiotemporal_model" ) {
     # generic stmv settings space AND time interp (and not just spatial), mostly for aegis "indicators"
 
-    p$libs =  RLibrary( unique( c( p$libs, "stmv" )  )
+    p$libs =  RLibrary( unique( c( p$libs, "stmv" )  ) )
 
     if (!exists("storage.backend", p)) p$storage.backend="bigmemory.ram"
     if (!exists("clusters", p)) p$clusters = rep("localhost", detectCores() )
