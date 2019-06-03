@@ -49,7 +49,7 @@
 
 vincenty = function (loc1, loc2, a, f) {
 
-  ## for history and equations:: see https://bitbucket.org/OSGeo/proj.4/wiki/GeodesicCalculations
+  ## for history and equations:: see https://github.com/OSGeo/proj.4/wiki/GeodesicCalculations
   warning( "Deprecated. Consider using geosphere::distVincetyEllipsoid " )
 
   names(loc1) = c("lon", "lat")

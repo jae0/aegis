@@ -15,214 +15,24 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
 
 
   # ---------------------
-
   # create/update library list
   p$libs = c( p$libs, RLibrary ( "colorspace",  "fields", "geosphere", "lubridate",  "lattice",
     "maps", "mapdata", "maptools", "parallel",  "rgdal", "rgeos",  "sp", "splancs", "GADMTools" ) )
-  p$libs = c( p$libs, project.library ( "aegis") )
-
-
-
-
-
-  # ---------------------
-
-  if (DS=="lookuptables") {
-    if (!exists("yrs", p)) p$yrs = 1950:lubridate::year(lubridate::now())  # default --- not all years have data .. where missing they will be filled with global means
-    if (!exists("spatial.domain", p) ) p$spatial.domain = "SSE"
-    if (!exists("spatial.domain.subareas", p)) p$spatial.domain.subareas = c( "snowcrab", "SSE.mpa" )
-    p = spatial_parameters( p=p)  # default (= only supported resolution of 0.2 km discretization)  .. do NOT change
-    if (!exists("variables", p)) p$variables = list()
-    if (!exists("LOCS", p$variables)) p$variables$LOCS=c("plon", "plat")
-    if (!exists("TIME", p$variables)) p$variables$TIME="tiyr"
-    p = aegis_parameters(p=p, DS="stmv_spatiotemporal_model", stmv_dimensionality="space-year" )
-    return(p)
-  }
+  p$libs = unique( c( p$libs, project.library ( "aegis") ) )
 
 
 
   # ---------------------
-
-  if (DS=="biochem") {
-    if (!exists("project.name", p) ) p$project.name=DS
-    if (!exists("data_root", p) ) p$data_root = project.datadirectory( "aegis", p$project.name )
-    # define focal years
-    if (!exists( "yrs", p)) p$yrs = 1950:lubridate::year(lubridate::now())  # default
-
-    p$DATA = 'biochem.db( p=p, DS="stmv_inputs" )'
-    p$varstomodel = c( )
-    if (!exists("variables", p)) p$variables = list()
-    if (!exists("LOCS", p$variables)) p$variables$LOCS=c("plon", "plat")
-    if (!exists("TIME", p$variables)) p$variables$TIME="tiyr"
-    if (!exists("spatial.domain", p) ) p$spatial.domain = "SSE"
-    if (!exists("spatial.domain.subareas", p)) p$spatial.domain.subareas = c( "snowcrab", "SSE.mpa" )
-    p = spatial_parameters( p=p)
-    p = aegis_parameters(p=p, DS="stmv_spatiotemporal_model", stmv_dimensionality="space-year" )
-    return(p)
-  }
-
-
-
-  # ---------------------
-  if (DS=="speciescomposition") {
-    if (!exists("project.name", p) ) p$project.name = DS
-    if (!exists("data_root", p) ) p$data_root = project.datadirectory( "aegis", p$project.name )
-    if (!exists("yrs", p)) p$yrs = c(1999:lubridate::year(lubridate::now()))  # NOTE:: this is short as groundfish species id is inconsistent
-
-    p$DATA = 'aegis_db( p=p, DS="stmv_inputs" )'
-    p$taxa = "maxresolved"
-    if (!exists("varstomodel", p) ) p$varstomodel = c( "pca1", "pca2", "ca1", "ca2" )
-    if (!exists("spatial.domain", p) ) p$spatial.domain = "SSE"
-    if (!exists("spatial.domain.subareas", p)) p$spatial.domain.subareas = c( "snowcrab", "SSE.mpa" )
-
-    p = spatial_parameters( p=p)
-    if (!exists("variables", p)) p$variables = list()
-    if (!exists("LOCS", p$variables)) p$variables$LOCS=c("plon", "plat")
-    if (!exists("TIME", p$variables)) p$variables$TIME="tiyr"
-    p = aegis_parameters(p=p, DS="stmv_spatiotemporal_model", stmv_dimensionality="space-year" )
-    return(p)
-  }
-
-  # ---------------------
-
-  if (DS=="condition") {
-    if (!exists("project.name", p) ) p$project.name = DS
-    if (!exists("data_root", p) ) p$data_root = project.datadirectory( "aegis", p$project.name )
-    if (!exists("yrs", p)) p$yrs = c(1970:lubridate::year(lubridate::now()))  # years for modelling and interpolation
-    p$DATA = 'aegis_db( p=p, DS="stmv_inputs" )'
-
-    p$varstomodel = c( "coAll", "coFish", "coElasmo", "coGadoid", "coDemersal", "coPelagic",
-                       "coSmallPelagic", "coLargePelagic", "coSmallDemersal",   "coLargeDemersal" )
-
-    if (!exists("spatial.domain", p) ) p$spatial.domain = "SSE"
-    if (!exists("spatial.domain.subareas", p)) p$spatial.domain.subareas = c( "snowcrab", "SSE.mpa" )
-
-    p = spatial_parameters( p=p)
-    if (!exists("variables", p)) p$variables = list()
-    if (!exists("LOCS", p$variables)) p$variables$LOCS=c("plon", "plat")
-    if (!exists("TIME", p$variables)) p$variables$TIME="tiyr"
-    p = aegis_parameters(p=p, DS="stmv_spatiotemporal_model", stmv_dimensionality="space-year" )
-    return(p)
-  }
-
-
-  # ---------------------
-  if (DS=="metabolism") {
-    if (!exists("project.name", p) ) p$project.name = DS
-    if (!exists("data_root", p) ) p$data_root = project.datadirectory( "aegis", p$project.name )
-    if (!exists("yrs", p)) p$yrs = c(1970:lubridate::year(lubridate::now()))  # years for modelling and interpolation
-    p$DATA = 'aegis_db( p=p, DS="stmv_inputs" )'
-
-    p$taxa = "alltaxa"   # do not use any other category
-    p$varstomodel = c( "mr", "smr", "Pr.Reaction" , "Ea", "A", "zn", "zm", "qn", "qm", "mass", "len"  )
-
-    if (!exists("spatial.domain", p) ) p$spatial.domain = "SSE"
-    if (!exists("spatial.domain.subareas", p)) p$spatial.domain.subareas = c( "snowcrab", "SSE.mpa" )
-
-    p = spatial_parameters( p=p)
-
-    if (!exists("variables", p)) p$variables = list()
-    if (!exists("LOCS", p$variables)) p$variables$LOCS=c("plon", "plat")
-    if (!exists("TIME", p$variables)) p$variables$TIME="tiyr"
-    p = aegis_parameters(p=p, DS="stmv_spatiotemporal_model", stmv_dimensionality="space-year" )
-    return(p)
-  }
-
-
-  # ---------------------
-  if (DS=="sizespectrum") {
-    if (!exists("project.name", p) ) p$project.name = DS
-    if (!exists("data_root", p) ) p$data_root = project.datadirectory( "aegis", p$project.name )
-    if (!exists("yrs", p)) p$yrs = c(1970:lubridate::year(lubridate::now()))  # years for modelling and interpolation
-
-    p$DATA = 'aegis_db( p=p, DS="stmv_inputs" )'
-    p$libs = c( p$libs, RLibrary ( "bigmemory" ) )
-    # faster to use RAM-based data objects but this forces use only of local cpu's
-    # configure SHM (shared RAM memory to be >18 GB .. in fstab .. in windows not sure how to do this?)
-    p$use.bigmemory.file.backing = FALSE  # for data assimilation, p$use.bigmemory.file.backing = TRUE  # file-backing is slower but can use all cpu's in a distributed cluster
-
-    p$taxa = "maxresolved"
-    # for spatial interpolation of nss stats
-    # p$varstomodel = c( "nss.rsquared", "nss.df", "nss.b0", "nss.b1", "nss.shannon" )
-    p$varstomodel = c( "nss.b0", "nss.b1", "nss.shannon" )
-    # for generation of nss
-
-    p$nss.distances=50  # km
-    p$nss.stimes= 50 # days
-    p$nss.type ="mass"
-    p$nss.base =2
-    p$nss.taxa = "all"
-    if (p$nss.type=="mass") p$nss.bins = bins.df( "gf.mass", p$nss.base )
-    if (p$nss.type=="len")  p$nss.bins = bins.df( "gf.len",  p$nss.base )
-
-    if (!exists("spatial.domain", p) ) p$spatial.domain = "SSE"
-    if (!exists("spatial.domain.subareas", p)) p$spatial.domain.subareas = c( "snowcrab", "SSE.mpa" )
-
-    p = spatial_parameters( p=p)
-
-    if (!exists("variables", p)) p$variables = list()
-    if (!exists("LOCS", p$variables)) p$variables$LOCS=c("plon", "plat")
-    if (!exists("TIME", p$variables)) p$variables$TIME="tiyr"
-    p = aegis_parameters(p=p, DS="stmv_spatiotemporal_model", stmv_dimensionality="space-year" )
-    return(p)
-  }
-
-
-  # ---------------------
-  if (DS=="speciesarea") {
-    if (!exists("project.name", p) ) p$project.name = DS
-    if (!exists("data_root", p) ) p$data_root = project.datadirectory( "aegis", p$project.name )
-    if (!exists("yrs", p)) p$yrs = c(1999:lubridate::year(lubridate::now()))  # years for modelling and interpolation
-
-    p$DATA = 'aegis_db( p=p, DS="stmv_inputs" )'
-    p$libs = unique( c( p$libs, RLibrary ( "bigmemory" ) ) )
-    p$varstomodel = c( "C", "Z", "T", "Npred" )
-    # faster to use RAM-based data objects but this forces use only of local cpu's
-    # configure SHM (shared RAM memory to be >18 GB .. in fstab .. in windows not sure how to do this?)
-    # file-backing is slower but can use all cpu's in a distributed cluster
-    p$use.bigmemory.file.backing = FALSE
-    p$speciesarea.method = "glm"
-    p$pred.radius = 50 # km
-    p$timescale = c( 0, 1, 2 ) # yr
-    p$lengthscale = c( 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 120 )  # km used in counting for rarefaction curve
-    p$taxa = "maxresolved" # p$taxa = "family.or.genera", "alltaxa"
-
-    if (!exists("spatial.domain", p) ) p$spatial.domain = "SSE"
-    if (!exists("spatial.domain.subareas", p)) p$spatial.domain.subareas = c( "snowcrab", "SSE.mpa" )
-
-    p = spatial_parameters( p=p)
-
-    if (!exists("variables", p)) p$variables = list()
-    if (!exists("LOCS", p$variables)) p$variables$LOCS=c("plon", "plat")
-    if (!exists("TIME", p$variables)) p$variables$TIME="tiyr"
-    p = aegis_parameters(p=p, DS="stmv_spatiotemporal_model", stmv_dimensionality="space-year" )
-    return(p)
-  }
-
-
-  # ---------------------
-  if (DS=="mpa") {
-    if (!exists("project.name", p) ) p$project.name = DS
-    if (!exists("data_root", p) ) p$data_root = project.datadirectory( "aegis", p$project.name )
-    if (!exists("yrs", p)) p$yrs = c(1999:lubridate::year(lubridate::now()))  # years for modelling and interpolation
-
-    p$DATA = 'mpa.db( p=p, DS="stmv_inputs" )'
-    p$libs = c( p$libs,  project.library( "netmensuration" ))
-    p$taxa =  "maxresolved"
-    p$map.regions = c("Canada", "USA") # library "map" coastline polygon designations
-    p$map.output.directory = file.path( p$project.outdir.root, "maps")
-    p$map.palette = colorRampPalette(c("darkblue","blue3", "green", "yellow", "orange","red3", "darkred"), space = "Lab")(100)
-    p$map.depthcontours = c( 200, 400, 600 ) # to plot on maps
-    p$map.depthcontours.colours = c( "gray90", "gray85", "gray80", "gray74", "gray72", "gray70" )
-    p$varstomodel = c() ### TODO ..
-    if (!exists("spatial.domain", p) ) p$spatial.domain = "SSE.mpa"
-    if (!exists("spatial.domain.subareas", p)) p$spatial.domain.subareas = c( "snowcrab" )
-    p = spatial_parameters( p=p)
-    if (!exists("variables", p)) p$variables = list()
-    if (!exists("LOCS", p$variables)) p$variables$LOCS=c("plon", "plat")
-    if (!exists("TIME", p$variables)) p$variables$TIME="tiyr"
-    p = aegis_parameters(p=p, DS="stmv_spatiotemporal_model", stmv_dimensionality="space-year" )
-    return(p)
+  # lookup parameters
+  if (DS %in% c("speciescomposition", "speciesarea", "metabolism", "condition", "sizespectrum") ) {
+    res = switch( DS,
+      speciescomposition = aegis.speciescomposition::speciescomposition_parameters(p=p, ...),
+      speciesarea = aegis.speciesarea::speciesarea_parameters(p=p, ...),
+      metabolism = aegis.metabolism::metabolism_parameters(p=p, ...),
+      condition = aegis.condition::condition_parameters(p=p, ...),
+      sizespectrum = aegis.sizespectrum::sizespectrum_parameters(p=p, ...)
+    )
+    return(res)
   }
 
 
@@ -230,7 +40,7 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
   if ( DS=="stmv_spatial_model" ) {
     # generic stmv settings space AND time interp (and not just spatial)
 
-    p$libs = RLibrary( c( p$libs, "stmv" ) )
+    p$libs = RLibrary( unique( c( p$libs, "stmv" ) ) )
     if (!exists("storage.backend", p)) p$storage.backend="bigmemory.ram"
     if (!exists("clusters", p)) p$clusters = rep("localhost", detectCores() )
     if (!exists("boundary", p)) p$boundary = FALSE
@@ -283,7 +93,7 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
     }
     if (!exists("Y", p$variables)) p$variables$Y = "not_defined" # this can be called to get covars.. do not stop
 
-    p = aegis_modelformula(p=p)  # use generic models if none are specified
+    p = aegis_stmv_modelformula(p=p)  # use generic models if none are specified
     p = stmv_variablelist(p=p)  # decompose into covariates from formulas , etc
 
     return(p)
@@ -294,7 +104,7 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
   if ( DS=="stmv_spatiotemporal_model" ) {
     # generic stmv settings space AND time interp (and not just spatial), mostly for aegis "indicators"
 
-    p$libs = RLibrary( c( p$libs, "stmv" ) )
+    p$libs =  RLibrary( unique( c( p$libs, "stmv" )  )
 
     if (!exists("storage.backend", p)) p$storage.backend="bigmemory.ram"
     if (!exists("clusters", p)) p$clusters = rep("localhost", detectCores() )
@@ -408,7 +218,7 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
     }
     if (!exists("Y", p$variables)) p$variables$Y = "not_defined" # this can be called to get covars.. do not stop
 
-    p = aegis_modelformula(p=p)  # use generic models if none are specified
+    p = aegis_stmv_modelformula(p=p)  # use generic models if none are specified
     p = stmv_variablelist(p=p)  # decompose into covariates, etc
 
     return(p)

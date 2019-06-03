@@ -1,9 +1,9 @@
 Basic environment for using aegis*, bio*, and stm* packages. This provides the required functions to bootstrap and interact with each package.
 
-To install you need to bootstrap from bitbucket directly:
+To install you need to bootstrap from github directly:
 
 ```
-  devtools::install_bitbucket( "ecomod/aegis" )
+  devtools::install_github( "jae0/aegis" )
 ```
 
 or you can add the following into your Rprofile:
@@ -19,7 +19,7 @@ if (!"aegis" %in% pkgsInstalled ) {
       install.packages("devtools", dependencies=TRUE, ask=FALSE)
     }
     require( devtools)
-    install_bitbucket( "ecomod/aegis")
+    install_github( "jae0/aegis")
   }
 }
 ```

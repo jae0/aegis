@@ -34,7 +34,7 @@
       PS = cbind( PS, substrate.db ( p=p, DS="complete"  ) )
 
       # override variable of interest to obtain results for static temperature vars
-      pt = aegis_parameters( p=p, DS="temperature" )
+      pt = aegis.temperature::temperature_parameters( p=p)
       pt$variables = list(Y = "t")
       # p0 = spatial_parameters( p=p0, spatial.domain=p$spatial.domain ) # return to correct domain
 
@@ -55,7 +55,7 @@
       dyear_index = 1
       if (exists("dyears", p) & exists("prediction.dyear", p))  dyear_index = which.min( abs( p$prediction.dyear - p$dyears))
 
-      pt = aegis_parameters( p=p, DS="temperature" )
+      pt = aegis.temperature::temperature_parameters( p=p )
       pt$variables = list( Y="t" )
       # pt = spatial_parameters( p=pt, spatial.domain=p$spatial.domain ) # return to correct domain
 
@@ -365,7 +365,7 @@
           v = which( PSub > qPSub[2])
           if (length(v)>0) PSub[v] = qPSub[2]
         }
-        
+
         CL = cbind( apply( PS, 1, mean, na.rm=TRUE ),
                     apply( PSlb, 1, mean, na.rm=TRUE ),
                     apply( PSub, 1, mean, na.rm=TRUE ) )

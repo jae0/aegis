@@ -47,7 +47,7 @@ aegis_db_extract = function( vars, spatial.domain, yrs=NULL, dyear=NULL, dyear_i
   out = list()
 
   # static vars: depth is the primary constraint, baseline = area-prefiltered for depth/bounds
-  pb = aegis::aegis_parameters(DS="bathymetry", spatial.domain=spatial.domain )
+  pb = aegis.bathymetry::bathymetry_parameters(spatial.domain=spatial.domain )
   PS = aegis_db(p=pb, DS="spatial") # all static variables
 
   environmentalvars_static = intersect( vars, names(PS) )
@@ -60,7 +60,7 @@ aegis_db_extract = function( vars, spatial.domain, yrs=NULL, dyear=NULL, dyear_i
 
   # dynamic vars .. temp is the basis of all
   if (!is.null(yrs)) {
-    pa = aegis::aegis_parameters(DS="temperature", yrs=yrs, spatial.domain=spatial.domain )
+    pa = aegis.temperature::temperature_parameters( yrs=yrs, spatial.domain=spatial.domain )
 
     environmentalvars_dynamic_seasonal = intersect( vars, c("t", "tub", "tlb" ) ) ## only ones right now
     if (length(environmentalvars_dynamic_seasonal) > 0) {
@@ -157,7 +157,7 @@ aegis_db_extract = function( vars, spatial.domain, yrs=NULL, dyear=NULL, dyear_i
 
   if (returntype=="data.frame" ) {
     # static vars: depth is the primary constraint, baseline = area-prefiltered for depth/bounds
-    AS = bathymetry.db( p=aegis::aegis_parameters(DS="bathymetry", spatial.domain=spatial.domain ), DS="baseline", varnames=c("plon", "plat") )
+    AS = bathymetry.db( p=aegis.bathymetry::bathymetry_parameters( spatial.domain=spatial.domain ), DS="baseline", varnames=c("plon", "plat") )
 
     APS = NULL
     ncovars = length(out)

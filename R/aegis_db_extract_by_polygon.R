@@ -13,7 +13,7 @@ aegis_db_extract_by_polygon = function( sppoly, spatial.domain="SSE", covfields=
     }
 
     # aggregate summaries of covariate fields by polygons
-    pb = aegis_parameters( DS="bathymetry", spatial.domain=spatial.domain )
+    pb = aegis.bathymetry::bathymetry_parameters( spatial.domain=spatial.domain )
     pts = bathymetry.db( p=pb, DS="baseline" )
     pts = SpatialPoints(pts, proj4string=sp::CRS(pb$internal.crs) )
     pts = spTransform( pts, sp::CRS(proj4string(sppoly)) )

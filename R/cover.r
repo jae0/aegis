@@ -1,4 +1,4 @@
-#MMM Sept 2014 - altered paths to reflect new ecomod polygon paths
+#MMM Sept 2014 - altered paths to reflect new jae0 polygon paths
 cover= function(x,area="all", wd=wd <- file.path(project.datadirectory('aegis'),'data')){
   require(PBSmapping)
 

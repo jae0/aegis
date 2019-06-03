@@ -339,11 +339,11 @@
         return(Z)
       }
 
-      p = aegis_parameters(DS="groundfish")
+      p = aegis.survey::groundfish_parameters()
 
       # data from groundfish data series
       set = groundfish.db( p=p, DS="set" )  ## TODO --- convert to aegis_db
-      
+
       variables = c( groundfish.variablelist("all"), "area")
       byyear = ts.getdata(set=set, fname="byear.4vw", from.file=F, variables=variables, plottimes="annual", regions="nafo.4vw", custom="normal")
       yrs = sort( unique( byyear$yr ) )
@@ -518,7 +518,7 @@
       # abundance estimated from interpolation
       #turned off for 2014
       # p = parallel_run( p=p, runindex= list(y=p$years.to.model, v=c("R0.mass", "R1.no", "R2.no", "totno.female.berried", "totno.female.imm", "totno.female.mat") ) )
-      
+
       #K = interpolation.db( DS="interpolation.simulation", p=p ) # to return the saved file
       #yrs = sort( unique( K$yr ) )
       #vars = sort( unique( K$vars ) )
@@ -941,13 +941,13 @@
     return ("Data not found")
 
     # aegis_subset = function( X, type  ) {
-      
+
     #   varlist = X[[ type ]]
     #   varlist = intersect( names(X$data), varlist)
     #   dat = X$data[, varlist ]
-      
+
     #   for (i in 1:length( X$to.log)) dat[,i] = log10(dat[,i] + 1)
-      
+
     #   if ( type=="keyfactors" ) {
     #     lkup = X$keyfactors.names
     #     for (i in 1:length( varlist )) {

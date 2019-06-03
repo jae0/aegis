@@ -8,6 +8,6 @@ Imports: devtools
 Suggests: lubridate
 License: MIT
 LazyData: true
-URL: https://bitbucket.org/ecomod/aegis
+URL: https://github.com/jae0/aegis
 
 
