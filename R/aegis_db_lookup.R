@@ -1,4 +1,4 @@
-aegis_db_lookup = function( X, lookupvars, xy_vars=c("lon", "lat"), time_var="timestamp", spatial.domain="SSE", yrs = 1950:lubridate::year(lubridate::now() ) ){
+aegis_db_lookup = function( X, lookupvars, xy_vars=c("lon", "lat"), time_var="timestamp", spatial.domain="SSE", yrs = c(1950:lubridate::year(lubridate::now() ) ) ) {
 
   # wrapper around aegis_lookup to make in-situ lookup simpler
   # spatial.domain = "SSE" is the default and really the only supported projection ..
