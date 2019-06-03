@@ -19,7 +19,7 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
   # create/update library list
   p$libs = c( p$libs, RLibrary ( "colorspace",  "fields", "geosphere", "lubridate",  "lattice",
     "maps", "mapdata", "maptools", "parallel",  "rgdal", "rgeos",  "sp", "splancs", "GADMTools" ) )
-  p$libs = c( p$libs, project.library ( "aegis.base") )
+  p$libs = c( p$libs, project.library ( "aegis") )
 
 
 
