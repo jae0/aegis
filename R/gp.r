@@ -53,13 +53,13 @@ gp = function( project="aegis.base", action="status", ... ) {
    }
 
 
-  if (action=="push.to.gitlab" ) {
+  if (action=="push.to.git" ) {
     system2( "git", "checkout master" )
     system2( "git", "push" )
     system2( "git", "checkout develop" )
   }
 
-  if (action=="update.gitlab" ) {
+  if (action=="update.git" ) {
     if ( length(c(...))==0 ) stop( "Need to send a comment as a third element for the commit.")
     system2( "git",  paste("commit -am '", c(...), "'" ) )
     system2( "git", "checkout master" )

@@ -1,5 +1,5 @@
 project.library = function( ... ) {
-  
+
   mylibs = project.libraryList()
   pkgsLoaded = .packages()
   pkgsInstalled = .packages(all.available = TRUE)
@@ -25,12 +25,12 @@ project.library = function( ... ) {
   notfound = setdiff( ll, pkgsInstalled )
   if (length(notfound) > 0) {
     print( "Missing some bio dependencies...")
-    n = readline(prompt="Install them? (local/gitlab/no): ")
-    if (n %in% c("local", "gitlab") ) {
+    n = readline(prompt="Install them? (local/bitbucket/no): ")
+    if (n %in% c("local", "bitbucket") ) {
       for ( nf in notfound ) {
         oo = which( mylibs$libname == nf )
         if (n=="local") try( devtools::install_git( mylibs$gitLoc[oo[1]], dependencies=FALSE, ... ) )
-        if (n=="gitlab") try( devtools::install_gitlab( mylibs$gitlabLoc[oo[1]], ... ) )
+        if (n=="bitbucket") try( devtools::install_bitbucket( mylibs$bitbucketLoc[oo[1]], ... ) )
         pkg = mylibs$libname[oo]
         # if ( pkg %in% pkgsLoaded ) {
         #   message("Reloading installed ", pkg )

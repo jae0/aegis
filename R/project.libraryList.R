@@ -11,7 +11,7 @@ project.libraryList = function( DS="default" ) {
       cbind( "bio.taxonomy", file.path(code_root, "bio.taxonomy"), "ecomod/bio.taxonomy")
     ), stringsAsFactors=FALSE)
 
-    names(mylibs) = c( "libname", "gitLoc", "gitlabLoc" )
+    names(mylibs) = c( "libname", "gitLoc", "bitbucketLoc" )
     return(mylibs)
   }
 
@@ -25,9 +25,9 @@ project.libraryList = function( DS="default" ) {
       cbind( "bio.snowcrab", file.path(code_root, "bio.snowcrab"), "ecomod/bio.snowcrab")
     ), stringsAsFactors=FALSE)
 
-    names(mylibs) = c( "libname", "gitLoc", "gitlabLoc" )
+    names(mylibs) = c( "libname", "gitLoc", "bitbucketLoc" )
     return(mylibs)
   }
-  
+
 }
 

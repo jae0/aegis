@@ -1,9 +1,9 @@
 Basic environment for using aegis*, bio*, and stm* packages. This provides the required functions to bootstrap and interact with each package.
 
-To install you need to bootstrap from gitlab directly: 
+To install you need to bootstrap from bitbucket directly:
 
 ```
-  devtools::install_gitlab( "ecomod/aegis.base" )
+  devtools::install_bitbucket( "ecomod/aegis.base" )
 ```
 
 or you can add the following into your Rprofile:
@@ -19,7 +19,7 @@ if (!"aegis.base" %in% pkgsInstalled ) {
       install.packages("devtools", dependencies=TRUE, ask=FALSE)
     }
     require( devtools)
-    install_gitlab( "ecomod/aegis.base")
+    install_bitbucket( "ecomod/aegis.base")
   }
 }
 ```
@@ -39,11 +39,11 @@ data_root = file.path( homedir, "bio.data" )   ### replace with correct path to 
 passwords = file.path( homedir, ".passwords" )
 if (file.exists(passwords)) source( passwords )
 
-require( aegis.base ) 
+require( aegis.base )
 ```
 
 
-Thereafter, you can used the bootstrapped environment to install the other basic tools: 
+Thereafter, you can used the bootstrapped environment to install the other basic tools:
 
 ```
   aegis.base::project.libraryInstall()
@@ -52,9 +52,8 @@ Thereafter, you can used the bootstrapped environment to install the other basic
 If you have a local git clone of the required packages, you can install with:
 
 ```
-  aegis.base::project.libraryInstall(local=TRUE)  
+  aegis.base::project.libraryInstall(local=TRUE)
 
 ```
 
-For usage, examples can be found in https://bitbucket.org/ecomod/aegis.*/tree/master/inst/scripts/. 
 
