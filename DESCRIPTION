@@ -1,5 +1,5 @@
 Package: aegis
-Title: Base tools to bootstrap and interoperate with 'aegis.*' and other associated projects. 
+Title: Base tools to bootstrap and interoperate with aegis.*, stmv.* and bio.* projects
 Version: 0.1
 Authors@R: c( person("Jae", "Choi", email="choi.jae.seok@gmail.com", role=c("aut", "cre")) ) 
 Description: This project provides tools to bootstrap a system to permit operation of aegis tools and data. Required are the definition of a few global variables: code_root, work_root, data_root. See the README for more details.
