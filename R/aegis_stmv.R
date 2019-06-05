@@ -33,7 +33,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       # p$nw = 10  # from temperature.r, number of intervals in a year
       p$clusters = rep("localhost", detectCores() )
       p$varstomodel = c()
-      p$taxa.of.interest = aegis::groundfish.variablelist("catch.summary")
+      p$taxa.of.interest = aegis.survey::groundfish.variablelist("catch.summary")
 
       if (!exists("polygon_source", p)) p$polygon_source = "pre2014"   # "pre2014" for older
       if (!exists("internal.crs", p)) p$internal.crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
@@ -43,7 +43,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
 
 
       # set up default map projection
-      p = c(p, aegis::coastline_layout( p=p, redo=redo ))
+      p = c(p, aegis.coastline::coastline_layout( p=p, redo=redo ))
       p$mypalette=RColorBrewer::brewer.pal(9, "YlOrRd")
 
       if (!exists("varstomodel", p) ) p$varstomodel = c( "pca1", "pca2", "ca1", "ca2" )
@@ -91,7 +91,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
     # p$aegis_project_datasources = c("speciescomposition", "speciesarea", "sizespectrum", "condition", "metabolism", "biochem")
     if (!exists("aegis_project_datasources", p)) p$aegis_project_datasources = "speciescomposition"
     for (id in p$aegis_project_datasources ) {
-      pz = aegis::aegis_parameters( p=p, DS=id )
+      pz = aegis_parameters( p=p, DS=id )
       pz_vars = intersect( pz$varstomodel, p$variables$COV )  # these are aegis vars to model
       if (length(pz_vars) > 0) p$aegis_variables[[id]] = pz_vars
     }
@@ -553,7 +553,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
         dir.create (projectdir, showWarnings=FALSE, recursive =TRUE)
         fn = file.path( projectdir, paste(outfn, "png", sep="." ) )
         png( filename=fn, width=3072, height=2304, pointsize=40, res=300 )
-        lp = aegis::aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
+        lp = aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
           annot=annot, annot.cex=annot.cex, at=datarange, col.regions=cols,
           corners=p$corners, spatial.domain=p$spatial.domain , plotlines="cfa.regions"  )
         print(lp)
@@ -580,7 +580,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
         dir.create (projectdir, showWarnings=FALSE, recursive =TRUE)
         fn = file.path( projectdir, paste(outfn, "png", sep="." ) )
         png( filename=fn, width=3072, height=2304, pointsize=40, res=300 )
-        lp = aegis::aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
+        lp = aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
           annot=annot, annot.cex=annot.cex, at=datarange, col.regions=cols,
           corners=p$corners, spatial.domain=p$spatial.domain , plotlines="cfa.regions" )
         print(lp)
@@ -606,7 +606,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
         dir.create (projectdir, showWarnings=FALSE, recursive =TRUE)
         fn = file.path( projectdir, paste(outfn, "png", sep="." ) )
         png( filename=fn, width=3072, height=2304, pointsize=40, res=300 )
-        lp = aegis::aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
+        lp = aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
               annot=annot, annot.cex=annot.cex, at=datarange , col.regions=cols,
               corners=p$corners, spatial.domain=p$spatial.domain , plotlines="cfa.regions" )
         print(lp)
@@ -655,7 +655,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
         dir.create (projectdir, showWarnings=FALSE, recursive =TRUE)
         fn = file.path( projectdir, paste(vn, "png", sep="." ) )
         png( filename=fn, width=3072, height=2304, pointsize=40, res=300 )
-        lp = aegis::aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
+        lp = aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
           annot=annot, annot.cex=annot.cex, at=datarange, col.regions=cols,
           corners=p$corners, spatial.domain=p$spatial.domain, plotlines="cfa.regions"  )
         print(lp)

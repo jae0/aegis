@@ -58,7 +58,7 @@ aegis_db_map = function( ip=NULL, p=NULL, type="all", voi=NULL ) {
 
       fn = file.path( projectdir, paste(outfn, "png", sep="." ) )
       png( filename=fn, width=3072, height=2304, pointsize=40, res=300 )
-        lp = aegis::aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
+        lp = aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
           annot=annot, annot.cex=annot.cex, at=datarange, col.regions=cols,
           corners=p$corners, spatial.domain=p$spatial.domain )
       print(lp)
@@ -82,7 +82,7 @@ aegis_db_map = function( ip=NULL, p=NULL, type="all", voi=NULL ) {
 
       fn = file.path( projectdir, paste(outfn, "png", sep="." ) )
       png( filename=fn, width=3072, height=2304, pointsize=40, res=300 )
-        lp = aegis::aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
+        lp = aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
           annot=annot, annot.cex=annot.cex, at=datarange, col.regions=cols,
           corners=p$corners, spatial.domain=p$spatial.domain )
       print(lp)
@@ -124,7 +124,7 @@ aegis_db_map = function( ip=NULL, p=NULL, type="all", voi=NULL ) {
 
       fn = file.path( projectdir, paste(vn, "png", sep="." ) )
       png( filename=fn, width=3072, height=2304, pointsize=40, res=300 )
-        lp = aegis::aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
+        lp = aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
           annot=annot, annot.cex=annot.cex, at=datarange, col.regions=cols,
           corners=p$corners, spatial.domain=p$spatial.domain )
       print(lp)

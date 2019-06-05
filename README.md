@@ -46,13 +46,13 @@ require( aegis )
 Thereafter, you can used the bootstrapped environment to install the other basic tools:
 
 ```
-  aegis::project.libraryInstall()
+  project.libraryInstall()
 ```
 
 If you have a local git clone of the required packages, you can install with:
 
 ```
-  aegis::project.libraryInstall(local=TRUE)
+  project.libraryInstall(local=TRUE)
 
 ```
 

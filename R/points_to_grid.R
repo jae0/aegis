@@ -14,7 +14,7 @@ points_to_grid = function( SPDF, res=100 ) {
     spbuffer = NULL
     proj4string=NULL
     SPDF=meuse
-    res = aegis::points_to_polygons( SPDF=meuse, spbuffer=50 ) # 50m snap buffer
+    res = points_to_polygons( SPDF=meuse, spbuffer=50 ) # 50m snap buffer
   }
 
   raster_template = raster(extent(SPDF)) # +1 to increase the area

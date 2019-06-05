@@ -2,8 +2,8 @@
 
 points_to_polygons = function( SPDF, SPDF.boundary=NULL, spbuffer=NULL ) {
 
-  # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data 
-  
+  # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
+
   require(sp)
   require(rgeos)
 
@@ -12,9 +12,9 @@ points_to_polygons = function( SPDF, SPDF.boundary=NULL, spbuffer=NULL ) {
     coordinates(meuse) = ~ x+y
     spbuffer = NULL
     proj4string=NULL
-    res = aegis::points_to_polygons( SPDF=meuse, spbuffer=50 ) # 50m snap buffer
+    res = points_to_polygons( SPDF=meuse, spbuffer=50 ) # 50m snap buffer
   }
-  
+
   rn0 = row.names(SPDF)  # store for end
   SPDF$uid_internal = 1:nrow(SPDF)
   row.names(SPDF) = SPDF$uid_internal
@@ -31,7 +31,7 @@ points_to_polygons = function( SPDF, SPDF.boundary=NULL, spbuffer=NULL ) {
     drange = range( c( diff(range( xy[,1] )), diff(range(xy[,2] )) ) )
     spbuffer =  floor( min(drange)/ 25 )
   }
-  
+
   # define boundary of points if no boundary -- could also use convex hull ...
   if (is.null(SPDF.boundary)) {
     SPDF.boundary = gBuffer( gUnaryUnion( gBuffer( SPDF, width=spbuffer, byid=TRUE) ), width=spbuffer)

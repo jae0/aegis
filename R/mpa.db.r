@@ -25,11 +25,11 @@
       proj4string( bbox ) = crs
       bbox = spTransform( bbox, CRS(crs) )
 
-      aoi = aegis::polygon.db( id="StAnnsBank_AOI", returnvalue="sp.polygon", crs=crs )
-      z1 = aegis::polygon.db( id="StAnnsBank_Zone1", returnvalue="sp.polygon", crs=crs  )
-      z2 = aegis::polygon.db( id="StAnnsBank_Zone2", returnvalue="sp.polygon", crs=crs  )
-      z3 = aegis::polygon.db( id="StAnnsBank_Zone3", returnvalue="sp.polygon", crs=crs  )
-      z4 = aegis::polygon.db( id="StAnnsBank_Zone4", returnvalue="sp.polygon", crs=crs   )
+      aoi = aegis.polygons::polygon.db( id="StAnnsBank_AOI", returnvalue="sp.polygon", crs=crs )
+      z1 = aegis.polygons::polygon.db( id="StAnnsBank_Zone1", returnvalue="sp.polygon", crs=crs  )
+      z2 = aegis.polygons::polygon.db( id="StAnnsBank_Zone2", returnvalue="sp.polygon", crs=crs  )
+      z3 = aegis.polygons::polygon.db( id="StAnnsBank_Zone3", returnvalue="sp.polygon", crs=crs  )
+      z4 = aegis.polygons::polygon.db( id="StAnnsBank_Zone4", returnvalue="sp.polygon", crs=crs   )
 
       out$sab.polygons = bind( aoi, z1, z2, z3, z4, keepnames=TRUE )
 
@@ -43,7 +43,7 @@
       out$map.contours = isobath.db( p=p, DS="isobath", depths=p$map.depthcontours, crs=crs  )
 
       # add a small buffer around data and clip to make smaller
-      out$map.coastline = aegis::coastline.db( DS=" gshhg coastline highres redo ",
+      out$map.coastline = aegis.coastline::coastline.db( DS=" gshhg coastline highres redo ",
         xlim=p$corners$lon+c(-1,1), ylim=p$corners$lat+c(-1,1), no.clip=FALSE, level=1 )
 
       save( out, file=fn, compress=TRUE )

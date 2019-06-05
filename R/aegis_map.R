@@ -79,10 +79,10 @@
           }
         }
 
-        pp = aegis::spatial_parameters( spatial.domain=spatial.domain )
+        pp = spatial_parameters( spatial.domain=spatial.domain )
 
         if (depthcontours) {
-          isobs = aegis::isobath.db( p=pp, depths=c( 100, 200, 300, 400, 500, 600, 700 ), crs=pp$internal.crs )
+          isobs = aegis.bathymetry::isobath.db( p=pp, depths=c( 100, 200, 300, 400, 500, 600, 700 ), crs=pp$internal.crs )
           depths1 = c(100, 300, 500, 700 )
           depths2 = c(200, 400, 600)
           for ( i in depths1 ) sp.lines( isobs[as.character(i) ] , col = rgb(0.2,0.2,0.2,0.5), cex=0.6 )
@@ -90,7 +90,7 @@
         }
 
         if ( !is.null(plotlines) ) {
-          lines.to.plot = aegis::area_lines.db( DS=plotlines )
+          lines.to.plot = aegis.polygons::area_lines.db( DS=plotlines )
           for ( pln in 1:length(lines.to.plot )) {
             ltp = lonlat2planar( lines.to.plot[[pln]], proj.type=pp$internal.crs )
             panel.lines( ltp$plon, ltp$plat, col="black", lwd=1, lty=2 )
@@ -98,7 +98,7 @@
         }
 
         #coastline
-        coast = aegis::coastline.db(p=pp, crs=pp$internal.crs, DS="gshhg coastline highres" )
+        coast = aegis.coastline::coastline.db(p=pp, crs=pp$internal.crs, DS="gshhg coastline highres" )
         sp.polygons( coast, col="black", cex=1, fill=landfillcolour)
 
         #legend

@@ -147,12 +147,12 @@ aegis_lookup = function( p, DS="all", locsmap=NULL, locs=NULL, timestamp=NULL, v
     aegis_project_datasources = c("speciescomposition", "speciesarea", "metabolism", "condition", "sizespectrum")  # check all
     for (id in aegis_project_datasources ) {
       pz = NULL
-      pz = try( aegis::aegis_parameters( DS=id ) )
+      pz = try( aegis_parameters( DS=id ) )
       if ( is.null(pz) ) next()
       if ( "try-error" %in% class(pz) ) next()
       pz_vars = intersect( pz$varstomodel, varnames )  # these are aegis vars to model
       if (length(pz_vars) > 0) {
-        # pa = aegis::spatial_parameters( p=pz ) # return to correct domain
+        # pa = spatial_parameters( p=pz ) # return to correct domain
         PS = NULL
         PS = aegis_db( p=pz, DS="baseline", varnames=pz_vars )
         if (!is.null(PS)) {

@@ -5,7 +5,7 @@ gp = function( project="aegis", action="status", ... ) {
 
   wd.start = getwd()
 
-  reploc = aegis::project.codedirectory( project )
+  reploc = project.codedirectory( project )
   setwd( reploc )
 
   if (action=="status" ) {
