@@ -4,8 +4,7 @@ aegis_db_spatial_object = function( spatial.domain="SSE", proj4string="+proj=utm
   require(raster)
   # return base layout of aegis grids as a Spatial* object
   # bathymetry is the basis of all grids
-  plocal = list(spatial.domain=spatial.domain)
-  bathymetry = bathymetry.db(p=plocal, DS="baseline")
+  bathymetry = bathymetry.db( DS="baseline", spatial.domain=spatial.domain )
   spdf0 = SpatialPoints(bathymetry[, c("plon", "plat")], proj4string=sp::CRS(proj4string) )
 
   raster_template = raster(extent(spdf0)) # +1 to increase the area
