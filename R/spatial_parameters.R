@@ -8,7 +8,7 @@ spatial_parameters = function( p=NULL, ... ) {
     if ( length(i) > 0 ) p = p[-i] # give any passed parameters a higher priority, overwriting pre-existing variable
 
     if ( p$spatial.domain %in% c("snowcrab") ) {
-        
+
         p$internal.crs =  "+proj=utm +ellps=WGS84 +zone=20 +units=km"
         p$dres = 1/60/4  # this is the 15 second grid from CHS  .. default use highest resolution
         p$pres = 1   # 1 km resolution!
