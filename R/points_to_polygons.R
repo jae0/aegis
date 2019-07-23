@@ -29,7 +29,7 @@ points_to_polygons = function( SPDF, SPDF.boundary=NULL, spbuffer=NULL ) {
 
   if (is.null(spbuffer)) {
     drange = range( c( diff(range( xy[,1] )), diff(range(xy[,2] )) ) )
-    spbuffer =  floor( min(drange)/ 25 )
+    spbuffer =  floor( min(drange)/ 25 ) + 1L
   }
 
   # define boundary of points if no boundary -- could also use convex hull ...

@@ -106,7 +106,7 @@ aegis_lookup = function( p, DS="all", locsmap=NULL, locs=NULL, timestamp=NULL, v
     sn = aegis_lookup( p=p, DS="spatial", locsmap=locsmap, varnames=varnames )
     if (!is.null(sn)) {
       for (vn in names(sn) ) {
-        if (is.list(sn)) {  
+        if (is.list(sn)) {
           out[,vn] = sn[[vn]]
         } else {
           out[,vn] = sn[,vn]
@@ -119,7 +119,7 @@ aegis_lookup = function( p, DS="all", locsmap=NULL, locs=NULL, timestamp=NULL, v
     sn = aegis_lookup( p=p, DS="spatial.annual", locsmap=locsmap, timestamp=timestamp, varnames=varnames )
     if (!is.null(sn)) {
       for (vn in names(sn) )  {
-        if (is.list(sn)) {  
+        if (is.list(sn)) {
           out[,vn] = sn[[vn]]
         } else {
           out[,vn] = sn[,vn]
@@ -134,7 +134,7 @@ aegis_lookup = function( p, DS="all", locsmap=NULL, locs=NULL, timestamp=NULL, v
       sn = aegis_lookup( p=p, DS="spatial.annual.seasonal", locsmap=locsmap, timestamp=timestamp, varnames=vn_sts )
       if (!is.null(sn)) {
         for (vn in names(sn) )  {
-          if (is.list(sn)) {  
+          if (is.list(sn)) {
             out[,vn] = sn[[vn]]
           } else {
             out[,vn] = sn[,vn]
@@ -160,7 +160,7 @@ aegis_lookup = function( p, DS="all", locsmap=NULL, locs=NULL, timestamp=NULL, v
               varnames=pz_vars, DB=PS )
           if (!is.null(sn)) {
             for (vn in names(sn) )  {
-              if (is.list(sn)) {  
+              if (is.list(sn)) {
                 out[,vn] = sn[[vn]]
               } else {
                 out[,vn] = sn[,vn]
