@@ -83,8 +83,8 @@ spatial_parameters = function( p=NULL, ... ) {
 
      }
 
-    p$nlons = floor( diff(range(c(p$lon0,p$lon1)))/p$dres) + 1L
-    p$nlats = floor( diff(range(c(p$lat0,p$lat1)))/p$dres) + 1L
+    p$nlons = round( diff(range(c(p$lon0,p$lon1)))/p$dres) + 1L
+    p$nlats = round( diff(range(c(p$lat0,p$lat1)))/p$dres) + 1L
     corners = data.frame(lon=c(p$lon0,p$lon1), lat=c(p$lat0,p$lat1))
     corners = lonlat2planar( corners, proj.type=p$internal.crs )
     corners$plon = round( corners$plon, p$psignif)  # this matches the p$pres value of x km resolution
