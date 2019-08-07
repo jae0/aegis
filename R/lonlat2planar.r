@@ -31,6 +31,6 @@
     for (i in 1:length( newnames)) {
       if ( newnames[i] %in% colnames(x) ) x[, newnames[i]] = NULL
     }
-    x = cbind(x,y)
+    x = as.data.frame(cbind(x,y))
     return (x)
   }
