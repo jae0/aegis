@@ -324,6 +324,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       WW0 = stmv_db( p=p, DS="stmv.prediction", yr=year, ret="ub")
 
       for ( gr in sreg ) {
+        # warping
         p1 = spatial_parameters( p=p, spatial.domain=gr ) # 'warping' from p -> p1
         L1 = bathymetry.db( p=p1, DS="baseline" )
         L1i = stmv::array_map( "xy->2", L1[, c("plon", "plat")], gridparams=p1$gridparams )
@@ -331,7 +332,9 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
         L1$plon_1 = L1$plon # store original coords
         L1$plat_1 = L1$plat
         L1 = lonlat2planar( L1, proj.type=p0$internal.crs )
-        p1$wght = fields::setup.image.smooth( nrow=p1$nplons, ncol=p1$nplats, dx=p1$pres, dy=p1$pres, theta=p1$pres, xwidth=4*p1$pres, ywidth=4*p1$pres )
+        p1$wght = fields::setup.image.smooth( nrow=p1$nplons, ncol=p1$nplats, dx=p1$pres, dy=p1$pres, theta=p1$pres/3, xwidth=4*p1$pres, ywidth=4*p1$pres )
+          # theta=p1$pres/3 assume at pres most of variance is accounted ... correct if dense pre-intepolated matrices .. if not can be noisy
+
         P = spatial_warp( PP0[], L0, L1, p0, p1, "fast", L0i, L1i )
         Pl = spatial_warp( VV0[], L0, L1, p0, p1, "fast", L0i, L1i )
         Pu = spatial_warp( WW0[], L0, L1, p0, p1, "fast", L0i, L1i )
@@ -386,7 +389,8 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       L1$plon_1 = L1$plon # store original coords
       L1$plat_1 = L1$plat
       L1 = lonlat2planar( L1, proj.type=p0$internal.crs )
-      p1$wght = fields::setup.image.smooth( nrow=p1$nplons, ncol=p1$nplats, dx=p1$pres, dy=p1$pres, theta=p1$pres, xwidth=4*p1$pres, ywidth=4*p1$pres )
+      p1$wght = fields::setup.image.smooth( nrow=p1$nplons, ncol=p1$nplats, dx=p1$pres, dy=p1$pres, theta=p1$pres/3, xwidth=4*p1$pres, ywidth=4*p1$pres )
+        # theta=p1$pres/3 assume at pres most of variance is accounted ... correct if dense pre-intepolated matrices .. if not can be noisy
       stats = matrix( NA, ncol=ncol(S0), nrow=nrow(L1) )
       for ( i in 1:ncol(S0) ) {
         stats[,i] = spatial_warp( S0[,i], L0, L1, p0, p1, "fast", L0i, L1i )
