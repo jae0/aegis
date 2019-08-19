@@ -32,7 +32,7 @@
       print (crsX)
       stop( "The proj4 CRS requires an explicit +units=km ")
     }
-    y = rgdal::project( x[,c("plon", "plat")], crsX, inv=TRUE )
+    y = rgdal::project( as.matrix(x[,c("plon", "plat")]), crsX, inv=TRUE )
     colnames(y) = newnames
     for (i in 1:length( newnames)) {
       if ( newnames[i] %in% colnames(x) ) x[, newnames[i]] = NULL
