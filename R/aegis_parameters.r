@@ -54,44 +54,6 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
     if (!exists("stmv_nmax", p)) p$stmv_nmax = 8000 # no real upper bound
 
 
-    # due to formulae being created on the fly, these are required params
-    if (!exists("Y", p$variables)) {
-      if (exists("stmv_local_modelformula", p))  {
-        if (!is.null(p$stmv_local_modelformula)) {
-          if (p$stmv_local_modelformula != "none") {
-            oo = all.vars( p$stmv_local_modelformula[[2]] )
-            if (length(oo) > 0) p$variables$Y = oo
-          }
-        }
-      }
-
-      if (exists("stmv_local_modelformula_space", p))  {
-        if (!is.null(p$stmv_local_modelformula_space)) {
-          if (p$stmv_local_modelformula_space != "none") {
-            oo = all.vars( p$stmv_local_modelformula_space[[2]] )
-            if (length(oo) > 0) p$variables$Y = oo
-          }
-        }
-      }
-
-      if (exists("stmv_local_modelformula_time", p))  {
-        if (!is.null(p$stmv_local_modelformula_time)) {
-          if (p$stmv_local_modelformula_time != "none") {
-            oo = all.vars( p$stmv_local_modelformula_time[[2]] )
-            if (length(oo) > 0) p$variables$Y = oo
-          }
-        }
-      }
-
-      if (exists("stmv_global_modelformula", p))  {
-        if (!is.null(p$stmv_global_modelformula)) {
-          if (p$stmv_global_modelformula != "none") {
-            oo = all.vars( p$stmv_global_modelformula[[2]] )
-            if (length(oo) > 0) p$variables$Y = oo
-          }
-        }
-      }
-    }
     if (!exists("Y", p$variables)) p$variables$Y = "not_defined" # this can be called to get covars.. do not stop
 
     p = aegis_stmv_modelformula(p=p)  # use generic models if none are specified
@@ -156,71 +118,17 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
     # global model options
     # using covariates as a first pass essentially makes it ~ kriging with external drift
     # .. no space or time here .. only in the local model
-    if (!exists("stmv_global_modelengine", p)) p$stmv_global_modelengine ="gam" #default
-    if (!exists("stmv_global_family", p)) p$stmv_global_family = gaussian()
+    if (!exists("stmv_global_modelengine", p)) p$stmv_global_modelengine ="none" #default
+    if (!exists("stmv_global_family", p)) p$stmv_global_family = gaussian(link="identity")
 
     ## local model-specific options
-    if (!exists("stmv_local_modelengine", p)) p$stmv_local_modelengine ="twostep"
-    if (p$stmv_local_modelengine =="twostep") {
-      # if (!exists("stmv_twostep_space", p)) p$stmv_twostep_space = "fft"
-      # if (!exists("stmv_twostep_space", p)) p$stmv_twostep_space = "tps"
-      # if (!exists("stmv_twostep_space", p))  p$stmv_twostep_space = "krige"  # warning .. kind of slow
+    if (!exists("stmv_local_modelengine", p)) p$stmv_local_modelengine ="none"
 
-      if (!exists("stmv_twostep_time", p))  p$stmv_twostep_time = "gam"
-
-      if (!exists("stmv_twostep_space", p))  p$stmv_twostep_space = "fft" #  matern, krige (very slow), lowpass, lowpass_matern
-      if (!exists("stmv_fft_filter", p))  p$stmv_fft_filter="matern"  #  matern, krige (very slow), lowpass, lowpass_matern
-      if (!exists("stmv_local_model_distanceweighted", p)) p$stmv_local_model_distanceweighted = TRUE
-
-
-    }  else if (p$stmv_local_modelengine == "gam") {
-      if (!exists("stmv_gam_optimizer", p)) p$stmv_gam_optimizer= c("outer", "bfgs")
-      if (!exists("stmv_local_model_distanceweighted", p)) p$stmv_local_model_distanceweighted = TRUE
-    }  else if (p$stmv_local_modelengine == "bayesx") {
-      if (!exists("stmv_local_model_bayesxmethod", p)) p$stmv_local_model_bayesxmethod="MCMC"
-      if (!exists("stmv_local_model_distanceweighted", p)) p$stmv_local_model_distanceweighted = FALSE
-    }
-
-    # due to formulae being created on the fly, these are required params
-    if (!exists("Y", p$variables)) {
-      if (exists("stmv_local_modelformula", p))  {
-        if (!is.null(p$stmv_local_modelformula)) {
-          if (p$stmv_local_modelformula != "none") {
-            oo = all.vars( p$stmv_local_modelformula[[2]] )
-            if (length(oo) > 0) p$variables$Y = oo
-          }
-        }
-      }
-      if (exists("stmv_local_modelformula_space", p))  {
-        if (!is.null(p$stmv_local_modelformula_space)) {
-          if (p$stmv_local_modelformula_space != "none") {
-            oo = all.vars( p$stmv_local_modelformula_space[[2]] )
-            if (length(oo) > 0) p$variables$Y = oo
-          }
-        }
-      }
-      if (exists("stmv_local_modelformula_time", p))  {
-        if (!is.null(p$stmv_local_modelformula_time)) {
-          if (p$stmv_local_modelformula_time != "none") {
-            oo = all.vars( p$stmv_local_modelformula_time[[2]] )
-            if (length(oo) > 0) p$variables$Y = oo
-          }
-        }
-      }
-
-      if (exists("stmv_global_modelformula", p))  {
-        if (!is.null(p$stmv_global_modelformula)) {
-          if (p$stmv_global_modelformula != "none") {
-            oo = all.vars( p$stmv_global_modelformula[[2]] )
-            if (length(oo) > 0) p$variables$Y = oo
-          }
-        }
-      }
-    }
     if (!exists("Y", p$variables)) p$variables$Y = "not_defined" # this can be called to get covars.. do not stop
 
     p = aegis_stmv_modelformula(p=p)  # use generic models if none are specified
-    p = stmv_variablelist(p=p)  # decompose into covariates, etc
+
+    # p = stmv_variablelist(p=p)  # decompose into covariates, etc
 
     return(p)
   }
