@@ -1,5 +1,5 @@
 
-aegis_db_extract = function( vars, spatial.domain, yrs=NULL, dyear=NULL, dyear_index=NULL, filldata="means", returntype="list", resolution=NULL, proj4string=NULL, redo=FALSE ){
+aegis_db_extract = function( vars, spatial.domain, yrs=NULL, dyear=NULL, dyear_index=NULL, filldata="means", returntype="list", areal_units_resolution_km=NULL, proj4string=NULL, redo=FALSE ){
 
   # based on aegis_db("stmv_inputs") but more generic and dynamic (nothing saved to storage) though slower
   # basically reformatting to match vn and yrs
@@ -29,7 +29,7 @@ aegis_db_extract = function( vars, spatial.domain, yrs=NULL, dyear=NULL, dyear_i
   }
 
   outputdirectory = getwd()
-  fn = file.path( outputdirectory, paste( "aegis_db_extract", spatial.domain, resolution, returntype, "rdata", sep="." ) )
+  fn = file.path( outputdirectory, paste( "aegis_db_extract", spatial.domain, areal_units_resolution_km, returntype, "rdata", sep="." ) )
   message ( "\n Temporary file being made in the current work directory:  ", fn, "\n")
 
   out = NULL
@@ -184,11 +184,11 @@ aegis_db_extract = function( vars, spatial.domain, yrs=NULL, dyear=NULL, dyear_i
       }
     }
 
-    if (!is.null(resolution) ) {
+    if (!is.null(areal_units_resolution_km) ) {
 
       spdf0 = SpatialPointsDataFrame( APS[, c("plon", "plat")], data=APS, proj4string=proj4string )
       raster_template = raster(extent(spdf0)) # +1 to increase the area
-      res(raster_template) = resolution  # in units of crs
+      res(raster_template) = areal_units_resolution_km  # in units of crs
       crs(raster_template) = projection(spdf0) # transfer the coordinate system to the raster
       out = NULL
       vns = setdiff( names(spdf0), "year" )

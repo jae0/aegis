@@ -1,6 +1,6 @@
-neighbourhood_structure = function( sppoly, strata_type="lattice" ) {
+neighbourhood_structure = function( sppoly, areal_units_strata_type="lattice" ) {
 
-  if (strata_type == "lattice") {
+  if (areal_units_strata_type == "lattice") {
     # generic lattice
     W.nb = poly2nb(sppoly, row.names=sppoly$StrataID, queen=TRUE)  # slow .. ~1hr?
     W.remove = which(card(W.nb) == 0)
@@ -22,7 +22,7 @@ neighbourhood_structure = function( sppoly, strata_type="lattice" ) {
 
   # ------------------------------------------------
 
-  if (strata_type == "stratanal_polygons") {
+  if (areal_units_strata_type == "stratanal_polygons") {
     # predefined polygons with customized list of neighbours
     W.nb = spdep::poly2nb(sppoly, row.names=sppoly$StrataID, queen=TRUE )
     W.nb = maritimes_groundfish_strata( W.nb=W.nb, returntype="neighbourhoods" )  # customized neighbourshood structure
