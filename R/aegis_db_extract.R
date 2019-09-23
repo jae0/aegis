@@ -1,15 +1,16 @@
 
-aegis_db_extract = function( vars, spatial.domain, yrs=NULL, dyear=NULL, dyear_index=NULL, filldata="means", returntype="list", areal_units_resolution_km=NULL, proj4string=NULL, redo=FALSE ){
+aegis_db_extract = function( vars, spatial_domain, yrs=NULL, dyear=NULL, dyear_index=NULL, filldata="means", returntype="list",
+  areal_units_resolution_km=NULL, aegis_proj4string_planar_km=NULL, redo=FALSE ){
 
   # based on aegis_db("stmv_inputs") but more generic and dynamic (nothing saved to storage) though slower
   # basically reformatting to match vn and yrs
 
-  # vars=covars; yrs=p$yrs; spatial.domain=p$spatial.domain; dyear=p$prediction.dyear; returntype="data.frame"
+  # vars=covars; yrs=p$yrs; spatial_domain=p$spatial_domain; dyear=p$prediction_dyear; returntype="data.frame"
 
   if (0) {
     vars=c("t", "z")
     yrs=1990:2010
-    spatial.domain ="SSE"
+    spatial_domain ="SSE"
     dyear=0.6
     # currently supported vars:
     # z = depth (m)
@@ -29,7 +30,7 @@ aegis_db_extract = function( vars, spatial.domain, yrs=NULL, dyear=NULL, dyear_i
   }
 
   outputdirectory = getwd()
-  fn = file.path( outputdirectory, paste( "aegis_db_extract", spatial.domain, areal_units_resolution_km, returntype, "rdata", sep="." ) )
+  fn = file.path( outputdirectory, paste( "aegis_db_extract", spatial_domain, areal_units_resolution_km, returntype, "rdata", sep="." ) )
   message ( "\n Temporary file being made in the current work directory:  ", fn, "\n")
 
   out = NULL
@@ -47,7 +48,7 @@ aegis_db_extract = function( vars, spatial.domain, yrs=NULL, dyear=NULL, dyear_i
   out = list()
 
   # static vars: depth is the primary constraint, baseline = area-prefiltered for depth/bounds
-  pb = aegis.bathymetry::bathymetry_parameters(spatial.domain=spatial.domain )
+  pb = aegis.bathymetry::bathymetry_parameters(spatial_domain=spatial_domain )
   PS = aegis_db(p=pb, DS="spatial") # all static variables
 
   environmentalvars_static = intersect( vars, names(PS) )
@@ -60,15 +61,15 @@ aegis_db_extract = function( vars, spatial.domain, yrs=NULL, dyear=NULL, dyear_i
 
   # dynamic vars .. temp is the basis of all
   if (!is.null(yrs)) {
-    pa = aegis.temperature::temperature_parameters( yrs=yrs, spatial.domain=spatial.domain )
+    pa = aegis.temperature::temperature_parameters( yrs=yrs, spatial_domain=spatial_domain )
 
     environmentalvars_dynamic_seasonal = intersect( vars, c("t", "tub", "tlb" ) ) ## only ones right now
     if (length(environmentalvars_dynamic_seasonal) > 0) {
       if (is.null(dyear_index)) {
         # priority to dyear_index if provided
         if (is.null(dyear)) {
-          if (exists("prediction.dyear", pa)) {
-            dyear = pa$prediction.dyear
+          if (exists("prediction_dyear", pa)) {
+            dyear = pa$prediction_dyear
           }
         }
         if (is.null(dyear)) dyear = 0.7 # catch all
@@ -128,7 +129,7 @@ aegis_db_extract = function( vars, spatial.domain, yrs=NULL, dyear=NULL, dyear_i
     aegis_project_datasources = c("speciescomposition", "speciesarea", "metabolism", "condition", "sizespectrum")  # check all
     for (id in aegis_project_datasources ) {
       pz = NULL
-      pz = try( aegis_parameters( DS=id, yrs=yrs, spatial.domain=spatial.domain ) )
+      pz = try( aegis_parameters( DS=id, yrs=yrs, spatial_domain=spatial_domain ) )
       if ( is.null(pz) ) next()
       if ( "try-error" %in% class(pz) ) next()
       pz_vars = intersect( pz$varstomodel, othervars )  # these are aegis vars to model
@@ -157,7 +158,7 @@ aegis_db_extract = function( vars, spatial.domain, yrs=NULL, dyear=NULL, dyear_i
 
   if (returntype=="data.frame" ) {
     # static vars: depth is the primary constraint, baseline = area-prefiltered for depth/bounds
-    AS = bathymetry.db( p=aegis.bathymetry::bathymetry_parameters( spatial.domain=spatial.domain ), DS="baseline", varnames=c("plon", "plat") )
+    AS = bathymetry.db( p=aegis.bathymetry::bathymetry_parameters( spatial_domain=spatial_domain ), DS="baseline", varnames=c("plon", "plat") )
 
     APS = NULL
     ncovars = length(out)
@@ -186,7 +187,7 @@ aegis_db_extract = function( vars, spatial.domain, yrs=NULL, dyear=NULL, dyear_i
 
     if (!is.null(areal_units_resolution_km) ) {
 
-      spdf0 = SpatialPointsDataFrame( APS[, c("plon", "plat")], data=APS, proj4string=proj4string )
+      spdf0 = SpatialPointsDataFrame( APS[, c("plon", "plat")], data=APS, proj4string=aegis_proj4string_planar_km )
       raster_template = raster(extent(spdf0)) # +1 to increase the area
       res(raster_template) = areal_units_resolution_km  # in units of crs
       crs(raster_template) = projection(spdf0) # transfer the coordinate system to the raster

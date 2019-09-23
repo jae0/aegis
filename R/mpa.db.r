@@ -9,15 +9,15 @@
         out = NULL
         if  (file.exists( fn)) load(fn)
           if ( !is.null(crs)) {
-            out$map.contours = spTransform(out$map.contours, CRS(p$internal.crs))
-            out$map.coastline = spTransform(out$map.coastline, CRS(p$internal.crs))
-            out$sab.polygons = spTransform(out$sab.polygons, CRS(p$internal.crs))
+            out$map.contours = spTransform(out$map.contours, CRS(crs))
+            out$map.coastline = spTransform(out$map.coastline, CRS(crs))
+            out$sab.polygons = spTransform(out$sab.polygons, CRS(crs))
           }
         return (out)
       }
 
       # storage/internal format is lon/lat:
-      crs = "+init=epsg:4326"
+      crs = projection_proj4string("lonlat_wgs84")
       out = list()
       bbox = p$corners[ , c("lon", "lat")]
       colnames( bbox) = c("lon","lat")
@@ -48,9 +48,9 @@
 
       save( out, file=fn, compress=TRUE )
       if ( !is.null(crs)) {
-        out$map.contours = spTransform(out$map.contours, CRS(p$internal.crs))
-        out$map.coastline = spTransform(out$map.coastline, CRS(p$internal.crs))
-        out$sab.polygons = spTransform(out$sab.polygons, CRS(p$internal.crs))
+        out$map.contours = spTransform(out$map.contours, CRS(crs))
+        out$map.coastline = spTransform(out$map.coastline, CRS(crs))
+        out$sab.polygons = spTransform(out$sab.polygons, CRS(crs))
       }
       return (out)
     }

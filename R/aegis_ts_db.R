@@ -375,7 +375,7 @@
         return(res)
       }
 
-			p = spatial_parameters( spatial.domain="SSE" )
+			p = spatial_parameters( spatial_domain="SSE" )
       fns = list.files( file.path( project.datadirectory("aegis"), "data", "SSE","complete" ) )
       yrs = substring( fns, 4,7)
       yrs = as.numeric(yrs)
@@ -403,7 +403,7 @@
         return(res)
       }
 
-      p = spatial_parameters( spatial.domain="SSE" )
+      p = spatial_parameters( spatial_domain="SSE" )
       fns = list.files( file.path( project.datadirectory("aegis"), "data", "SSE",'complete' ) )
       yrs = substring( fns, 4,7)
       yrs = as.numeric(yrs)
@@ -430,7 +430,7 @@
         load(outfn)
         return(res)
       }
-      p = spatial_parameters( spatial.domain="SSE" )
+      p = spatial_parameters( spatial_domain="SSE" )
       fns = list.files( file.path( project.datadirectory("aegis"), "data", "SSE","complete" ) )
       yrs = substring( fns, 4,7)
       yrs = as.numeric(yrs)
@@ -459,7 +459,7 @@
         return(res)
       }
 
-      p = spatial_parameters( spatial.domain="SSE" )
+      p = spatial_parameters( spatial_domain="SSE" )
       fns = list.files( file.path( project.datadirectory("aegis"), "data", "SSE","complete" ) )
       yrs = substring( fns, 4,7)
       yrs = as.numeric(yrs)

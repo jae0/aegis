@@ -42,7 +42,7 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
 
     p$libs = RLibrary( unique( c( p$libs, "stmv" ) ) )
 
-    if (!exists("storage.backend", p)) p$storage.backend="bigmemory.ram"
+    if (!exists("storage_backend", p)) p$storage_backend="bigmemory.ram"
     if (!exists("clusters", p)) p$clusters = rep("localhost", detectCores() )
     if (!exists("boundary", p)) p$boundary = FALSE
     if (!exists("stmv_filter_depth_m", p)) p$stmv_filter_depth_m = 0 # depth (m) stats locations with elevation > 0 m as being on land (and so ignore)
@@ -69,7 +69,7 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
 
     p$libs =  RLibrary( unique( c( p$libs, "stmv" )  ) )
 
-    if (!exists("storage.backend", p)) p$storage.backend="bigmemory.ram"
+    if (!exists("storage_backend", p)) p$storage_backend="bigmemory.ram"
     if (!exists("clusters", p)) p$clusters = rep("localhost", detectCores() )
     if (!exists("boundary", p)) p$boundary = FALSE
     if (!exists("stmv_filter_depth_m", p)) p$stmv_filter_depth_m = 0 # depth (m) stats locations with elevation > 0 m as being on land (and so ignore)
@@ -80,7 +80,7 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
     if (!exists("stmv_distance_scale", p)) p$stmv_distance_scale = c(50, 60, 75, 100) # km ... approx guess of 95% AC range .. data tends to be sprse realtive to pure space models
 
     # lookup temporal params for the SSE domain
-    if (!exists("data.sources", p)) p$data.sources = c("groundfish", "snowcrab")
+    if (!exists("data_sources", p)) p$data_sources = c("groundfish", "snowcrab")
     # obtain current temperature years
 
     if (!exists("yrs", p)) p$yrs = c(1999:lubridate::year(lubridate::now()))  # years for modelling and interpolation
@@ -94,7 +94,7 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
     p$dyears = {c(1:p$nw)-1} / p$nw # intervals of decimal years... fractional year breaks
     p$dyear_centre = p$dyears[ round(p$nw/2) ] + p$tres/2
 
-    if (!exists("prediction.dyear", p)) p$prediction.dyear = lubridate::decimal_date( lubridate::ymd("0000/Sep/01")) # used for creating timeslices and predictions  .. needs to match the values in aegis_parameters()
+    if (!exists("prediction_dyear", p)) p$prediction_dyear = lubridate::decimal_date( lubridate::ymd("0000/Sep/01")) # used for creating timeslices and predictions  .. needs to match the values in aegis_parameters()
 
     # must specify, else assumed = 1 (1= no time)
     if (!exists("stmv_dimensionality", p)) p$stmv_dimensionality = "space-year"  # default
@@ -103,7 +103,7 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
       ## nt=ny annual time steps (default)
       if (!exists("nt", p)) p$nt = p$ny   # ie, default is an annual model (no p$nw)
       # output timeslices for predictions in decimla years, yes all of them here
-      if (!exists("prediction.ts", p)) p$prediction.ts = p$yrs + p$prediction.dyear
+      if (!exists("prediction_ts", p)) p$prediction_ts = p$yrs + p$prediction_dyear
     } else if (p$stmv_dimensionality == "space-year-season") {
       ## nt = ny*nw is seassonal
 
@@ -112,7 +112,7 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
       tout$tiyr = tout$yr + tout$dyear/p$nw - p$tres/2 # mid-points
       tout = tout[ order(tout$tiyr), ]
       # output timeslices for predictions in decimla years, yes all of them here
-      if (!exists("prediction.ts", p)) p$prediction.ts = tout$tiyr   # predictions at these time values (decimal-year)
+      if (!exists("prediction_ts", p)) p$prediction_ts = tout$tiyr   # predictions at these time values (decimal-year)
     }
 
     # global model options

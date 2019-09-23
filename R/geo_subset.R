@@ -1,48 +1,48 @@
 
-geo_subset = function( spatial.domain, Z ) {
-  #\\ filter locations based upon depths and location of spatial.domain
+geo_subset = function( spatial_domain, Z ) {
+  #\\ filter locations based upon depths and location of spatial_domain
   #\\ most are in planar coords (so require plon, plat and z {depth} )
 
   # trim to extents
-  ps = spatial_parameters( spatial.domain=spatial.domain ) # obtain internal projection params
+  ps = spatial_parameters( spatial_domain=spatial_domain ) # obtain internal projection params
   inside = which(
     Z$plon >= ps$corners$plon[1] & Z$plon <= ps$corners$plon[2] &
     Z$plat >= ps$corners$plat[1] & Z$plat <= ps$corners$plat[2]  )
   if (length( inside ) > 0) Z = Z[ inside, ]
 
 
-  if ( spatial.domain == "canada.east.superhighres" ) {
+  if ( spatial_domain == "canada.east.superhighres" ) {
     Z = Z[ which( Z$z < 5000 & Z$z > 0) , ]
   }
 
 
-  if ( spatial.domain == "canada.east.highres" ) {
+  if ( spatial_domain == "canada.east.highres" ) {
     Z = Z[ which( Z$z < 5000 & Z$z > 0) , ]
   }
 
-  if ( spatial.domain == "canada.east" ) {
+  if ( spatial_domain == "canada.east" ) {
     Z = Z[ which(Z$z < 5000 & Z$z > 0 ) ,]
   }
 
-  if ( spatial.domain == "SSE.mpa" ) {
+  if ( spatial_domain == "SSE.mpa" ) {
     Z = Z[ which(Z$z < 2000 & Z$z > 0 ) ,]
     bnd = polygon.db( id="scotia.fundy.with.buffer" )
-    bnd = lonlat2planar( bnd, proj.type=ps$internal.crs ) # convert to internal projection
+    bnd = lonlat2planar( bnd, proj.type=ps$aegis_proj4string_planar_km ) # convert to internal projection
     jj = which( sp::point.in.polygon( Z$plon, Z$plat, bnd$plon, bnd$plat) != 0 )
     if (length( jj) > 0) Z = Z[ jj, ]
   }
 
-  if ( spatial.domain =="SSE" ) {
+  if ( spatial_domain =="SSE" ) {
     Z = Z[ which(Z$z < 800 & Z$z > 0 ) ,]
   }
 
-  if ( spatial.domain == "snowcrab" ) {
+  if ( spatial_domain == "snowcrab" ) {
     #\\ NOTE::: snowcrab baseline == SSE baseline, except it is a subset
 
     kk = which( Z$z < 350 & Z$z > 10  )
     if (length( kk) > 0) Z = Z[ kk, ]
 
-    jj = polygon_inside( Z[,c(1:2)], region="cfaall", planar=T, proj.type=ps$internal.crs )
+    jj = polygon_inside( Z[,c(1:2)], region="cfaall", planar=T, proj.type=ps$aegis_proj4string_planar_km )
     if (length( jj) > 0) Z = Z[ jj, ]
 
     # filter out area 4X
@@ -50,7 +50,7 @@ geo_subset = function( spatial.domain, Z ) {
       lon = c(-63, -65.5, -56.8, -66.3 ),
       lat = c( 44.75, 43.8, 47.5, 42.8 )
     ) )
-    corners = lonlat2planar( corners, proj.type=ps$internal.crs )
+    corners = lonlat2planar( corners, proj.type=ps$aegis_proj4string_planar_km )
     dd1 = which( Z$plon < corners$plon[1] & Z$plat > corners$plat[1]  )
     if (length( dd1) > 0) Z = Z[- dd1, ]
     dd2 = which( Z$plon < corners$plon[2] & Z$plat > corners$plat[2]  )

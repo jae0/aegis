@@ -1,8 +1,8 @@
 
-aegis_db_extract_by_polygon = function( sppoly, spatial.domain="SSE", covfields=NULL, force_matrix=TRUE, redo=FALSE, ... ) {
+aegis_db_extract_by_polygon = function( sppoly, spatial_domain="SSE", covfields=NULL, force_matrix=TRUE, redo=FALSE, ... ) {
 
     outputdirectory = getwd()
-    fn = file.path( outputdirectory, paste( "aegis_db_extract_by_polygon", spatial.domain, "rdata", sep="." ) )
+    fn = file.path( outputdirectory, paste( "aegis_db_extract_by_polygon", spatial_domain, "rdata", sep="." ) )
     message ( "\n Temporary file being made in the current work directory:  ", fn, "\n")
 
     out = NULL
@@ -13,9 +13,9 @@ aegis_db_extract_by_polygon = function( sppoly, spatial.domain="SSE", covfields=
     }
 
     # aggregate summaries of covariate fields by polygons
-    pb = aegis.bathymetry::bathymetry_parameters( spatial.domain=spatial.domain )
+    pb = aegis.bathymetry::bathymetry_parameters( spatial_domain=spatial_domain )
     pts = bathymetry.db( p=pb, DS="baseline" )
-    pts = SpatialPoints(pts, proj4string=sp::CRS(pb$internal.crs) )
+    pts = SpatialPoints(pts, proj4string=sp::CRS(pb$aegis_proj4string_planar_km) )
     pts = spTransform( pts, sp::CRS(proj4string(sppoly)) )
     # match each datum to an area
     o = over( pts, sppoly)
@@ -24,7 +24,7 @@ aegis_db_extract_by_polygon = function( sppoly, spatial.domain="SSE", covfields=
 
     o = NULL
 
-    if (is.null(covfields)) covfields = aegis_db_extract(spatial.domain=spatial.domain, ... )
+    if (is.null(covfields)) covfields = aegis_db_extract(spatial_domain=spatial_domain, ... )
 
     fnsummary = function(i) {
       m = mean(covfields[[vn]][i], na.rm=TRUE )

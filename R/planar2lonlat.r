@@ -15,7 +15,7 @@
 
   # first try an internal conversion /lookup for CRS
     proj4.params = NULL
-    pcrs = lookup.projection.params(proj.type)
+    pcrs = projection_proj4string(proj.type)
     if (!is.null(pcrs)) proj4.params = try( sp::CRS( pcrs ), silent=TRUE )
 
     # if internal lookup does not work then try to directly pass to CRS

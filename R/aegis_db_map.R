@@ -13,12 +13,12 @@ aegis_db_map = function( ip=NULL, p=NULL, type="all", voi=NULL ) {
 
   if ( type=="all" ) {
 
-    allgrids = unique(c( p$spatial.domain.subareas, p$spatial.domain) )
+    allgrids = unique(c( p$spatial_domain_subareas, p$spatial_domain) )
     p$clusters =p$stmv_clusters[[1]]
 
     for ( gr in allgrids ) {
       print (gr)
-      p1 = spatial_parameters(  p=p, spatial.domain=gr )
+      p1 = spatial_parameters(  p=p, spatial_domain=gr )
       aegis_db_map( p=p1, type="climatology" ) # no parallel option .. just a few
       parallel_run( aegis_db_map, p=p1, type="annual", voi=voi, runindex=list( yrs=p1$yrs)  )
     }
@@ -29,7 +29,7 @@ aegis_db_map = function( ip=NULL, p=NULL, type="all", voi=NULL ) {
 
 
   if ( type %in% c("annual" ) ) {
-    projectdir = file.path(p$data_root, "maps", voi, p$spatial.domain, "annual" )
+    projectdir = file.path(p$data_root, "maps", voi, p$spatial_domain, "annual" )
     dir.create( projectdir, recursive=T, showWarnings=F )
 
     if (is.null(ip)) ip = 1:length(p$yrs)
@@ -60,7 +60,7 @@ aegis_db_map = function( ip=NULL, p=NULL, type="all", voi=NULL ) {
       png( filename=fn, width=3072, height=2304, pointsize=40, res=300 )
         lp = aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
           annot=annot, annot.cex=annot.cex, at=datarange, col.regions=cols,
-          corners=p$corners, spatial.domain=p$spatial.domain )
+          corners=p$corners, spatial_domain=p$spatial_domain )
       print(lp)
       dev.off()
 
@@ -84,7 +84,7 @@ aegis_db_map = function( ip=NULL, p=NULL, type="all", voi=NULL ) {
       png( filename=fn, width=3072, height=2304, pointsize=40, res=300 )
         lp = aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
           annot=annot, annot.cex=annot.cex, at=datarange, col.regions=cols,
-          corners=p$corners, spatial.domain=p$spatial.domain )
+          corners=p$corners, spatial_domain=p$spatial_domain )
       print(lp)
       dev.off()
 
@@ -98,7 +98,7 @@ aegis_db_map = function( ip=NULL, p=NULL, type="all", voi=NULL ) {
 
 
   if ( type %in% c("climatology" ) ) {
-    projectdir = file.path(p$data_root, "maps", voi, p$spatial.domain, "climatology" )
+    projectdir = file.path(p$data_root, "maps", voi, p$spatial_domain, "climatology" )
     dir.create( projectdir, recursive=T, showWarnings=F )
 
     loc = bathymetry.db(p=p, DS="baseline" )
@@ -126,7 +126,7 @@ aegis_db_map = function( ip=NULL, p=NULL, type="all", voi=NULL ) {
       png( filename=fn, width=3072, height=2304, pointsize=40, res=300 )
         lp = aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
           annot=annot, annot.cex=annot.cex, at=datarange, col.regions=cols,
-          corners=p$corners, spatial.domain=p$spatial.domain )
+          corners=p$corners, spatial_domain=p$spatial_domain )
       print(lp)
       dev.off()
 

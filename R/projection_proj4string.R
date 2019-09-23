@@ -1,12 +1,14 @@
- #' @export 
-lookup.projection.params = function(x) {
-    # for examples, see: 
+ #' @export
+projection_proj4string = function(x) {
+    # for examples, see:
     # http://www.progonos.com/furuti/MapProj/Normal/TOC/cartTOC.html
     out  = switch( x,
+      lonlat_wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs",
       utm19		= "+proj=utm +ellps=WGS84 +zone=19 +units=km ",
-      utm20             = "+proj=utm +ellps=WGS84 +zone=20 +units=km ", 
-      utm21             = "+proj=utm +ellps=WGS84 +zone=21 +units=km ", 
+      utm20             = "+proj=utm +ellps=WGS84 +zone=20 +units=km ",
+      utm21             = "+proj=utm +ellps=WGS84 +zone=21 +units=km ",
       utm20.substrate   = "+proj=utm +datum=NAD83 +zone=20 +units=km",
+      omerc_nova_scotia = "+proj=omerc +lat_0=44.0 +lonc=-63.0 +gamma=0.0 +k=1 +alpha=325 +x_0=0 +y_0=0 +ellps=WGS84 +units=km",
       lambert.conic.equidist    = "+proj=eqdc +ellps=WGS84 +lon_0=63W +lat_0=45N +lat_1=43N +lat_2=47N +units=km ",
       lambert.conic             = "+proj=lcc +ellps=WGS84  +lon_0=63W +lat_0=45N +lat_1=43N +lat_2=47N +units=km ",
       lambert.conic.4t          = "+proj=lcc +ellps=WGS84  +lon_0=63W +lat_0=47N +lat_1=45N +lat_2=49N +units=km ",

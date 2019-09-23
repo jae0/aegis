@@ -1,4 +1,4 @@
-data_spatial_openstreetmap = function( what, p, redo=FALSE, fn=NULL, ... ) {
+data_spatial_openstreetmap = function( DS, p, redo=FALSE, fn=NULL, ... ) {
 
   # testing open street maps data ...
 
@@ -11,7 +11,7 @@ data_spatial_openstreetmap = function( what, p, redo=FALSE, fn=NULL, ... ) {
 
   # -----------------------------
 
-    if (what=="NS_coastline_openstreetmap") {
+    if (DS=="NS_coastline_openstreetmap") {
     # https://planet.openstreetmap.org/  https://planet.openstreetmap.org/historical-shapefiles/processed_p.tar.bz2 (projection not clear)
     # http://data.openstreetmapdata.com/coastlines-split-4326.zip (WGS84)
 
@@ -19,7 +19,7 @@ data_spatial_openstreetmap = function( what, p, redo=FALSE, fn=NULL, ... ) {
       if ( !redo ) {
         if ( file.exists(fn) )  {
         load( fn )
-        if (exists("internal.crs", p)) pg = spTransform( pg, sp::CRS(p$internal.crs) )
+        if (exists("aegis_proj4string_planar_km", p)) pg = spTransform( pg, sp::CRS(p$aegis_proj4string_planar_km) )
         return (pg)
       }
       }
@@ -39,7 +39,7 @@ data_spatial_openstreetmap = function( what, p, redo=FALSE, fn=NULL, ... ) {
       ns = data_spatial( "NS_boundary_statscan_crude", p=p)
 
       out = raster::shapefile( shapefilename_osm )
-      out = spTransform( out, sp::CRS(p$internal.crs) )
+      out = spTransform( out, sp::CRS(p$aegis_proj4string_planar_km) )
       out = gSimplify( out, tol=1)  # in meters
 
       pg = gIntersection( out, ns, drop_lower_td=TRUE, byid=TRUE )
@@ -60,13 +60,13 @@ data_spatial_openstreetmap = function( what, p, redo=FALSE, fn=NULL, ... ) {
   # ---------------------------------
 
 
-      if (what=="NS_openstreetmaps_test") {
+      if (DS=="NS_openstreetmaps_test") {
         # from open street maps data .. not fully working .. test only via osmdata
         fn = file.path( p$data.directory, "polygons", "NS_openstreetmaps.rdata" )
         if ( !redo ) {
           if ( file.exists(fn) )  {
             load( fn )
-            if (exists("internal.crs", p)) pg = spTransform( pg, sp::CRS(p$internal.crs) )
+            if (exists("aegis_proj4string_planar_km", p)) pg = spTransform( pg, sp::CRS(p$aegis_proj4string_planar_km) )
             return (pg)
           }
         }
@@ -104,7 +104,7 @@ data_spatial_openstreetmap = function( what, p, redo=FALSE, fn=NULL, ... ) {
         ns = data_spatial( "NS_boundary_statscan_crude", p=p)
 
         out = raster::shapefile( shapefilename_osm )
-        out = spTransform( out, sp::CRS(p$internal.crs) )
+        out = spTransform( out, sp::CRS(p$aegis_proj4string_planar_km) )
   #      out = gSimplify( out, tol=1)  # in meters
 
         pg = gIntersection( out, ns, drop_lower_td=TRUE, byid=TRUE )
@@ -125,7 +125,7 @@ data_spatial_openstreetmap = function( what, p, redo=FALSE, fn=NULL, ... ) {
   # --------------------------
 
 
-      if (what=="NS_ocean_openstreetmapdata") {
+      if (DS=="NS_ocean_openstreetmapdata") {
         # from open street maps data
         fn = file.path( p$data.directory, "polygons", "NS_ocean_openstreetmapdata.rdata" )
 
@@ -133,7 +133,7 @@ data_spatial_openstreetmap = function( what, p, redo=FALSE, fn=NULL, ... ) {
 
         if ( file.exists(fn) )  {
           load( fn )
-          if (exists("internal.crs", p)) pg = spTransform( pg, sp::CRS(p$internal.crs) )
+          if (exists("aegis_proj4string_planar_km", p)) pg = spTransform( pg, sp::CRS(p$aegis_proj4string_planar_km) )
           return (pg)
         }
         }
@@ -153,7 +153,7 @@ data_spatial_openstreetmap = function( what, p, redo=FALSE, fn=NULL, ... ) {
         ns = data_spatial( "NS_boundary_statscan_crude", p=p)
 
         out = raster::shapefile( shapefilename_osm )
-        out = spTransform( out, sp::CRS(p$internal.crs) )
+        out = spTransform( out, sp::CRS(p$aegis_proj4string_planar_km) )
   #      out = gSimplify( out, tol=1)  # in meters
 
         pg = gIntersection( out, ns, drop_lower_td=TRUE, byid=TRUE )

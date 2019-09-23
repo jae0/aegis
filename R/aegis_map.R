@@ -2,9 +2,9 @@
 
   aegis_map = function( xyz, depthcontours=TRUE, pts=NULL, colpts=FALSE,
       annot=NULL, annot.cex=2, leg = NULL,
-      projection = "+proj=utm +ellps=WGS84 +zone=20 +units=km",
+      projection_map_proj4string = NULL,
       col.regions=FALSE, at=0:1,
-      corners=NULL, rez=c(1,1), spatial.domain="SSE", display=FALSE, save=TRUE,
+      corners=NULL, rez=c(1,1), spatial_domain="SSE", display=FALSE, save=TRUE,
       pt.cex=0.5, pt.pch=16, pt.col='black',
       colorkey=NULL, fill=T, scalebar=NULL, landfillcolour="lightgrey", plotlines=NULL,
       ... ) {
@@ -13,6 +13,11 @@
 
 		require( lattice )
 
+    pp = spatial_parameters( spatial_domain=spatial_domain )
+
+    if (is.null(projection_map_proj4string)) {
+      projection_map_proj4string = pp$aegis_proj4string_planar_km
+    }
 
     xlim =ylim = NULL
     if(is.null(colorkey)) colorkey=list(space="right", labels=list(cex=3)) # these are lattice options
@@ -24,10 +29,10 @@
 
     if ( is.null( xyz$plon) ) {
       names( xyz ) = c( "lon", "lat", "z" )
-      xyz = lonlat2planar( xyz,   proj.type=projection)
+      xyz = lonlat2planar( xyz,   proj.type=projection_map_proj4string)
       xyz = xyz[ , c( "plon", "plat", "z" ) ]
       if ( !is.null(corners) ) {
-        if ( is.null(corners$plon) ) corners = lonlat2planar( corners,  proj.type=projection )
+        if ( is.null(corners$plon) ) corners = lonlat2planar( corners, proj.type=projection_map_proj4string )
       }
 
     } else {
@@ -46,7 +51,7 @@
 
     if ( ! is.null(pts) ) {
       if ( is.null( pts$plon) ) {
-        pts = lonlat2planar(xyz,  proj.type=p$internal.crs)
+        pts = lonlat2planar(xyz,  proj.type=projection_map_proj4string )
         pts = pts[, c("plon", "plat")]
       }
     }
@@ -58,8 +63,8 @@
 
 
     lp = levelplot( z ~ plon+plat, data=xyz, aspect="iso", pts=pts, colpts=colpts,
-      annot=annot, annot.cex=annot.cex,
-      spatial.domain=spatial.domain,
+      annot=annot, annot.cex=annot.cex, projection_map_proj4string=projection_map_proj4string,
+      pp=pp,
       xlab="", ylab="", scales=list(draw=F), col.regions=col.regions, at=at, xlim=xlim, ylim=ylim,
       colorkey=colorkey, rez=rez, leg=leg, plotlines=plotlines,
       panel = function(x, y, z, rez=rez,  ...) {
@@ -79,10 +84,8 @@
           }
         }
 
-        pp = spatial_parameters( spatial.domain=spatial.domain )
-
         if (depthcontours) {
-          isobs = aegis.bathymetry::isobath.db( p=pp, depths=c( 100, 200, 300, 400, 500, 600, 700 ), crs=pp$internal.crs )
+          isobs = aegis.bathymetry::isobath.db( p=pp, depths=c( 100, 200, 300, 400, 500, 600, 700 ), crs=projection_map_proj4string )
           depths1 = c(100, 300, 500, 700 )
           depths2 = c(200, 400, 600)
           for ( i in depths1 ) sp.lines( isobs[as.character(i) ] , col = rgb(0.2,0.2,0.2,0.5), cex=0.6 )
@@ -92,13 +95,13 @@
         if ( !is.null(plotlines) ) {
           lines.to.plot = aegis.polygons::area_lines.db( DS=plotlines )
           for ( pln in 1:length(lines.to.plot )) {
-            ltp = lonlat2planar( lines.to.plot[[pln]], proj.type=pp$internal.crs )
+            ltp = lonlat2planar( lines.to.plot[[pln]], proj.type=projection_map_proj4string )
             panel.lines( ltp$plon, ltp$plat, col="black", lwd=1, lty=2 )
           }
         }
 
         #coastline
-        coast = aegis.coastline::coastline.db(p=pp, crs=pp$internal.crs, DS="gshhg coastline highres" )
+        coast = aegis.coastline::coastline.db(p=pp, crs=projection_map_proj4string  )
         sp.polygons( coast, col="black", cex=1, fill=landfillcolour)
 
         #legend

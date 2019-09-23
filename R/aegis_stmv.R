@@ -35,9 +35,11 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       p$varstomodel = c()
       p$taxa.of.interest = aegis.survey::groundfish.variablelist("catch.summary")
 
+
+
       if (!exists("polygon_source", p)) p$polygon_source = "pre2014"   # "pre2014" for older
-      if (!exists("internal.crs", p)) p$internal.crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
-      if (!exists("proj4string_planar_km", p)) p$proj4string_planar_km = "+proj=omerc +lat_0=44.0 +lonc=-63.0 +gamma=0.0 +k=1 +alpha=325 +x_0=0 +y_0=0 +ellps=WGS84 +units=km"  # oblique mercator, centred on Scotian Shelf rotated by 325 degrees
+      if (!exists("aegis_proj4string_lonlat", p)) p$aegis_proj4string_lonlat = projection_proj4string("lonlat_wgs84")
+      if (!exists("areal_units_proj4string_planar_km", p)) p$areal_units_proj4string_planar_km = projection_proj4string("omerc_nova_scotia")  # oblique mercator, centred on Scotian Shelf rotated by 325 degrees
       if (!exists("boundingbox", p)) p$boundingbox = list( xlim = c(-70.5, -56.5), ylim=c(39.5, 47.5)) # bounding box for plots using spplot
       if (!exists("trawlable_units", p)) p$trawlable_units = "standardtow"  # for groundfish.db
 
@@ -53,15 +55,15 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
     p$libs = c( p$libs, RLibrary ( "sp", "spdep", "rgeos", "INLA", "mgcv" ))  # standard CRAN libs -- geostatistical support
     p$libs = c( p$libs, RLibrary( "aegis", "bio.taxonomy", "carstm", "stmv", "netmensuration" ) ) #,  ) # locally developed code
 
-    if (!exists("project.name", p) ) stop("project.name is required")
+    if (!exists("project_name", p) ) stop("project_name is required")
     if (!exists("data_root", p) ) stop( "data_root is required")
     if (!exists("variables", p) ) stop( "variables is required")
     if (!exists("Y", p$variables) ) stop( "variables$Y is required")
     if (!exists("LOCS", p$variables)) p$variables$LOCS=c("plon", "plat")
     if (!exists("TIME", p$variables)) p$variables$TIME="tiyr"
 
-    if (!exists("spatial.domain", p) ) p$spatial.domain = "SSE"
-    if (!exists("spatial.domain.subareas", p)) p$spatial.domain.subareas = NULL #c( "snowcrab" )
+    if (!exists("spatial_domain", p) ) p$spatial_domain = "SSE"
+    if (!exists("spatial_domain_subareas", p)) p$spatial_domain_subareas = NULL #c( "snowcrab" )
 
     p = spatial_parameters( p=p )
 
@@ -69,7 +71,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
 
     p = aegis_parameters(p=p, DS="stmv_spatiotemporal_model" )
 
-    if (!exists("storage.backend", p)) p$storage.backend="bigmemory.ram"
+    if (!exists("storage_backend", p)) p$storage_backend="bigmemory.ram"
 
     if (!exists("boundary", p)) p$boundary = FALSE
     if (!exists("stmv_filter_depth_m", p)) p$stmv_filter_depth_m = 0 # depth (m) stats locations with elevation > 0 m as being on land (and so ignore)
@@ -277,8 +279,8 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
     PS = aegis_db_extract(
       vars=p$variables$COV,
       yrs=p$yrs,
-      spatial.domain=p$spatial.domain,
-      dyear=p$prediction.dyear
+      spatial_domain=p$spatial_domain,
+      dyear=p$prediction_dyear
     )
     PS$data_offset = rep( p$pres*p$pres, nrow(LOCS) )  # force to be density n/km^2
     out = list(input=set, output=list( LOCS=LOCS, COV=PS ))
@@ -293,11 +295,11 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
   if ( DS %in% c("predictions", "predictions.redo" ) ) {
     # NOTE: the primary interpolated data were already created by stmv.
     # This routine points to this data and also creates
-    # subsets of the data where required, determined by "spatial.domain.subareas"
+    # subsets of the data where required, determined by "spatial_domain_subareas"
     # not strictly required for snow crab data analysis as there are no sub-areas that are analysed
     # at present, but in case there are small-area analysis in future, this is a mechnanism
 
-    projectdir = file.path(p$data_root, "modelled", p$variables$Y, p$spatial.domain )
+    projectdir = file.path(p$data_root, "modelled", p$variables$Y, p$spatial_domain )
 
     if (DS %in% c("predictions")) {
       P = Pl = Pu = NULL
@@ -308,7 +310,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       if (ret=="ub") return( Pu)
     }
 
-    sreg = setdiff( p$spatial.domain.subareas, p$spatial.domain ) # see  note above
+    sreg = setdiff( p$spatial_domain_subareas, p$spatial_domain ) # see  note above
     if (is.null(sreg)) return
     if (length(sreg) < 1 ) return
 
@@ -325,20 +327,20 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
 
       for ( gr in sreg ) {
         # warping
-        p1 = spatial_parameters( p=p, spatial.domain=gr ) # 'warping' from p -> p1
+        p1 = spatial_parameters( p=p, spatial_domain=gr ) # 'warping' from p -> p1
         L1 = bathymetry.db( p=p1, DS="baseline" )
         L1i = stmv::array_map( "xy->2", L1[, c("plon", "plat")], gridparams=p1$gridparams )
-        L1 = planar2lonlat( L1, proj.type=p1$internal.crs )
+        L1 = planar2lonlat( L1, proj.type=p1$aegis_proj4string_planar_km )
         L1$plon_1 = L1$plon # store original coords
         L1$plat_1 = L1$plat
-        L1 = lonlat2planar( L1, proj.type=p0$internal.crs )
+        L1 = lonlat2planar( L1, proj.type=p0$aegis_proj4string_planar_km )
         p1$wght = fields::setup.image.smooth( nrow=p1$nplons, ncol=p1$nplats, dx=p1$pres, dy=p1$pres, theta=p1$pres/3, xwidth=4*p1$pres, ywidth=4*p1$pres )
           # theta=p1$pres/3 assume at pres most of variance is accounted ... correct if dense pre-intepolated matrices .. if not can be noisy
 
         P = spatial_warp( PP0[], L0, L1, p0, p1, "fast", L0i, L1i )
         Pl = spatial_warp( VV0[], L0, L1, p0, p1, "fast", L0i, L1i )
         Pu = spatial_warp( WW0[], L0, L1, p0, p1, "fast", L0i, L1i )
-        projectdir_p1 = file.path(p$data_root, "modelled", p1$variables$Y, p1$spatial.domain )
+        projectdir_p1 = file.path(p$data_root, "modelled", p1$variables$Y, p1$spatial_domain )
         dir.create( projectdir_p1, recursive=T, showWarnings=F )
         fn1_sg = file.path( projectdir_p1, paste("stmv.prediction.mean",  year, "rdata", sep=".") )
         fn2_sg = file.path( projectdir_p1, paste("stmv.prediction.lb",  year, "rdata", sep=".") )
@@ -365,13 +367,13 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
 
     if (DS %in% c("stmv.stats")) {
       stats = NULL
-      projectdir = file.path(p$data_root, "modelled", p$variables$Y, p$spatial.domain )
+      projectdir = file.path(p$data_root, "modelled", p$variables$Y, p$spatial_domain )
       fn = file.path( projectdir, paste( "stmv.statistics", "rdata", sep=".") )
       if (file.exists(fn) ) load(fn)
       return( stats )
     }
 
-    sreg = setdiff( p$spatial.domain.subareas, p$spatial.domain )
+    sreg = setdiff( p$spatial_domain_subareas, p$spatial_domain )
     if (is.null(sreg)) return
     if (length(sreg) < 1 ) return
 
@@ -382,13 +384,13 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
     L0i = stmv::array_map( "xy->2", L0[, c("plon", "plat")], gridparams=p0$gridparams )
 
     for ( gr in sreg ) {
-      p1 = spatial_parameters( p=p, spatial.domain=gr ) # 'warping' from p -> p1
+      p1 = spatial_parameters( p=p, spatial_domain=gr ) # 'warping' from p -> p1
       L1 = bathymetry.db( p=p1, DS="baseline" )
       L1i = stmv::array_map( "xy->2", L1[, c("plon", "plat")], gridparams=p1$gridparams )
-      L1 = planar2lonlat( L1, proj.type=p1$internal.crs )
+      L1 = planar2lonlat( L1, proj.type=p1$aegis_proj4string_planar_km )
       L1$plon_1 = L1$plon # store original coords
       L1$plat_1 = L1$plat
-      L1 = lonlat2planar( L1, proj.type=p0$internal.crs )
+      L1 = lonlat2planar( L1, proj.type=p0$aegis_proj4string_planar_km )
       p1$wght = fields::setup.image.smooth( nrow=p1$nplons, ncol=p1$nplats, dx=p1$pres, dy=p1$pres, theta=p1$pres/3, xwidth=4*p1$pres, ywidth=4*p1$pres )
         # theta=p1$pres/3 assume at pres most of variance is accounted ... correct if dense pre-intepolated matrices .. if not can be noisy
       stats = matrix( NA, ncol=ncol(S0), nrow=nrow(L1) )
@@ -396,7 +398,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
         stats[,i] = spatial_warp( S0[,i], L0, L1, p0, p1, "fast", L0i, L1i )
       }
       colnames(stats) = Snames
-      projectdir_p1 = file.path(p$data_root, "modelled", p$variables$Y, p1$spatial.domain )
+      projectdir_p1 = file.path(p$data_root, "modelled", p$variables$Y, p1$spatial_domain )
       dir.create( projectdir_p1, recursive=T, showWarnings=F )
       fn1_sg = file.path( projectdir_p1, paste("stmv.statistics", "rdata", sep=".") )
       save( stats, file=fn1_sg, compress=T )
@@ -415,9 +417,9 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
     # assemble data for use by other projects
     if (DS=="complete") {
       IC = NULL
-      projectdir = file.path(p$data_root, "modelled", p$variables$Y, p$spatial.domain )
+      projectdir = file.path(p$data_root, "modelled", p$variables$Y, p$spatial_domain )
       dir.create(projectdir, recursive=T, showWarnings=F)
-      outfile =  file.path( projectdir, paste( p$project.name, "complete", p$spatial.domain, "rdata", sep= ".") )
+      outfile =  file.path( projectdir, paste( p$project_name, "complete", p$spatial_domain, "rdata", sep= ".") )
       if ( file.exists( outfile ) ) load( outfile )
       Inames = names(IC)
       if (is.null(varnames)) varnames=Inames
@@ -427,10 +429,10 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       return(IC)
     }
 
-    grids = unique( c(p$spatial.domain.subareas , p$spatial.domain ) ) # operate upon every domain
+    grids = unique( c(p$spatial_domain_subareas , p$spatial_domain ) ) # operate upon every domain
 
     for (gr in grids ) {
-      p1 = spatial_parameters( p=p, spatial.domain=gr ) #target projection
+      p1 = spatial_parameters( p=p, spatial_domain=gr ) #target projection
       # p1$variables$Y = p$variables$Y # need to send this to get the correct results
       L1 = bathymetry.db(p=p1, DS="baseline")
       BS = aegis_stmv( p=p1, DS="stmv.stats" )
@@ -451,9 +453,9 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       colnames(CL) = paste( p1$variables$Y, c("mean", "lb", "ub"), "climatology", sep=".")
       IC = cbind( IC, CL )
       PS = PSlb = PSub = NULL
-      projectdir = file.path(p$data_root, "modelled", p1$variables$Y, p1$spatial.domain )
+      projectdir = file.path(p$data_root, "modelled", p1$variables$Y, p1$spatial_domain )
       dir.create( projectdir, recursive=T, showWarnings=F )
-      outfile =  file.path( projectdir, paste( p$project.name, "complete", p1$spatial.domain, "rdata", sep= ".") )
+      outfile =  file.path( projectdir, paste( p$project_name, "complete", p1$spatial_domain, "rdata", sep= ".") )
       save( IC, file=outfile, compress=T )
       print( outfile )
     }
@@ -467,8 +469,8 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
     if ( DS=="baseline" ) {
       BL = list()
       for (bvn in varnames ) {
-        projectdir = file.path(p$data_root, "modelled", bvn, p$spatial.domain )
-        outfile =  file.path( projectdir, paste( p$project.name, "baseline", ret, p$spatial.domain, "rdata", sep= ".") )
+        projectdir = file.path(p$data_root, "modelled", bvn, p$spatial_domain )
+        outfile =  file.path( projectdir, paste( p$project_name, "baseline", ret, p$spatial_domain, "rdata", sep= ".") )
         TS = NULL
         load( outfile)
         BL[[bvn]] = TS
@@ -476,12 +478,12 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       return (BL)
     }
 
-    grids = unique( c(p$spatial.domain.subareas , p$spatial.domain ) ) # operate upon every domain
+    grids = unique( c(p$spatial_domain_subareas , p$spatial_domain ) ) # operate upon every domain
 
     for (gr in grids) {
         print(gr)
-        p1 = spatial_parameters( p=p, spatial.domain=gr ) #target projection
-        projectdir = file.path(p$data_root, "modelled", p$variables$Y, p1$spatial.domain )
+        p1 = spatial_parameters( p=p, spatial_domain=gr ) #target projection
+        projectdir = file.path(p$data_root, "modelled", p$variables$Y, p1$spatial_domain )
         dir.create( projectdir, recursive=T, showWarnings=F )
         L1 = bathymetry.db(p=p1, DS="baseline")
         nL1 = nrow(L1)
@@ -489,19 +491,19 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
         for (i in 1:p$ny ) {
           TS[,i] = stmv_db( p=p1, DS="stmv.prediction", yr=p$yrs[i], ret="mean")
         }
-        outfile =  file.path( projectdir, paste( p$project.name, "baseline", "mean", p1$spatial.domain, "rdata", sep= ".") )
+        outfile =  file.path( projectdir, paste( p$project_name, "baseline", "mean", p1$spatial_domain, "rdata", sep= ".") )
         save( TS, file=outfile, compress=T )
         TS = TS[] * NA
         for (i in 1:p$ny ) {
           TS[,i] = stmv_db( p=p1, DS="stmv.prediction", yr=p$yrs[i], ret="lb")
         }
-        outfile =  file.path( projectdir, paste( p$project.name, "baseline", "lb", p1$spatial.domain, "rdata", sep= ".") )
+        outfile =  file.path( projectdir, paste( p$project_name, "baseline", "lb", p1$spatial_domain, "rdata", sep= ".") )
         save( TS, file=outfile, compress=T )
         TS = TS[] * NA
         for (i in 1:p$ny ) {
           TS[,i] = stmv_db( p=p1, DS="stmv.prediction", yr=p$yrs[i], ret="ub")
         }
-        outfile =  file.path( projectdir, paste( p$project.name, "baseline", "ub", p1$spatial.domain, "rdata", sep= ".") )
+        outfile =  file.path( projectdir, paste( p$project_name, "baseline", "ub", p1$spatial_domain, "rdata", sep= ".") )
         save( TS, file=outfile, compress=T )
       }
     return( "Complete" )
@@ -512,10 +514,10 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
 
   if ( DS=="map.all" ) {
 
-    allgrids = unique(c( p$spatial.domain.subareas, p$spatial.domain) )
+    allgrids = unique(c( p$spatial_domain_subareas, p$spatial_domain) )
     for ( gr in allgrids ) {
       print (gr)
-      p1 = spatial_parameters(  p=p, spatial.domain= gr )
+      p1 = spatial_parameters(  p=p, spatial_domain= gr )
       aegis_stmv( p=p1, DS="map.climatology" ) # no parallel option .. just a few
       aegis_stmv( p=p1, DS="map.annual" )
     }
@@ -531,7 +533,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
     eps = 0.001
 
     for ( year in p$yrs ) {
-        projectdir = file.path(p$data_root, "maps", p$variables$Y, p$spatial.domain, "annual" )
+        projectdir = file.path(p$data_root, "maps", p$variables$Y, p$spatial_domain, "annual" )
         dir.create( projectdir, recursive=T, showWarnings=F )
         loc = bathymetry.db(p=p, DS="baseline" )
 
@@ -559,7 +561,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
         png( filename=fn, width=3072, height=2304, pointsize=40, res=300 )
         lp = aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
           annot=annot, annot.cex=annot.cex, at=datarange, col.regions=cols,
-          corners=p$corners, spatial.domain=p$spatial.domain , plotlines="cfa.regions"  )
+          corners=p$corners, spatial_domain=p$spatial_domain , plotlines="cfa.regions"  )
         print(lp)
         dev.off()
 
@@ -586,7 +588,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
         png( filename=fn, width=3072, height=2304, pointsize=40, res=300 )
         lp = aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
           annot=annot, annot.cex=annot.cex, at=datarange, col.regions=cols,
-          corners=p$corners, spatial.domain=p$spatial.domain , plotlines="cfa.regions" )
+          corners=p$corners, spatial_domain=p$spatial_domain , plotlines="cfa.regions" )
         print(lp)
         dev.off()
 
@@ -612,7 +614,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
         png( filename=fn, width=3072, height=2304, pointsize=40, res=300 )
         lp = aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
               annot=annot, annot.cex=annot.cex, at=datarange , col.regions=cols,
-              corners=p$corners, spatial.domain=p$spatial.domain , plotlines="cfa.regions" )
+              corners=p$corners, spatial_domain=p$spatial_domain , plotlines="cfa.regions" )
         print(lp)
         dev.off()
 
@@ -635,7 +637,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
     H = NULL
 
     for (vn in vnames) {
-        projectdir = file.path(p$data_root, "maps", p$variables$Y, p$spatial.domain, "climatology" )
+        projectdir = file.path(p$data_root, "maps", p$variables$Y, p$spatial_domain, "climatology" )
         dir.create( projectdir, recursive=T, showWarnings=F )
         loc = bathymetry.db(p=p, DS="baseline" )
         H = aegis_stmv( p=p, DS="complete" )
@@ -661,7 +663,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
         png( filename=fn, width=3072, height=2304, pointsize=40, res=300 )
         lp = aegis_map( xyz=xyz, depthcontours=TRUE, pts=NULL,
           annot=annot, annot.cex=annot.cex, at=datarange, col.regions=cols,
-          corners=p$corners, spatial.domain=p$spatial.domain, plotlines="cfa.regions"  )
+          corners=p$corners, spatial_domain=p$spatial_domain, plotlines="cfa.regions"  )
         print(lp)
         dev.off()
 

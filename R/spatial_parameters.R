@@ -7,9 +7,9 @@ spatial_parameters = function( p=NULL, ... ) {
     i = which(duplicated(names(p), fromLast=TRUE ))
     if ( length(i) > 0 ) p = p[-i] # give any passed parameters a higher priority, overwriting pre-existing variable
 
-    if ( p$spatial.domain %in% c("snowcrab") ) {
+    if ( p$spatial_domain %in% c("snowcrab") ) {
 
-        p$internal.crs =  "+proj=utm +ellps=WGS84 +zone=20 +units=km"
+        p$aegis_proj4string_planar_km =  projection_proj4string("utm20")
         p$dres = 1/60/4  # this is the 15 second grid from CHS  .. default use highest resolution
         p$pres = 1   # 1 km resolution!
         p$lon0=-66.1
@@ -19,9 +19,9 @@ spatial_parameters = function( p=NULL, ... ) {
         p$lat1=47.4
         p$psignif = 1
 
-    } else if ( p$spatial.domain %in% c("SSE") ) {
+    } else if ( p$spatial_domain %in% c("SSE") ) {
 
-        p$internal.crs =  "+proj=utm +ellps=WGS84 +zone=20 +units=km"
+        p$aegis_proj4string_planar_km =  projection_proj4string("utm20")
         p$dres = 1/60/4  # this is the 15 second grid from CHS  .. default use highest resolution
         p$pres = 1   # 1 km resolution!
         p$lon0=-68
@@ -30,9 +30,9 @@ spatial_parameters = function( p=NULL, ... ) {
         p$lat1=48
         p$psignif = 1
 
-    } else if ( p$spatial.domain %in% c("SSE.mpa") ) {
+    } else if ( p$spatial_domain %in% c("SSE.mpa") ) {
 
-        p$internal.crs =  "+proj=utm +ellps=WGS84 +zone=20 +units=km"
+        p$aegis_proj4string_planar_km = projection_proj4string("utm20")
         p$dres = 1/60/4  # this is the 15 second grid from CHS  .. default use highest resolution
         p$pres = 1  # 1 km resolution
         p$lon0=-71
@@ -42,9 +42,9 @@ spatial_parameters = function( p=NULL, ... ) {
         p$psignif = 1
         p$boundary = "scotia.fundy.with.buffer"
 
-    } else if ( p$spatial.domain=="canada.east") {
+    } else if ( p$spatial_domain=="canada.east") {
 
-        p$internal.crs = "+proj=lcc +ellps=WGS84  +lon_0=62W +lat_0=45N +lat_1=43N +lat_2=47N +units=km "
+        p$aegis_proj4string_planar_km =  projection_proj4string("lambert.conic.canada.east")
         p$dres = 1/60/4  # this is the 15 second grid from CHS  .. ~ 0.25 km
         p$pres = 1  # km
         p$lon0=-72
@@ -53,9 +53,9 @@ spatial_parameters = function( p=NULL, ... ) {
         p$lat1=50
         p$psignif = 1
 
-    } else if ( p$spatial.domain %in% c("canada.east.highres")) {
+    } else if ( p$spatial_domain %in% c("canada.east.highres")) {
 
-        p$internal.crs = "+proj=lcc +ellps=WGS84  +lon_0=62W +lat_0=45N +lat_1=43N +lat_2=47N +units=km"
+        p$aegis_proj4string_planar_km =  projection_proj4string("lambert.conic.canada.east")
         p$dres = 1/60/4  # CHS is 15 arc second ~ 0.25 km
         p$pres = 0.5  # discretize to 0.5 km resolution
         p$lon0=-72
@@ -64,9 +64,9 @@ spatial_parameters = function( p=NULL, ... ) {
         p$lat1=50
         p$psignif = 1
 
-    } else if ( p$spatial.domain %in% c("canada.east.superhighres")) {
+    } else if ( p$spatial_domain %in% c("canada.east.superhighres")) {
 
-        p$internal.crs = "+proj=lcc +ellps=WGS84  +lon_0=62W +lat_0=45N +lat_1=43N +lat_2=47N +units=km"
+        p$aegis_proj4string_planar_km =  projection_proj4string("lambert.conic.canada.east")
         p$dres = 1/60/4  # CHS is 15 arc second ~ 0.25 km
         p$pres = 0.2  # discretize to 0.2 km resolution
         p$lon0=-72
@@ -77,8 +77,8 @@ spatial_parameters = function( p=NULL, ... ) {
 
     } else {
 
-        message( "The spatial.domain was not recognised:")
-        message( p$spatial.domain )
+        message( "The spatial_domain was not recognised:")
+        message( p$spatial_domain )
         message( "Assuming this is manual mode and you are constructing your own list .. you are on your own ...")
 
      }
@@ -86,7 +86,7 @@ spatial_parameters = function( p=NULL, ... ) {
     p$nlons = round( diff(range(c(p$lon0,p$lon1)))/p$dres) + 1L
     p$nlats = round( diff(range(c(p$lat0,p$lat1)))/p$dres) + 1L
     corners = data.frame(lon=c(p$lon0,p$lon1), lat=c(p$lat0,p$lat1))
-    corners = lonlat2planar( corners, proj.type=p$internal.crs )
+    corners = lonlat2planar( corners, proj.type=p$aegis_proj4string_planar_km )
     corners$plon = round( corners$plon, p$psignif)  # this matches the p$pres value of x km resolution
     corners$plat = round( corners$plat, p$psignif)  # this matches the p$pres value of x km resolution
     p$corners=corners

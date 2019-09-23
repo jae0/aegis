@@ -5,7 +5,7 @@
     #\\ output scale is defined in the +units=km (default for bio) or +units=m (default for proj)
     # first try an internal conversion /lookup for CRS
     pjj = NULL
-    pjj = lookup.projection.params(proj.type)
+    pjj = projection_proj4string(proj.type)
     if (!is.null(pjj)) {
       proj4.params = try( sp::CRS( pjj ), silent=TRUE )
     } else {

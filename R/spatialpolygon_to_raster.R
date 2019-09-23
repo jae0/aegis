@@ -53,9 +53,9 @@ spatialpolygon_to_raster = function( sp_poly, res=100, vn="dummy_value", return.
         p$project.directory = file.path( p$root.directory, "NSspatial")
         p$data.directory    = file.path( p$project.directory, "data" )
         p$mypalette <- brewer.pal(6, "YlOrRd")
-        p$internal.crs = CRS( "+proj=omerc +lat_0=44.6475 +lonc=-63.580278 +gamma=0.0 +k=1 +alpha=332 +x_0=0 +y_0=0 +ellps=WGS84 +units=m" )
+        p$aegis_proj4string_planar_km = CRS( "+proj=omerc +lat_0=44.6475 +lonc=-63.580278 +gamma=0.0 +k=1 +alpha=332 +x_0=0 +y_0=0 +ellps=WGS84 +units=km" )
 
-        if (exists("internal.crs", p)) spdata = spTransform( spdata, sp::CRS(p$internal.crs) )
+        if (exists("aegis_proj4string_planar_km", p)) spdata = spTransform( spdata, sp::CRS(p$aegis_proj4string_planar_km) )
         uid = "PRCDDA"
         spdata$uid = spdata[[uid]]
         spdata$Total = spdata$POP2001
