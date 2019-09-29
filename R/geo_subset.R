@@ -26,7 +26,7 @@ geo_subset = function( spatial_domain, Z ) {
 
   if ( spatial_domain == "SSE.mpa" ) {
     Z = Z[ which(Z$z < 2000 & Z$z > 0 ) ,]
-    bnd = polygon.db( id="scotia.fundy.with.buffer" )
+    bnd = polygon.db( polyid="scotia.fundy.with.buffer" )
     bnd = lonlat2planar( bnd, proj.type=ps$aegis_proj4string_planar_km ) # convert to internal projection
     jj = which( sp::point.in.polygon( Z$plon, Z$plat, bnd$plon, bnd$plat) != 0 )
     if (length( jj) > 0) Z = Z[ jj, ]

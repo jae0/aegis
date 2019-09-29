@@ -25,11 +25,11 @@
       proj4string( bbox ) = crs
       bbox = spTransform( bbox, CRS(crs) )
 
-      aoi = aegis.polygons::polygon.db( id="StAnnsBank_AOI", returnvalue="sp.polygon", crs=crs )
-      z1 = aegis.polygons::polygon.db( id="StAnnsBank_Zone1", returnvalue="sp.polygon", crs=crs  )
-      z2 = aegis.polygons::polygon.db( id="StAnnsBank_Zone2", returnvalue="sp.polygon", crs=crs  )
-      z3 = aegis.polygons::polygon.db( id="StAnnsBank_Zone3", returnvalue="sp.polygon", crs=crs  )
-      z4 = aegis.polygons::polygon.db( id="StAnnsBank_Zone4", returnvalue="sp.polygon", crs=crs   )
+      aoi = aegis.polygons::polygon.db( polyid="StAnnsBank_AOI", returnvalue="sp.polygon", crs=crs )
+      z1 = aegis.polygons::polygon.db( polyid="StAnnsBank_Zone1", returnvalue="sp.polygon", crs=crs  )
+      z2 = aegis.polygons::polygon.db( polyid="StAnnsBank_Zone2", returnvalue="sp.polygon", crs=crs  )
+      z3 = aegis.polygons::polygon.db( polyid="StAnnsBank_Zone3", returnvalue="sp.polygon", crs=crs  )
+      z4 = aegis.polygons::polygon.db( polyid="StAnnsBank_Zone4", returnvalue="sp.polygon", crs=crs   )
 
       out$sab.polygons = bind( aoi, z1, z2, z3, z4, keepnames=TRUE )
 

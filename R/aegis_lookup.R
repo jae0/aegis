@@ -145,9 +145,9 @@ aegis_lookup = function( p, DS="all", locsmap=NULL, locs=NULL, timestamp=NULL, v
 
     # additional aegis_db variables
     aegis_project_datasources = c("speciescomposition", "speciesarea", "metabolism", "condition", "sizespectrum")  # check all
-    for (id in aegis_project_datasources ) {
+    for (apds in aegis_project_datasources ) {
       pz = NULL
-      pz = try( aegis_parameters( DS=id ) )
+      pz = try( aegis_parameters( DS=apds ) )
       if ( is.null(pz) ) next()
       if ( "try-error" %in% class(pz) ) next()
       pz_vars = intersect( pz$varstomodel, varnames )  # these are aegis vars to model

@@ -54,6 +54,16 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
     if (!exists("timeperiod", p) )  p$timeperiod="default"
     if (!exists("inputdata_spatial_discretization_planar_km", p) )  p$inputdata_spatial_discretization_planar_km = 1
 
+    if (!exists("auid", p) ) auid = paste(
+      p$spatial_domain,
+      paste0(p$areal_units_overlay, collapse="_"),
+      p$areal_units_resolution_km,
+      p$areal_units_strata_type,
+      p$areal_units_constraint,
+      p$timeperiod,
+      sep="_"
+    )
+
     if (!exists("discretization", p) ) p$discretization = list()
     if (!exists("z", p$discretization) ) p$discretization$z = c(1.25, 2.5, 5, 10, 20, 40, 80, 160, 320, 640, 1280 )  # depth cut points
     # if (!exists("z", p$discretization) ) p$discretization$z = c(2.5, 5, 10, 20, 40, 80, 160, 320, 640 )
