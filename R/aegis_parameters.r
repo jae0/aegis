@@ -137,7 +137,7 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
 
     if (!exists("nw", p)) p$nw = 10 # default value of 10 time steps number of intervals in time within a year for all temp and indicators
     p$tres = 1/ p$nw # time resolution .. predictions are made with models that use seasonal components
-    p$dyears = {c(1:p$nw)-1} / p$nw # intervals of decimal years... fractional year breaks
+    p$dyears = (c(1:p$nw)-1) / p$nw # intervals of decimal years... fractional year breaks
     p$dyear_centre = p$dyears[ round(p$nw/2) ] + p$tres/2
 
     if (!exists("prediction_dyear", p)) p$prediction_dyear = lubridate::decimal_date( lubridate::ymd("0000/Sep/01")) # used for creating timeslices and predictions  .. needs to match the values in aegis_parameters()
