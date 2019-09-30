@@ -54,7 +54,7 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
     if (!exists("timeperiod", p) )  p$timeperiod="default"
     if (!exists("inputdata_spatial_discretization_planar_km", p) )  p$inputdata_spatial_discretization_planar_km = 1
 
-    if (!exists("auid", p) ) auid = paste(
+    if (!exists("auid", p) ) p$auid = paste(
       p$spatial_domain,
       paste0(p$areal_units_overlay, collapse="_"),
       p$areal_units_resolution_km,
