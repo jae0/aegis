@@ -20,7 +20,8 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
     "maps", "mapdata", "maptools", "parallel",  "rgdal", "rgeos",  "sp", "splancs", "GADMTools" ) )
   p$libs = unique( c( p$libs, project.library ( "aegis") ) )
 
-
+  if ( !exists("inputdata_spatial_discretization_planar_km", p) )  p$inputdata_spatial_discretization_planar_km = 1
+  if ( !exists("inputdata_temporal_discretization_yr", p) )  p$inputdata_temporal_discretization_yr = 1   # ie., daily .. controls resolution of data prior to modelling to reduce data set and speed up modelling
 
 
   # ---------------------
@@ -40,6 +41,8 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
 
   # ----------------------------------
   if ( DS=="carstm" ) {
+    p$libs =  RLibrary( unique( c( p$libs, "carstm" )  ) )
+
     if ( !exists("project_name", p)) stop("project_name is required")
 
     if ( !exists("data_root", p) ) p$data_root = project.datadirectory( "aegis", p$project_name )
@@ -52,7 +55,6 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
     if (!exists("areal_units_resolution_km", p )) stop( "areal_units_resolution_km should be defined ... " ) # km
     if (!exists("areal_units_proj4string_planar_km", p )) stop( "areal_units_proj4string_planar_km should be defined ... " ) # km
     if (!exists("timeperiod", p) )  p$timeperiod="default"
-    if (!exists("inputdata_spatial_discretization_planar_km", p) )  p$inputdata_spatial_discretization_planar_km = 1
 
     if (!exists("auid", p) ) p$auid = paste(
       p$spatial_domain,
@@ -77,90 +79,18 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
     if (!exists("tmax", p$discretization) ) p$discretization$tmax = c( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15 )
     if (!exists("degreedays", p$discretization) ) p$discretization$degreedays = c(10, 100, 200, 400, 800, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 5000)
 
-
     return(p)
   }
 
-
   # ----------------------------------
-  if ( DS=="stmv_spatial_model" ) {
-    # generic stmv settings space AND time interp (and not just spatial)
-
-    p$libs = RLibrary( unique( c( p$libs, "stmv" ) ) )
-
-    if (!exists("storage_backend", p)) p$storage_backend="bigmemory.ram"
-    if (!exists("clusters", p)) p$clusters = rep("localhost", detectCores() )
-    if (!exists("boundary", p)) p$boundary = FALSE
-    if (!exists("stmv_filter_depth_m", p)) p$stmv_filter_depth_m = 0 # depth (m) stats locations with elevation > 0 m as being on land (and so ignore)
-    if (!exists("stmv_rsquared_threshold", p)) p$stmv_rsquared_threshold = 0.75 # lower threshold
-    if (!exists("stmv_distance_statsgrid", p)) p$stmv_distance_statsgrid = 5 # resolution (km) of data aggregation (i.e. generation of the ** statistics ** )
-    # if (!exists("stmv_distance_prediction", p)) p$stmv_distance_prediction  = p$stmv_distance_statsgrid *0.75 # this is a half window km
-    if (!exists("stmv_distance_scale", p)) p$stmv_distance_scale = c(25, 30, 40) # km ... approx guess of 95% AC range
-    if (!exists("stmv_nmin", p)) p$stmv_nmin = 200 # min number of data points req before attempting to model timeseries in a localized space
-    if (!exists("stmv_nmax", p)) p$stmv_nmax = 8000 # no real upper bound
-
-
-    if (!exists("Y", p$variables)) p$variables$Y = "not_defined" # this can be called to get covars.. do not stop
-
-    p = aegis_stmv_modelformula(p=p)  # use generic models if none are specified
-    p = stmv_variablelist(p=p)  # decompose into covariates from formulas , etc
-
-    return(p)
-  }
-
-
-  # ----------------------------------
-  if ( DS=="stmv_spatiotemporal_model" ) {
-    # generic stmv settings space AND time interp (and not just spatial), mostly for aegis "indicators"
-
+  if ( DS=="stmv" ) {
+    # aegis defaults ..
     p$libs =  RLibrary( unique( c( p$libs, "stmv" )  ) )
 
     if (!exists("storage_backend", p)) p$storage_backend="bigmemory.ram"
     if (!exists("clusters", p)) p$clusters = rep("localhost", detectCores() )
     if (!exists("boundary", p)) p$boundary = FALSE
     if (!exists("stmv_filter_depth_m", p)) p$stmv_filter_depth_m = 0 # depth (m) stats locations with elevation > 0 m as being on land (and so ignore)
-
-    if (!exists("stmv_rsquared_threshold", p)) p$stmv_rsquared_threshold = 0.2 # lower threshold
-    if (!exists("stmv_distance_statsgrid", p)) p$stmv_distance_statsgrid = 2 # resolution (km) of data aggregation (i.e. generation of the ** statistics ** )
-    # if (!exists("stmv_distance_prediction", p)) p$stmv_distance_prediction = p$stmv_distance_statsgrid *0.75 # this is a half window km
-    if (!exists("stmv_distance_scale", p)) p$stmv_distance_scale = c(50, 60, 75, 100) # km ... approx guess of 95% AC range .. data tends to be sprse realtive to pure space models
-
-    # lookup temporal params for the SSE domain
-    if (!exists("data_sources", p)) p$data_sources = c("groundfish", "snowcrab")
-    # obtain current temperature years
-
-    if (!exists("yrs", p)) p$yrs = c(1999:lubridate::year(lubridate::now()))  # years for modelling and interpolation
-    p$ny = length(p$yrs)
-
-    if (!exists("stmv_nmin", p)) p$stmv_nmin = floor( 7 * p$ny ) # min number of data points req before attempting to model timeseries in a localized space
-    if (!exists("stmv_nmax", p)) p$stmv_nmax = max( floor( 7 * p$ny ) * 11, 8000) # no real upper bound
-
-    if (!exists("nw", p)) p$nw = 10 # default value of 10 time steps number of intervals in time within a year for all temp and indicators
-    p$tres = 1/ p$nw # time resolution .. predictions are made with models that use seasonal components
-    p$dyears = (c(1:p$nw)-1) / p$nw # intervals of decimal years... fractional year breaks
-    p$dyear_centre = p$dyears[ round(p$nw/2) ] + p$tres/2
-
-    if (!exists("prediction_dyear", p)) p$prediction_dyear = lubridate::decimal_date( lubridate::ymd("0000/Sep/01")) # used for creating timeslices and predictions  .. needs to match the values in aegis_parameters()
-
-    # must specify, else assumed = 1 (1= no time)
-    if (!exists("stmv_dimensionality", p)) p$stmv_dimensionality = "space-year"  # default
-
-    if (p$stmv_dimensionality == "space-year") {
-      ## nt=ny annual time steps (default)
-      if (!exists("nt", p)) p$nt = p$ny   # ie, default is an annual model (no p$nw)
-      # output timeslices for predictions in decimla years, yes all of them here
-      if (!exists("prediction_ts", p)) p$prediction_ts = p$yrs + p$prediction_dyear
-    } else if (p$stmv_dimensionality == "space-year-season") {
-      ## nt = ny*nw is seassonal
-
-      if (!exists("nt", p)) p$nt = p$nw*p$ny # i.e., seasonal with p$nw (default is annual: nt=ny)
-      tout = expand.grid( yr=p$yrs, dyear=1:p$nw, KEEP.OUT.ATTRS=FALSE )
-      tout$tiyr = tout$yr + tout$dyear/p$nw - p$tres/2 # mid-points
-      tout = tout[ order(tout$tiyr), ]
-      # output timeslices for predictions in decimla years, yes all of them here
-      if (!exists("prediction_ts", p)) p$prediction_ts = tout$tiyr   # predictions at these time values (decimal-year)
-    }
-
     # global model options
     # using covariates as a first pass essentially makes it ~ kriging with external drift
     # .. no space or time here .. only in the local model
@@ -170,10 +100,25 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
     ## local model-specific options
     if (!exists("stmv_local_modelengine", p)) p$stmv_local_modelengine ="none"
 
+    if (!exists("stmv_rsquared_threshold", p)) p$stmv_rsquared_threshold = 0.75 # lower threshold
+    if (!exists("stmv_distance_statsgrid", p)) p$stmv_distance_statsgrid = 5 # resolution (km) of data aggregation (i.e. generation of the ** statistics ** )
+    # if (!exists("stmv_distance_prediction", p)) p$stmv_distance_prediction  = p$stmv_distance_statsgrid *0.75 # this is a half window km
+    if (!exists("stmv_distance_scale", p)) p$stmv_distance_scale = c(25, 30, 40) # km ... approx guess of 95% AC range
+    if (!exists("stmv_nmin", p)) p$stmv_nmin = 30 # min number of data points req before attempting to model timeseries in a localized space
+    if (!exists("stmv_nmax", p)) p$stmv_nmax = 6000 # no real upper bound
+
     if (!exists("Y", p$variables)) p$variables$Y = "not_defined" # this can be called to get covars.. do not stop
 
+    # lookup temporal params for the SSE domain
+    if (!exists("data_sources", p)) p$data_sources = c("groundfish", "snowcrab")
+    # obtain current temperature years
+
+    p = aegis_stmv_modelformula(p=p)  # use generic models if none are specified
+    p = stmv_variablelist(p=p)  # decompose into covariates from formulas , etc
 
     return(p)
   }
+
+
 
 }

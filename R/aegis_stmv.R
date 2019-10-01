@@ -35,8 +35,6 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       p$varstomodel = c()
       p$taxa.of.interest = aegis.survey::groundfish.variablelist("catch.summary")
 
-
-
       if (!exists("polygon_source", p)) p$polygon_source = "pre2014"   # "pre2014" for older
       if (!exists("aegis_proj4string_lonlat", p)) p$aegis_proj4string_lonlat = projection_proj4string("lonlat_wgs84")
       if (!exists("areal_units_proj4string_planar_km", p)) p$areal_units_proj4string_planar_km = projection_proj4string("omerc_nova_scotia")  # oblique mercator, centred on Scotian Shelf rotated by 325 degrees
@@ -67,9 +65,8 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
 
     p = spatial_parameters( p=p )
 
-    if (!exists("stmv_dimensionality", p))  p$stmv_dimensionality="space-year"
-
-    p = aegis_parameters(p=p, DS="stmv_spatiotemporal_model" )
+    if (!exists("aegis_dimensionality", p))  p$aegis_dimensionality="space-year"
+    p = temporal_parameters(p=p)
 
     if (!exists("storage_backend", p)) p$storage_backend="bigmemory.ram"
 
@@ -169,7 +166,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
         message( "The specified stmv_local_modelengine is not tested/supported ... you are on your own ;) ..." )
       }
 
-      p = stmv_variablelist(p=p)  # decompose into covariates, etc
+      p = aegis_parameters(p=p, DS="stmv" )  # generics ... in case something is missing
 
     return(p)
   }
