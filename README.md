@@ -3,7 +3,8 @@ Basic environment for using aegis*, bio*, and stm* packages. This provides the r
 To install you need to bootstrap from github directly:
 
 ```
-  devtools::install_github( "jae0/aegis" )
+  require(devtools)
+  install_github( "jae0/aegis" )
 ```
 
 or you can add the following into your Rprofile:
@@ -28,7 +29,7 @@ if (!"aegis" %in% pkgsInstalled ) {
 Then, you need to have an Rprofile set up properly such as:
 
 ```.
-libPaths("~/R")
+# libPaths("~/R")  # or where ever you like
 homedir = path.expand("~")
 tmpdir = file.path( homedir, "tmp" )
 work_root = file.path( homedir, "work" )    ### replace with correct path to work directory (local temporary storage)
