@@ -21,12 +21,12 @@ RLibrary = function( ... ) {
     n = readline(prompt="Install them? (y/n): ")
     if ( tolower(n) %in% c("y", "yes") ) {
       for ( nf in notfound ) {
-        try( install.packages( nf, dependencies=TRUE ) )
+        try( utils::install.packages( nf, dependencies=TRUE ) )
         try( require( pkg, character.only = TRUE ) )
       }
     }
   }
-  
+
   if ( "INLA" %in% notfound ) {
     print( "To install INLA:")
     print( '  install.packages("INLA", repos="https://www.math.ntnu.no/inla/R/stable") ' )

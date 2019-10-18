@@ -29,9 +29,9 @@ project.library = function( ... ) {
     if (n %in% c("local", "github", "bitbucket") ) {
       for ( nf in notfound ) {
         oo = which( mylibs$libname == nf )
-        if (n=="local") try( devtools::install_git( mylibs$gitLoc[oo[1]], dependencies=FALSE, ... ) )
-        if (n=="github") try( devtools::install_github( mylibs$githubLoc[oo[1]], ... ) )
-        if (n=="bitbucket") try( devtools::install_bitbucket( mylibs$bitbucketLoc[oo[1]], ... ) )
+        if (n=="local") try( remotes::install_git( mylibs$gitLoc[oo[1]], dependencies=FALSE, ... ) )
+        if (n=="github") try( remotes::install_github( mylibs$githubLoc[oo[1]], ... ) )
+        if (n=="bitbucket") try( remotes::install_bitbucket( mylibs$bitbucketLoc[oo[1]], ... ) )
         pkg = mylibs$libname[oo]
         # if ( pkg %in% pkgsLoaded ) {
         #   message("Reloading installed ", pkg )
