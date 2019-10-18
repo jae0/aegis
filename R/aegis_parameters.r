@@ -20,8 +20,6 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
     "maps", "mapdata", "maptools", "parallel",  "rgdal", "rgeos",  "sp", "splancs", "GADMTools" ) )
   p$libs = unique( c( p$libs, project.library ( "aegis") ) )
 
-  if ( !exists("inputdata_spatial_discretization_planar_km", p) )  p$inputdata_spatial_discretization_planar_km = 1
-  if ( !exists("inputdata_temporal_discretization_yr", p) )  p$inputdata_temporal_discretization_yr = 1   # ie., daily .. controls resolution of data prior to modelling to reduce data set and speed up modelling
 
 
   # ---------------------
