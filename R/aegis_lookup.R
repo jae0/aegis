@@ -1,6 +1,8 @@
 
 aegis_lookup = function( p, DS="all", locsmap=NULL, locs=NULL, timestamp=NULL, varnames=NULL, DB=NULL, ret="mean" ) {
 
+  # lookup from "stmv" results
+
   if (0) {
     # example of how to use this:
     set = survey.db( p=p, DS="set" )

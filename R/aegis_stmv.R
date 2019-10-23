@@ -51,7 +51,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
 
 
     p$libs = c( p$libs, RLibrary ( "sp", "spdep", "rgeos", "INLA", "mgcv" ))  # standard CRAN libs -- geostatistical support
-    p$libs = c( p$libs, RLibrary( "aegis", "bio.taxonomy", "carstm", "stmv", "netmensuration" ) ) #,  ) # locally developed code
+    p$libs = c( p$libs, RLibrary( "aegis", "bio.taxonomy", "stmv", "netmensuration" ) ) #,  ) # locally developed code
 
     if (!exists("project_name", p) ) stop("project_name is required")
     if (!exists("data_root", p) ) stop( "data_root is required")
