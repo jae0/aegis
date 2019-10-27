@@ -7,8 +7,8 @@ project.library = function( ... ) {
   ll = unique( c(...) )
   test = setdiff( ll, mylibs$libname )
   if (length( test) > 0 ) {
-    print( "The following are not part of the local projects ... " )
-    print( test )
+    # print( "The following are not part of the local projects ... " )
+    # print( test )
   }
 
   found = intersect( pkgsInstalled, ll )
