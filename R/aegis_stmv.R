@@ -225,6 +225,8 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       set[,p$variables$Y][ set[,p$variables$Y] > highestpossible ] = highestpossible
       # keep "zero's" to inform spatial processes but only as "lowestpossible" value
       jj = which( set[,p$variables$Y] > 0 )
+      ## NOTE this replaces with small values ...dangerous ..
+
       lowestpossible =  quantile( set[,p$variables$Y][jj], probs=p$quantile_bounds[1], na.rm=TRUE )
       lowerbound =  quantile( set[,p$variables$Y][jj], probs=p$quantile_bounds[1]/10, na.rm=TRUE )
       ii = which( set[,p$variables$Y] < lowestpossible )
