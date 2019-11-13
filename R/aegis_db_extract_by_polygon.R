@@ -19,7 +19,7 @@ aegis_db_extract_by_polygon = function( sppoly, spatial_domain="SSE", covfields=
     pts = spTransform( pts, sp::CRS(proj4string(sppoly)) )
     # match each datum to an area
     o = over( pts, sppoly)
-    pts$StrataID = as.character( o$StrataID )
+    pts$AUID = as.character( o$AUID )
     pts$rowindex = 1:nrow(pts)
 
     o = NULL
@@ -54,46 +54,46 @@ aegis_db_extract_by_polygon = function( sppoly, spatial_domain="SSE", covfields=
     sds = list()
     datatype = list()
 
-    strata = as.character( sppoly$StrataID )
+    strata = as.character( sppoly$AUID )
     cvn = names(covfields)
 
     for ( vn in cvn ) {
       if (is.vector(covfields[[vn]])) {
          datatype[[vn]] = "vector"
-         res  = aggregate( rowindex ~ StrataID, pts@data, fnsummary, na.action=na.omit, drop=FALSE )
+         res  = aggregate( rowindex ~ AUID, pts@data, fnsummary, na.action=na.omit, drop=FALSE )
          mc = matrix(NA, nrow=length(strata), ncol=1, dimnames=list(strata, vn ) )
-         mc[ match(res$StrataID, strata), ] = res$rowindex[,1][]
+         mc[ match(res$AUID, strata), ] = res$rowindex[,1][]
          means[[vn]] = mc[]
          mc=NULL
          sc = matrix(NA, nrow=length(strata), ncol=1, dimnames=list(strata, vn ) )
-         sc[ match(res$StrataID, strata), ] = res$rowindex[,2][]
+         sc[ match(res$AUID, strata), ] = res$rowindex[,2][]
          sds[[vn]] = sc[]
          sc = NULL
       }
 
       if (is.matrix(covfields[[vn]])) {
         datatype[[vn]] = "matrix"
-        m = aggregate( rowindex ~ StrataID, pts@data, fnsummary_mean, na.action=na.omit, drop=FALSE )
+        m = aggregate( rowindex ~ AUID, pts@data, fnsummary_mean, na.action=na.omit, drop=FALSE )
         if (is.matrix(m$rowindex)) {
           mc = matrix( NA, nrow=length(strata), ncol=ncol(m$rowindex), dimnames=list( strata, dimnames(covfields[[vn]])[[2]] ) )
-          mc[ match(m$StrataID, strata), ] = m$rowindex[]
+          mc[ match(m$AUID, strata), ] = m$rowindex[]
           means[[vn]] = mc[]
           mc = NULL
         } else {
           mc = matrix(NA, nrow=length(strata), ncol=1, dimnames=list(strata, vn ) )
-          mc[ match(m$StrataID, strata), ] = m$rowindex[,1][]
+          mc[ match(m$AUID, strata), ] = m$rowindex[,1][]
           means[[vn]] = mc[]
         }
 
-        s = aggregate( rowindex ~ StrataID, pts@data, fnsummary_sd, na.action=na.omit, drop=FALSE )
+        s = aggregate( rowindex ~ AUID, pts@data, fnsummary_sd, na.action=na.omit, drop=FALSE )
         if (is.matrix(s$rowindex)) {
           sc = matrix( NA, nrow=length(strata), ncol=ncol(s$rowindex), dimnames=list( strata, dimnames(covfields[[vn]])[[2]] ) )
-          sc[ match(s$StrataID, strata), ] = s$rowindex[]
+          sc[ match(s$AUID, strata), ] = s$rowindex[]
           sds[[vn]] = sc[]
           sc = NULL
         } else {
           sc = matrix( NA, nrow=length(strata), ncol=1, dimnames=list( strata, vn ) )
-          sc[ match(s$StrataID, strata), ] = s$rowindex[,2][]
+          sc[ match(s$AUID, strata), ] = s$rowindex[,2][]
           sds[[vn]] = sc[]
           sc = NULL
         }

@@ -10,7 +10,7 @@ reformat_to_array = function( input, matchfrom, matchto ) {
 
     # out = matrix( NA, nrow=length(matchto[[1]]), ncol=1, dimnames=matchto  )
     # d1 = match( matchfrom[[1]], matchto[[1]] )
-    # out[ d1, 1 ] = input
+    ## out[ d1, 1 ] = input
   }
 
   if (ndims == 2) {
