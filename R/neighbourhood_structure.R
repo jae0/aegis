@@ -1,6 +1,6 @@
-neighbourhood_structure = function( sppoly, areal_units_strata_type="lattice" ) {
+neighbourhood_structure = function( sppoly, areal_units_source="lattice" ) {
 
-  if (areal_units_strata_type == "lattice") {
+  if (areal_units_source == "lattice") {
     # generic lattice
     W.nb = poly2nb(sppoly, row.names=sppoly$AUID, queen=TRUE)  # slow .. ~1hr?
     W.remove = which(card(W.nb) == 0)
@@ -9,11 +9,11 @@ neighbourhood_structure = function( sppoly, areal_units_strata_type="lattice" ) 
       W.keep = which(card(W.nb) > 0)
       W.nb = nb_remove( W.nb, W.remove )
       sppoly = sppoly[W.keep,]
-      row.names(sppoly) = as.character(sppoly$AUID)
+
+      sppoly$AUID = as.character(sppoly$AUID)
+      row.names(sppoly) = sppoly$AUID
       sppoly = sp::spChFIDs( sppoly, row.names(sppoly) )  #fix id's
-      sppoly$AUID = factor( as.character(sppoly$AUID) )
-      sppoly$strata = as.numeric( sppoly$AUID )
-      sppoly = sppoly[order(sppoly$strata),]
+      sppoly = sppoly[order(sppoly$AUID),]
       sppoly <<- sppoly  ## overwrite in parent data frame
     }
     attr(sppoly, "nb") = W.nb
@@ -22,7 +22,7 @@ neighbourhood_structure = function( sppoly, areal_units_strata_type="lattice" ) 
 
   # ------------------------------------------------
 
-  if (areal_units_strata_type == "stratanal_polygons") {
+  if (areal_units_source == "stratanal_polygons") {
     # predefined polygons with customized list of neighbours
     W.nb = spdep::poly2nb(sppoly, row.names=sppoly$AUID, queen=TRUE )
     W.nb = maritimes_groundfish_strata( W.nb=W.nb, returntype="neighbourhoods" )  # customized neighbourshood structure

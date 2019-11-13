@@ -54,19 +54,19 @@ aegis_db_extract_by_polygon = function( sppoly, spatial_domain="SSE", covfields=
     sds = list()
     datatype = list()
 
-    strata = as.character( sppoly$AUID )
+    auid = as.character( sppoly$AUID )
     cvn = names(covfields)
 
     for ( vn in cvn ) {
       if (is.vector(covfields[[vn]])) {
          datatype[[vn]] = "vector"
          res  = aggregate( rowindex ~ AUID, pts@data, fnsummary, na.action=na.omit, drop=FALSE )
-         mc = matrix(NA, nrow=length(strata), ncol=1, dimnames=list(strata, vn ) )
-         mc[ match(res$AUID, strata), ] = res$rowindex[,1][]
+         mc = matrix(NA, nrow=length(auid), ncol=1, dimnames=list(auid, vn ) )
+         mc[ match(res$AUID, auid), ] = res$rowindex[,1][]
          means[[vn]] = mc[]
          mc=NULL
-         sc = matrix(NA, nrow=length(strata), ncol=1, dimnames=list(strata, vn ) )
-         sc[ match(res$AUID, strata), ] = res$rowindex[,2][]
+         sc = matrix(NA, nrow=length(auid), ncol=1, dimnames=list(auid, vn ) )
+         sc[ match(res$AUID, auid), ] = res$rowindex[,2][]
          sds[[vn]] = sc[]
          sc = NULL
       }
@@ -75,25 +75,25 @@ aegis_db_extract_by_polygon = function( sppoly, spatial_domain="SSE", covfields=
         datatype[[vn]] = "matrix"
         m = aggregate( rowindex ~ AUID, pts@data, fnsummary_mean, na.action=na.omit, drop=FALSE )
         if (is.matrix(m$rowindex)) {
-          mc = matrix( NA, nrow=length(strata), ncol=ncol(m$rowindex), dimnames=list( strata, dimnames(covfields[[vn]])[[2]] ) )
-          mc[ match(m$AUID, strata), ] = m$rowindex[]
+          mc = matrix( NA, nrow=length(auid), ncol=ncol(m$rowindex), dimnames=list( auid, dimnames(covfields[[vn]])[[2]] ) )
+          mc[ match(m$AUID, auid), ] = m$rowindex[]
           means[[vn]] = mc[]
           mc = NULL
         } else {
-          mc = matrix(NA, nrow=length(strata), ncol=1, dimnames=list(strata, vn ) )
-          mc[ match(m$AUID, strata), ] = m$rowindex[,1][]
+          mc = matrix(NA, nrow=length(auid), ncol=1, dimnames=list(auid, vn ) )
+          mc[ match(m$AUID, auid), ] = m$rowindex[,1][]
           means[[vn]] = mc[]
         }
 
         s = aggregate( rowindex ~ AUID, pts@data, fnsummary_sd, na.action=na.omit, drop=FALSE )
         if (is.matrix(s$rowindex)) {
-          sc = matrix( NA, nrow=length(strata), ncol=ncol(s$rowindex), dimnames=list( strata, dimnames(covfields[[vn]])[[2]] ) )
-          sc[ match(s$AUID, strata), ] = s$rowindex[]
+          sc = matrix( NA, nrow=length(auid), ncol=ncol(s$rowindex), dimnames=list( auid, dimnames(covfields[[vn]])[[2]] ) )
+          sc[ match(s$AUID, auid), ] = s$rowindex[]
           sds[[vn]] = sc[]
           sc = NULL
         } else {
-          sc = matrix( NA, nrow=length(strata), ncol=1, dimnames=list( strata, vn ) )
-          sc[ match(s$AUID, strata), ] = s$rowindex[,2][]
+          sc = matrix( NA, nrow=length(auid), ncol=1, dimnames=list( auid, vn ) )
+          sc[ match(s$AUID, auid), ] = s$rowindex[,2][]
           sds[[vn]] = sc[]
           sc = NULL
         }
@@ -107,7 +107,7 @@ aegis_db_extract_by_polygon = function( sppoly, spatial_domain="SSE", covfields=
         if (length(j) > 0 ) {
           matrix_dim = dim( means[[cvn[i[1]]]] )
           matrix_colnames = dimnames( means[[cvn[i[1]]]])[[2]]
-          matrix_rownames = strata
+          matrix_rownames = auid
           for (k in j){
             vn = cvn[k]
             vv = means[[vn]]

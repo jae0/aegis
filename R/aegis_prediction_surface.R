@@ -1,5 +1,5 @@
 
-aegis_prediction_surface = function( aegis_data, strata_subset=NULL ) {
+aegis_prediction_surface = function( aegis_data, au_subset=NULL ) {
   # convert list object as a tabular dataframe
   out = NULL
   vars = names(aegis_data)
@@ -28,8 +28,8 @@ aegis_prediction_surface = function( aegis_data, strata_subset=NULL ) {
     }
   }
 
-  if (!is.null(strata_subset)) {
-    out = out[ which(as.character(out$AUID)) %in% strata_subset, ]
+  if (!is.null(au_subset)) {
+    out = out[ which(as.character(out$AUID)) %in% au_subset, ]
   }
 
   return(out)

@@ -21,8 +21,8 @@ aegis_db_spatial_object = function( spatial_domain="SSE", proj4string="+proj=utm
   spobj = as(spobj, "SpatialPixelsDataFrame")
 
   spobj = as(spobj, returntype)
-  spobj$AUID = 1:length(spobj)  # row index
-  row.names(spobj) = as.character(spobj$AUID)
+  spobj$AUID = as.character( 1:length(spobj) )  # row index
+  row.names(spobj) = spobj$AUID
 
   return(spobj)
 }
