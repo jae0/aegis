@@ -1,5 +1,5 @@
 
-meanweights_by_arealunit = function( set, AUID, yrs, fillall=FALSE, annual_breakdown_only=FALSE ) {
+meanweights_by_arealunit = function( set, AUID, yrs, fillall=FALSE, annual_breakdown_only=FALSE, robustify_quantiles=NULL ) {
   # find mean weight for each stratum and year .. fill where possible if required
   res=data.frame( order=1:length(AUID) )
   res$AUID = as.character( AUID )
@@ -32,6 +32,15 @@ meanweights_by_arealunit = function( set, AUID, yrs, fillall=FALSE, annual_break
     if (length(ll) > 0) out$meanweights[ll] = out$meanweights_overall
     ll = which(!is.finite(out$meanweights))
     if (length(ll) > 0) out$meanweights[ll] = median(out$meanweights, na.rm=TRUE)
+  }
+
+  if (!is.null(robustify_quantiles) ) {
+    # robustify_quantiles = c(0.025, 0.975)
+    wl = quantile( out$meanweights, probs=robustify_quantiles, na.rm=TRUE )
+    nn = which( out$meanweights < wl[1] )
+    if (length(nn) > 0 ) out$meanweights[nn] = wl[1]
+    nn = which( out$meanweights > wl[2] )
+    if (length(nn) > 0 ) out$meanweights[nn] = wl[2]
   }
 
   if ( annual_breakdown_only ) return( out$meanweights)
