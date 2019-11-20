@@ -10,7 +10,7 @@ aegis_db_lookup = function( X, lookupvars, xy_vars=c("lon", "lat"), time_var="ti
   p$yrs = yrs
   p = temporal_parameters(p=p, aegis_dimensionality="space-year" )
 
-  p$variables = list(
+  p$stmv_variables = list(
     LOCS=c("plon", "plat"),
     TIME="tiyr"
   )

@@ -3,7 +3,7 @@ aegis_db_map = function( ip=NULL, p=NULL, type="all", voi=NULL ) {
   # ip is the first parameter passed in the parallel mode
   if (exists( "libs", p)) RLibrary( p$libs )
 
-  if (is.null(voi)) if (exists("variables",p)) if(exists("Y", p$variables)) voi=p$variables$Y
+  if (is.null(voi)) if (exists("stmv_variables",p)) if(exists("Y", p$stmv_variables)) voi=p$stmv_variables$Y
 
   require( lattice )
 

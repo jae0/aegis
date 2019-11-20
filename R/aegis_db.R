@@ -35,7 +35,7 @@
 
       # override variable of interest to obtain results for static temperature vars
       pt = aegis.temperature::temperature_parameters( p=p)
-      pt$variables = list(Y = "t")
+      pt$stmv_variables = list(Y = "t")
       # p0 = spatial_parameters( p=p0, spatial_domain=p$spatial_domain ) # return to correct domain
 
       tclim = temperature.db( p=pt, DS="complete" )
@@ -56,7 +56,7 @@
       if (exists("dyears", p) & exists("prediction_dyear", p))  dyear_index = which.min( abs( p$prediction_dyear - p$dyears))
 
       pt = aegis.temperature::temperature_parameters( p=p )
-      pt$variables = list( Y="t" )
+      pt$stmv_variables = list( Y="t" )
       # pt = spatial_parameters( p=pt, spatial_domain=p$spatial_domain ) # return to correct domain
 
       PS = list()
@@ -126,8 +126,8 @@
         stmv::array_map( "xy->1", bathymetry.db(p=p, DS="baseline"), gridparams=p$gridparams ) )
 
       # spatial vars and climatologies
-      # sp_vars = intersect( c("dZ", "ddZ", "substrate.grainsize", "tmean.climatology", "tsd.climatology", "b.sd", "b.range", "s.sd", "s.range", "t.range" ), p$variables$COV )
-      newvars = setdiff(p$variables$COV, names(INP) )
+      # sp_vars = intersect( c("dZ", "ddZ", "substrate.grainsize", "tmean.climatology", "tsd.climatology", "b.sd", "b.range", "s.sd", "s.range", "t.range" ), p$stmv_variables$COV )
+      newvars = setdiff(p$stmv_variables$COV, names(INP) )
       if (length(newvars) > 0) {
         sn = aegis_lookup( p=p, DS="spatial", locsmap=locsmap, varnames=newvars )
         if (!is.null(sn)) {
@@ -135,8 +135,8 @@
         }
       }
       # for space-time(year-averages)
-      # st_vars = intersect( c( "tmean", "tsd", "tamplitude" ), p$variables$COV )
-      newvars = setdiff(p$variables$COV, names(INP) )
+      # st_vars = intersect( c( "tmean", "tsd", "tamplitude" ), p$stmv_variables$COV )
+      newvars = setdiff(p$stmv_variables$COV, names(INP) )
       if (length(newvars) > 0) {
         sn = aegis_lookup( p=p, DS="spatial.annual", locsmap=locsmap, timestamp=INP[,"timestamp"], varnames=newvars )
         if (!is.null(sn)) {
@@ -145,23 +145,23 @@
         }
       }
 
-      tokeep = unique( c( p$variables$ALL, p$variables$Y, p$variables$LOCS ) )
-      if (exists( "TIME", p$variables ) ) {
-        tokeep = unique( c( tokeep, p$variables$TIME, "dyear", "yr" ) )
+      tokeep = unique( c( p$stmv_variables$ALL, p$stmv_variables$Y, p$stmv_variables$LOCS ) )
+      if (exists( "TIME", p$stmv_variables ) ) {
+        tokeep = unique( c( tokeep, p$stmv_variables$TIME, "dyear", "yr" ) )
       }
 
       INP = INP[, which(names(INP) %in% tokeep ) ]  # a data frame
-      oo = setdiff( c(p$variables$LOCS, p$variables$COV), names(INP))
+      oo = setdiff( c(p$stmv_variables$LOCS, p$stmv_variables$COV), names(INP))
       if (length(oo) > 0 ) {
         print(oo )
-        stop("Some variables are missing in the input data")
+        stop("Some stmv_variables are missing in the input data")
       }
       INP = na.omit(INP)
 
     # cap quantiles of dependent vars
       if (exists("quantile_bounds", p)) {
         dr = list()
-        for (vn in p$variables$COV) {
+        for (vn in p$stmv_variables$COV) {
           dr[[vn]] = quantile( INP[,vn], probs=p$quantile_bounds, na.rm=TRUE ) # use 95%CI
           il = which( INP[,vn] < dr[[vn]][1] )
           if ( length(il) > 0 ) INP[il,vn] = dr[[vn]][1]
@@ -170,8 +170,8 @@
         }
       }
 
-      PS = aegis_db( p=p, DS="prediction.surface" ) # a list object with static and annually varying variables
-      PS = PS[ which(names(PS) %in% p$variables$COV ) ] # time vars, if they are part of the model will be created within stmv
+      PS = aegis_db( p=p, DS="prediction.surface" ) # a list object with static and annually varying stmv_variables
+      PS = PS[ which(names(PS) %in% p$stmv_variables$COV ) ] # time vars, if they are part of the model will be created within stmv
 
       OUT = list( LOCS=bathymetry.db(p=p, DS="baseline"), COV=PS )
 
@@ -188,7 +188,7 @@
       # This routine points to this data and also creates
       # subsets of the data where required, determined by "spatial_domain_subareas"
 
-      projectdir = file.path(p$data_root, "modelled", p$variables$Y, p$spatial_domain )
+      projectdir = file.path(p$data_root, "modelled", p$stmv_variables$Y, p$spatial_domain )
 
       if (DS %in% c("predictions")) {
         P = Pl = Pu = NULL
@@ -226,7 +226,7 @@
           Pl = spatial_warp( VV0[], L0, L1, p0, p1, "fast", L0i, L1i )
           Pu = spatial_warp( WW0[], L0, L1, p0, p1, "fast", L0i, L1i )
 
-          projectdir_p1 = file.path(p$data_root, "modelled", p1$variables$Y, p1$spatial_domain )
+          projectdir_p1 = file.path(p$data_root, "modelled", p1$stmv_variables$Y, p1$spatial_domain )
           dir.create( projectdir_p1, recursive=T, showWarnings=F )
           fn1_sg = file.path( projectdir_p1, paste("stmv.prediction.mean",  yr, "rdata", sep=".") )
           fn2_sg = file.path( projectdir_p1, paste("stmv.prediction.lb",  yr, "rdata", sep=".") )
@@ -251,7 +251,7 @@
 
       if (DS %in% c("stmv.stats")) {
         stats = NULL
-        projectdir = file.path(p$data_root, "modelled", p$variables$Y, p$spatial_domain )
+        projectdir = file.path(p$data_root, "modelled", p$stmv_variables$Y, p$spatial_domain )
         fn = file.path( projectdir, paste( "stmv.statistics", "rdata", sep=".") )
         if (file.exists(fn) ) load(fn)
         return( stats )
@@ -281,7 +281,7 @@
           stats[,i] = spatial_warp( S0[,i], L0, L1, p0, p1, "fast", L0i, L1i )
         }
         colnames(stats) = Snames
-        projectdir_p1 = file.path(p$data_root, "modelled", p1$variables$Y, p1$spatial_domain )
+        projectdir_p1 = file.path(p$data_root, "modelled", p1$stmv_variables$Y, p1$spatial_domain )
         dir.create( projectdir_p1, recursive=T, showWarnings=F )
         fn1_sg = file.path( projectdir_p1, paste("stmv.statistics", "rdata", sep=".") )
         save( stats, file=fn1_sg, compress=T )
@@ -301,7 +301,7 @@
 
       if (DS=="complete") {
         IC = NULL
-        projectdir = file.path(p$data_root, "modelled", p$variables$Y, p$spatial_domain )
+        projectdir = file.path(p$data_root, "modelled", p$stmv_variables$Y, p$spatial_domain )
         dir.create(projectdir, recursive=T, showWarnings=F)
         outfile =  file.path( projectdir, paste( "aegis", "complete", p$spatial_domain, "rdata", sep= ".") )
         if ( file.exists( outfile ) ) load( outfile )
@@ -324,13 +324,13 @@
         L1 = bathymetry.db(p=p1, DS="baseline")
 
         BS = aegis_db( p=p1, DS="stmv.stats" )
-        colnames(BS) = paste(p1$variables$Y, colnames(BS), sep=".")
+        colnames(BS) = paste(p1$stmv_variables$Y, colnames(BS), sep=".")
         IC = cbind( L1, BS )
 
         # climatology
         nL1 = nrow(L1)
         PS = PSlb = PSub = matrix( NA, nrow=nL1, ncol=p$ny )
-        p1$stmvSaveDir = file.path(p1$data_root, "modelled", p1$variables$Y, p1$spatial_domain )
+        p1$stmvSaveDir = file.path(p1$data_root, "modelled", p1$stmv_variables$Y, p1$spatial_domain )
 
 
         for (iy in 1:p$ny) {
@@ -372,11 +372,11 @@
                     apply( PSlb, 1, mean, na.rm=TRUE ),
                     apply( PSub, 1, mean, na.rm=TRUE ) )
 
-        colnames(CL) = paste( p1$variables$Y, c("mean", "lb", "ub"), "climatology", sep=".")
+        colnames(CL) = paste( p1$stmv_variables$Y, c("mean", "lb", "ub"), "climatology", sep=".")
         IC = cbind( IC, CL )
         PS = PSlb = PSub = NULL
 
-        projectdir = file.path(p$data_root, "modelled", p1$variables$Y, p1$spatial_domain )
+        projectdir = file.path(p$data_root, "modelled", p1$stmv_variables$Y, p1$spatial_domain )
         dir.create( projectdir, recursive=T, showWarnings=F )
         outfile =  file.path( projectdir, paste( "aegis", "complete", p1$spatial_domain, "rdata", sep= ".") )
         save( IC, file=outfile, compress=T )
@@ -418,7 +418,7 @@
           if (!is.null(oo)) TS[,i] = oo
         }
 
-        projectdir = file.path(p$data_root, "modelled", p1$variables$Y, p1$spatial_domain )
+        projectdir = file.path(p$data_root, "modelled", p1$stmv_variables$Y, p1$spatial_domain )
         dir.create( projectdir, recursive=T, showWarnings=F )
         outfile =  file.path( projectdir, paste( "aegis", "baseline", p1$spatial_domain, "rdata", sep= ".") )
         save( TS, file=outfile, compress=T )

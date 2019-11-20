@@ -72,7 +72,7 @@ aegis_lookup = function( p, DS="all", locsmap=NULL, locs=NULL, timestamp=NULL, v
       if (vn=="t") ret = "mean"
       if (vn=="tlb") ret = "lb"
       if (vn=="tub") ret = "ub"
-      if (vn %in% c("t", "tlb", "tub"))  p$variables$Y = "t"  # required to force use of directory "t"
+      if (vn %in% c("t", "tlb", "tub"))  p$stmv_variables$Y = "t"  # required to force use of directory "t"
       DB = NULL
       DB=aegis_db(p=p, DS="spatial.annual.seasonal", ret=ret) # at this point this is the only database with seasonality .. other stats (than mean) will require supplemntary functionss
       if (!is.null(DB)) {

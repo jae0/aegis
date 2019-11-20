@@ -64,7 +64,7 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
     if (!exists("stmv_nmin", p)) p$stmv_nmin = 30 # min number of data points req before attempting to model timeseries in a localized space
     if (!exists("stmv_nmax", p)) p$stmv_nmax = 6000 # no real upper bound
 
-    if (!exists("Y", p$variables)) p$variables$Y = "not_defined" # this can be called to get covars.. do not stop
+    if (!exists("Y", p$stmv_variables)) p$stmv_variables$Y = "not_defined" # this can be called to get covars.. do not stop
 
     # lookup temporal params for the SSE domain
     if (!exists("data_sources", p)) p$data_sources = c("groundfish", "snowcrab")
