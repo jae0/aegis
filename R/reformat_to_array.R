@@ -35,7 +35,7 @@ reformat_to_array = function( input, matchfrom, matchto ) {
     out[ cbind( d1, d2, d3, d4 ) ] = input
   }
   if (ndims > 4) {
-    stop( "you are going to have to add more here ...")
+    stop( "you are going to have to add more methods here ...")
   }
 
   return( out )
