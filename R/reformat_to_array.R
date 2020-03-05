@@ -3,6 +3,8 @@ reformat_to_array = function( input, matchfrom, matchto ) {
 
   ndims = length(matchto)
 
+  out = NULL
+
   if (ndims == 1) {
     out = array( NA, dim=length(matchto[[1]]), dimnames=matchto  )
     d1 = match( matchfrom[[1]], matchto[[1]] )
