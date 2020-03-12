@@ -1,4 +1,4 @@
-  map_simple = function( toplot, plotarea, vn, resol=1, theta=resol*25, filterdistances=theta/2.3, annot=vn, spatial_domain="SSE" ) {
+  map_simple = function( toplot, plotarea, vn, resol=1, theta=resol*25, filterdistances=theta/2.3, annot=vn, spatial_domain="SSE", er=NULL ) {
 
     names( toplot ) = c("plon", "plat", "z")  # for aegis map, rename to z
     idup = which( duplicated( toplot[, c("plon", "plat")]  ))
@@ -13,7 +13,7 @@
 
     plocs = plotarea[ which( !is.finite( rowSums(distances) ) ), ]
 
-    er =  range( toplot[,"z"], na.rm=T) * c(0.95, 1.05)
+    if (is.null(er)) er =  range( toplot[,"z"], na.rm=T) * c(0.95, 1.05)
     datarange = seq( er[1], er[2], length.out=50)
 
     u = fastTps( x=toplot[,c("plon","plat")], Y=toplot[,"z"], theta=theta )
