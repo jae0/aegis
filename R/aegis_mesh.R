@@ -1,6 +1,6 @@
 
 
-aegis_mesh = function( SPDF, SPDF_boundary="default", spbuffer=NULL, k=5, resolution=100, output_type="polygons" ) {
+aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, k=5, resolution=100, output_type="polygons" ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
 
@@ -23,6 +23,11 @@ aegis_mesh = function( SPDF, SPDF_boundary="default", spbuffer=NULL, k=5, resolu
     res = aegis_mesh( SPDF=meuse) # 50m snap buffer
     res = aegis_mesh( SPDF=meuse, spbuffer=50 ) # 50m snap buffer
     res = aegis_mesh( SPDF=meuse, spbuffer=50, output_type="grid" )
+
+    mypalette = colorRampPalette(c("darkblue","blue3", "green", "yellow", "orange","red3", "darkred"), space = "Lab")(100)
+
+    spplot( res, "zinc", col.regions=mypalette )
+
   }
 
   message( "'aegis_mesh' expects the projection to be in planar coordinates and also the same units as the resolution.")
