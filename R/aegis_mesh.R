@@ -18,6 +18,7 @@ aegis_mesh = function( SPDF, SPDF_boundary="default", spbuffer=NULL, k=5, resolu
     k =5
     resolution = 100
     output_type = "polygons"
+    SPDF_boundary="non_convex_hull"
 
     res = aegis_mesh( SPDF=meuse) # 50m snap buffer
     res = aegis_mesh( SPDF=meuse, spbuffer=50 ) # 50m snap buffer
