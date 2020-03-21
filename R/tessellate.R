@@ -1,6 +1,6 @@
 
 tessellate = function(xy) {
-  # create a tiled geometry 
+  # create a tiled geometry
   require(sp)
   # triangulate and tessilate
   require(deldir)
