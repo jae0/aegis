@@ -15,7 +15,7 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, k=5
 
     res = aegis_mesh( SPDF=meuse) # 50m snap buffer
     res = aegis_mesh( SPDF=meuse, spbuffer=50 ) # 50m snap buffer
-    res = aegis_mesh( SPDF=meuse, spbuffer=50, output_type="grid" )
+    res = aegis_mesh( SPDF=meuse, resolution=1, spbuffer=50, output_type="grid" )
     res = aegis_mesh( SPDF=meuse, resolution=1, output_type="grid.count" )
     res = as( res, "SpatialPointsDataFrame")
     res = res[ res$layer > 0 ,]
@@ -53,6 +53,8 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, k=5
     SPDF$count = 1
     rast = rasterize( SPDF, raster_template, field="count", fun="count", background=0) # not meaningful fir factors
     O = as(rast, "SpatialGridDataFrame")
+    O = as(O, "SpatialPointsDataFrame")
+    O = O[ O$layer > 0, ]
     return(O)
   }
 
@@ -61,8 +63,7 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, k=5
   if ( output_type=="polygons" ) {
 
     rn0 = row.names(SPDF)  # store for end
-    SPDF$uid_internal = as.character( 1:nrow(SPDF) )
-    row.names(SPDF) = SPDF$uid_internal
+    SPDF$uid_internal = rn0
 
     xy = try( coordinates(SPDF) )
     if ( ("try-error" %in% class(xy)) ) stop( "Coordinates were not specified in data object?")
@@ -131,7 +132,7 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, k=5
     if (length(SPI) != length(SP) ) {
       stop( "The size of the spbuffer is too small to recover all the areal units from a Voroni tessilation, increase the distance..." )
     }
-    row.names(SPI) = row.names(SP)
+    row.names(SPI) = rn0
 
     O = SpatialPolygonsDataFrame(SPI, data=data.frame( SPDF ), match="uid_internal" )
     row.names(O) = rn0

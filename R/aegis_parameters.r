@@ -6,12 +6,7 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
   ## consider moving bathymetry, temperature and substrate parameters here top to make things all centralized
 
   # ---------------------
-  # deal with additional passed parameters
-  if ( is.null(p) ) p=list()
-  p_add = list(...)
-  if (length(p_add) > 0 ) p = c(p, p_add)
-  i = which(duplicated(names(p), fromLast = TRUE ))
-  if ( length(i) > 0 ) p = p[-i] # give any passed parameters a higher priority, overwriting pre-existing variable
+  p = parameters_control(p, list(...), control="add") # add passed args to parameter list, priority to args
 
 
   # ---------------------
