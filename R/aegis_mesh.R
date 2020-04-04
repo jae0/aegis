@@ -1,6 +1,6 @@
 
 
-aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, k=5, resolution=100, output_type="polygons", maxtries=10, hull_multiplier=6, spbuffer_factor=1.25 ) {
+aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, resolution=100, output_type="polygons", hull_multiplier=6, areal_units_tessilation_nmin=0, nreduceby=1 ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
 
@@ -17,12 +17,19 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, k=5
     res = aegis_mesh( SPDF=meuse, spbuffer=50 ) # 50m snap buffer
     res = aegis_mesh( SPDF=meuse, resolution=1, spbuffer=50, output_type="grid" )
     res = aegis_mesh( SPDF=meuse, resolution=1, output_type="grid.count" )
-    res = as( res, "SpatialPointsDataFrame")
-    res = res[ res$layer > 0 ,]
+    res = aegis_mesh( SPDF=meuse, resolution=1, spbuffer=50 )
+    res = aegis_mesh( SPDF=meuse, resolution=1, spbuffer=50, areal_units_tessilation_nmin=1 )
 
     mypalette = colorRampPalette(c("darkblue","blue3", "green", "yellow", "orange","red3", "darkred"), space = "Lab")(100)
 
     spplot( res, "zinc", col.regions=mypalette )
+
+    SPDF_boundary="non_convex_hull"
+    spbuffer=NULL
+    resolution=100
+    output_type="polygons"
+    hull_multiplier=6
+    areal_units_tessilation_nmin=0
 
   }
 
@@ -62,15 +69,17 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, k=5
 
   if ( output_type=="polygons" ) {
 
-    rn0 = row.names(SPDF)  # store for end
-    SPDF$uid_internal = rn0
+    # fine grid representation
+    SPDF$uuuid = 1:nrow(SPDF)  # internal id
+    M = aegis_mesh( SPDF=SPDF,  resolution=resolution, output_type="grid.count" )
 
-    xy = try( coordinates(SPDF) )
+    rn0 = row.names(M)  # store for end
+    M$uid_internal = rn0
+
+    xy = try( coordinates(M) )
     if ( ("try-error" %in% class(xy)) ) stop( "Coordinates were not specified in data object?")
-    rownames(xy) = SPDF$uid_internal
+    rownames(xy) = M$uid_internal
 
-    SP = tessellate(xy) # via voronoi
-    # plot(SP)
 
     drange = range( c( diff(range( xy[,1] )), diff(range(xy[,2] )) ) )
     spbuffer_default =  floor( min(drange)/ 25 )
@@ -85,64 +94,59 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, k=5
       message( "spbuffer very low. Setting initial spbuffer =", spbuffer/4)
     }
 
-    ntries = 0
 
-    finished = FALSE
-    while ( !finished ) {
+    # define boundary of points if no boundary -- could also use convex hull ...
+    if (SPDF_boundary=="gBuffer") {
+      bnd = gBuffer( gUnaryUnion( gBuffer( M, width=spbuffer, byid=TRUE) ), width=spbuffer)
+      # plot(bnd)
+    }
 
-      if (ntries > 0) {
-        spbuffer = round( spbuffer * spbuffer_factor, 3 )
-        message( "Insufficient spbuffer to get all areal units, increasing spbuffer to: ", spbuffer )
-      }
+    if (SPDF_boundary=="concave.hull") {
+      v = concave.hull( xy, ub=spbuffer*hull_multiplier)
+      if ( any( !is.finite(v) )) next()
+      w = list( Polygons(list( Polygon( as.matrix( v ) )), ID="boundary" ))
+      bnd = SpatialPolygons( w, proj4string=sp::CRS(proj4string0) )
+      bnd = gBuffer( gUnaryUnion( gBuffer( bnd, width=spbuffer, byid=TRUE) ), width=spbuffer)
+      # plot(bnd)
+    }
 
-      # define boundary of points if no boundary -- could also use convex hull ...
-      if (SPDF_boundary=="gBuffer") {
-        bnd = gBuffer( gUnaryUnion( gBuffer( SPDF, width=spbuffer, byid=TRUE) ), width=spbuffer)
+    if (SPDF_boundary=="non_convex_hull") {
+      v = non_convex_hull( xy, alpha=spbuffer*hull_multiplier  )
+      if ( any( !is.finite(v) )) next()
+      w = list( Polygons(list( Polygon( as.matrix( v ) )), ID="boundary" ))
+      bnd = SpatialPolygons( w, proj4string=sp::CRS(proj4string0) )
+      bnd = gBuffer( gUnaryUnion( gBuffer( bnd, width=spbuffer, byid=TRUE) ), width=spbuffer)
         # plot(bnd)
-      }
+    }
 
-      if (SPDF_boundary=="concave.hull") {
-        v = concave.hull( xy, ub=spbuffer*hull_multiplier)
-        if ( any( !is.finite(v) )) next()
-        w = list( Polygons(list( Polygon( as.matrix( v ) )), ID="boundary" ))
-        bnd = SpatialPolygons( w, proj4string=sp::CRS(proj4string0) )
-        bnd = gBuffer( gUnaryUnion( gBuffer( bnd, width=spbuffer, byid=TRUE) ), width=spbuffer)
-        # plot(bnd)
-      }
+    sp::proj4string( bnd ) = proj4string0
+    SP = as(SPDF, "SpatialPoints" )
 
-      if (SPDF_boundary=="non_convex_hull") {
-        v = non_convex_hull( xy, alpha=spbuffer*hull_multiplier  )
-        if ( any( !is.finite(v) )) next()
-        w = list( Polygons(list( Polygon( as.matrix( v ) )), ID="boundary" ))
-        bnd = SpatialPolygons( w, proj4string=sp::CRS(proj4string0) )
-        bnd = gBuffer( gUnaryUnion( gBuffer( bnd, width=spbuffer, byid=TRUE) ), width=spbuffer)
-          # plot(bnd)
-      }
-
-      sp::proj4string( bnd ) = proj4string0
+    for ( nmin in seq( from=0, to=areal_units_tessilation_nmin, by=nreduceby ) ) {
+      nlast = length(SP)
       sp::proj4string( SP ) = proj4string0
-
-      SPI = gIntersection(  bnd, SP, byid=TRUE ) # crop
-      if (length(SPI) == length(SP) ) finished = TRUE
-
-      ntries = ntries + 1
-      if (ntries >= maxtries) finished = TRUE
+      SP = gIntersection(  bnd, SP, byid=TRUE ) # crop
+      SP = tessellate(coordinates( SP )) # centroids via voronoi
+      sp::proj4string( SP ) = proj4string0
+      SP = gIntersection(  bnd, SP, byid=TRUE ) # crop
+      vv = over( SPDF, SP  )
+      ww = tapply( rep(1, length(vv)), vv, sum, na.rm=T )
+      good = which(ww >= nmin )
+      ngood = length(good)
+      if (ngood > 0 ) {
+        xx = over( SP, SPDF[good,] )
+        yy = which(is.finite( xx$uuuid ))
+        SP = SP[ yy, ]
+      }
     }
+    sp::proj4string( SP ) = proj4string0
+    SP = gIntersection(  bnd, SP, byid=TRUE ) # crop
+    SP = tessellate(coordinates( SP )) # centroids via voronoi
+    sp::proj4string( SP ) = proj4string0
+    SP = gIntersection(  bnd, SP, byid=TRUE ) # crop
+    return(SP)
 
-    if (length(SPI) != length(SP) ) {
-      stop( "The size of the spbuffer is too small to recover all the areal units from a Voroni tessilation, increase the distance..." )
-    }
-    row.names(SPI) = rn0
-
-    O = SpatialPolygonsDataFrame(SPI, data=data.frame( SPDF ), match="uid_internal" )
-    row.names(O) = rn0
-    attr( O, "spbuffer") = spbuffer
-    message( "Final spbuffer = ", spbuffer )
-    O = sp::spChFIDs( O, rn0 )  #fix id's
-
-    O$uid_internal = NULL
-
-    O = spTransform( O, sp::CRS(proj4string0) )  # revert to input coordinate system
+  }
 
     if (0) {
       # make sure it is OK
@@ -160,8 +164,5 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, k=5
       spplot( SPDF, "zinc", col.regions=mypalette )
       spplot( O, "zinc", col.regions=mypalette )
     }
-
-    return(O)
-  }
 
 }
