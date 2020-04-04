@@ -30,6 +30,7 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
     output_type="polygons"
     hull_multiplier=6
     areal_units_tessilation_nmin=0
+    nreduceby=1
 
   }
 
@@ -123,9 +124,6 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
     SP = as(SPDF, "SpatialPoints" )
 
     for ( nmin in seq( from=0, to=areal_units_tessilation_nmin, by=nreduceby ) ) {
-      nlast = length(SP)
-      sp::proj4string( SP ) = proj4string0
-      SP = gIntersection(  bnd, SP, byid=TRUE ) # crop
       SP = tessellate(coordinates( SP )) # centroids via voronoi
       sp::proj4string( SP ) = proj4string0
       SP = gIntersection(  bnd, SP, byid=TRUE ) # crop
@@ -138,9 +136,9 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
         yy = which(is.finite( xx$uuuid ))
         SP = SP[ yy, ]
       }
+      SP = gIntersection(  bnd, SP, byid=TRUE, checkValidity=2L ) # crop
     }
-    sp::proj4string( SP ) = proj4string0
-    SP = gIntersection(  bnd, SP, byid=TRUE ) # crop
+
     SP = tessellate(coordinates( SP )) # centroids via voronoi
     sp::proj4string( SP ) = proj4string0
     SP = gIntersection(  bnd, SP, byid=TRUE ) # crop
