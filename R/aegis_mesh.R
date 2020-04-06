@@ -77,6 +77,10 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
 
     good = 1:nrow(M)
     nAU =  length(good)
+    SP0 = as(SPDF, "SpatialPoints")
+    M= NULL
+    SPDF = NULL
+    gc()
 
     finished = FALSE
     while(!finished) {
