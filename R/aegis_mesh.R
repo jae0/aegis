@@ -76,7 +76,7 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
     bnd = aegis_envelope( xy=xy, method=SPDF_boundary, spbuffer=spbuffer, returntype="SpatialPolygons", proj4string=proj4string0, hull_multiplier=hull_multiplier )
 
     good = 1:nrow(M)
-    nAU =  length(AU)
+    nAU =  length(good)
 
     finished = FALSE
     while(!finished) {
