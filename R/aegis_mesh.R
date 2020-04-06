@@ -73,7 +73,7 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
     # fine grid representation
     M = aegis_mesh( SPDF=SPDF,  resolution=resolution, output_type="grid.count" )
     xy = coordinates( M )
-    bnd = aegis_envelope( xy=xy, method=SPDF_boundary, spbuffer=spbuffer, returntype="SpatialPolygons", proj4string=proj4string0 )
+    bnd = aegis_envelope( xy=xy, method=SPDF_boundary, spbuffer=spbuffer, returntype="SpatialPolygons", proj4string=proj4string0, hull_multiplier=hull_multiplier )
 
     good = 1:nrow(M)
     nAU =  length(AU)

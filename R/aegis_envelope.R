@@ -1,4 +1,4 @@
-aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returntype="SpatialPolygons", proj4string=NULL ) {
+aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returntype="SpatialPolygons", proj4string=NULL, hull_multiplier=1 ) {
 
   # obtain boundary of a bunch of points .. expect spatiial points
   drange = range( c( diff(range( xy[,1] )), diff(range(xy[,2] )) ) )
