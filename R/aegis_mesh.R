@@ -1,12 +1,10 @@
 
 
-aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, resolution=100, output_type="polygons", hull_multiplier=6, areal_units_tessilation_nmin=0, nreduceby=3, nAU_min=30, ntarget_inside=1 ) {
+aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, resolution=100, output_type="polygons", hull_multiplier=6, nreduceby=3, nAU_min=30, areal_units_tessilation_nmin=1 ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
-
   require(sp)
   require(rgeos)
-
 
   if (0) {
     data(meuse)
@@ -18,11 +16,9 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
     resolution=100
     output_type="polygons"
     hull_multiplier=6
-    areal_units_tessilation_nmin=0
     nreduceby=3
-    ntarget_inside=1
+    areal_units_tessilation_nmin=1
     nAU_min=30
-
 
 
     res = aegis_mesh( SPDF=meuse) # 50m snap buffer
@@ -91,7 +87,7 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
       vv = over( SP0, AU  )
       ww = tapply( rep(1, length(vv)), vv, sum, na.rm=T )
       toremove = which(
-        ww < ntarget_inside &
+        ww < areal_units_tessilation_nmin &
         sa < median(sa)
       )
       ntr = length(toremove)
