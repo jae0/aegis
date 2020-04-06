@@ -1,6 +1,6 @@
 
 
-aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, resolution=100, output_type="polygons", hull_multiplier=6, areal_units_tessilation_nmin=0, nreduceby=1 ) {
+aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, resolution=100, output_type="polygons", hull_multiplier=6, areal_units_tessilation_nmin=0, nreduceby=3, nAU_min=30, ntarget_inside=1 ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
 
@@ -12,25 +12,29 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
     data(meuse)
     coordinates(meuse) = ~ x+y
     sp::proj4string(meuse) = CRS("+init=epsg:28992")
-
-    res = aegis_mesh( SPDF=meuse) # 50m snap buffer
-    res = aegis_mesh( SPDF=meuse, spbuffer=50 ) # 50m snap buffer
-    res = aegis_mesh( SPDF=meuse, resolution=1, spbuffer=50, output_type="grid" )
-    res = aegis_mesh( SPDF=meuse, resolution=1, output_type="grid.count" )
-    res = aegis_mesh( SPDF=meuse, resolution=1, spbuffer=50 )
-    res = aegis_mesh( SPDF=meuse, resolution=1, spbuffer=50, areal_units_tessilation_nmin=1 )
-
-    mypalette = colorRampPalette(c("darkblue","blue3", "green", "yellow", "orange","red3", "darkred"), space = "Lab")(100)
-
-    spplot( res, "zinc", col.regions=mypalette )
-
+    SPDF = meuse
     SPDF_boundary="non_convex_hull"
     spbuffer=NULL
     resolution=100
     output_type="polygons"
     hull_multiplier=6
     areal_units_tessilation_nmin=0
-    nreduceby=1
+    nreduceby=3
+    ntarget_inside=1
+    nAU_min=30
+
+
+
+    res = aegis_mesh( SPDF=meuse) # 50m snap buffer
+    res = aegis_mesh( SPDF=meuse, spbuffer=50 ) # 50m snap buffer
+    res = aegis_mesh( SPDF=meuse, resolution=1, spbuffer=50, output_type="grid" )
+    res = aegis_mesh( SPDF=meuse, resolution=1, output_type="grid.count" )
+    res = aegis_mesh( SPDF=meuse, resolution=1, spbuffer=50 )
+    res = aegis_mesh( SPDF=meuse, resolution=5, spbuffer=50, areal_units_tessilation_nmin=1 )
+
+    mypalette = colorRampPalette(c("darkblue","blue3", "green", "yellow", "orange","red3", "darkred"), space = "Lab")(100)
+
+    spplot( res, "zinc", col.regions=mypalette )
 
   }
 
@@ -71,78 +75,45 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
   if ( output_type=="polygons" ) {
 
     # fine grid representation
-    SPDF$uuuid = 1:nrow(SPDF)  # internal id
     M = aegis_mesh( SPDF=SPDF,  resolution=resolution, output_type="grid.count" )
+    xy = coordinates( M )
+    bnd = aegis_envelope( xy=xy, method=SPDF_boundary, spbuffer=spbuffer, returntype="SpatialPolygons", proj4string=proj4string0 )
 
-    rn0 = row.names(M)  # store for end
-    M$uid_internal = rn0
+    good = 1:nrow(M)
+    nAU =  length(AU)
 
-    xy = try( coordinates(M) )
-    if ( ("try-error" %in% class(xy)) ) stop( "Coordinates were not specified in data object?")
-    rownames(xy) = M$uid_internal
-
-
-    drange = range( c( diff(range( xy[,1] )), diff(range(xy[,2] )) ) )
-    spbuffer_default =  floor( min(drange)/ 25 )
-
-    if (is.null(spbuffer)) {
-      spbuffer = spbuffer_default
-      message( "spbuffer not set, using spbuffer=", spbuffer)
-    }
-
-    if (spbuffer < spbuffer_default / 4 ) {
-      spbuffer = spbuffer_default
-      message( "spbuffer very low. Setting initial spbuffer =", spbuffer/4)
-    }
-
-
-    # define boundary of points if no boundary -- could also use convex hull ...
-    if (SPDF_boundary=="gBuffer") {
-      bnd = gBuffer( gUnaryUnion( gBuffer( M, width=spbuffer, byid=TRUE) ), width=spbuffer)
-      # plot(bnd)
-    }
-
-    if (SPDF_boundary=="concave.hull") {
-      v = concave.hull( xy, ub=spbuffer*hull_multiplier)
-      if ( any( !is.finite(v) )) next()
-      w = list( Polygons(list( Polygon( as.matrix( v ) )), ID="boundary" ))
-      bnd = SpatialPolygons( w, proj4string=sp::CRS(proj4string0) )
-      bnd = gBuffer( gUnaryUnion( gBuffer( bnd, width=spbuffer, byid=TRUE) ), width=spbuffer)
-      # plot(bnd)
-    }
-
-    if (SPDF_boundary=="non_convex_hull") {
-      v = non_convex_hull( xy, alpha=spbuffer*hull_multiplier  )
-      if ( any( !is.finite(v) )) next()
-      w = list( Polygons(list( Polygon( as.matrix( v ) )), ID="boundary" ))
-      bnd = SpatialPolygons( w, proj4string=sp::CRS(proj4string0) )
-      bnd = gBuffer( gUnaryUnion( gBuffer( bnd, width=spbuffer, byid=TRUE) ), width=spbuffer)
-        # plot(bnd)
-    }
-
-    sp::proj4string( bnd ) = proj4string0
-    SP = as(SPDF, "SpatialPoints" )
-
-    for ( nmin in seq( from=0, to=areal_units_tessilation_nmin, by=nreduceby ) ) {
-      SP = tessellate(coordinates( SP )) # centroids via voronoi
-      sp::proj4string( SP ) = proj4string0
-      SP = gIntersection(  bnd, SP, byid=TRUE ) # crop
-      vv = over( SPDF, SP  )
+    finished = FALSE
+    while(!finished) {
+      AU = tessellate(xy[good,]) # centroids via voronoi
+      sp::proj4string( AU ) = proj4string0
+      AU = gIntersection(  bnd, AU, byid=TRUE ) # crop
+      sa = gArea(AU, byid=TRUE)
+      vv = over( SP0, AU  )
       ww = tapply( rep(1, length(vv)), vv, sum, na.rm=T )
-      good = which(ww >= nmin )
-      ngood = length(good)
-      if (ngood > 0 ) {
-        xx = over( SP, SPDF[good,] )
-        yy = which(is.finite( xx$uuuid ))
-        SP = SP[ yy, ]
+      toremove = which(
+        ww < ntarget_inside &
+        sa < median(sa)
+      )
+      ntr = length(toremove)
+      if (ntr > 0 ) {
+        good = setdiff( good, good[ toremove[ 1:min(nreduceby, ntr)]] )  #remove up to 3 a a time
       }
-      SP = gIntersection(  bnd, SP, byid=TRUE, checkValidity=2L ) # crop
+      nAU_previous = nAU
+      nAU = length(good)
+      if ( nAU <= nAU_min ) finished=TRUE
+      if ( nAU == nAU_previous ) finished =TRUE
+
+      plot(AU)
+      print(nAU)
     }
 
-    SP = tessellate(coordinates( SP )) # centroids via voronoi
-    sp::proj4string( SP ) = proj4string0
-    SP = gIntersection(  bnd, SP, byid=TRUE ) # crop
-    return(SP)
+    AU = tessellate(xy[good,]) # centroids via voronoi
+    sp::proj4string( AU ) = proj4string0
+    AU = gIntersection(  bnd, AU, byid=TRUE ) # crop
+
+    # plot(AU)
+
+    return(AU)
 
   }
 
