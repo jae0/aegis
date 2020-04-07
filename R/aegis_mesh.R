@@ -90,12 +90,15 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
       sa = gArea(AU, byid=TRUE)
       vv = over( SP0, AU  )
       ww = tapply( rep(1, length(vv)), vv, sum, na.rm=T )
+      nden = ww / sa
       toremove = which(
         ww < areal_units_constraint_nmin &
-        sa < median(sa)
+        sa < median((sa)  &
+        nden < median((nden)
       )
       ntr = length(toremove)
       if (ntr > 0 ) {
+        toremove = toremove[ order(nden) ]
         good = setdiff( good, good[ toremove[ 1:min(nreduceby, ntr)]] )  #remove up to 3 a a time
       }
       nAU_previous = nAU
