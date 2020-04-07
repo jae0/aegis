@@ -93,8 +93,8 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
       nden = ww / sa
       toremove = which(
         ww < areal_units_constraint_nmin &
-        sa < median((sa)  &
-        nden < median((nden)
+        sa < quantile(sa, probs=0.9)  &
+        nden < quantile(nden, probs=0.5)
       )
       ntr = length(toremove)
       if (ntr > 0 ) {
