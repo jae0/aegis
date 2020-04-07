@@ -1,6 +1,6 @@
 
 
-aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, resolution=100, output_type="polygons", hull_multiplier=6, nreduceby=3, nAU_min=30, areal_units_tessilation_nmin=1 ) {
+aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, resolution=100, output_type="polygons", hull_multiplier=6, nreduceby=3, nAU_min=30, areal_units_constraint_nmin=1 ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
   require(sp)
@@ -17,7 +17,7 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
     output_type="polygons"
     hull_multiplier=6
     nreduceby=3
-    areal_units_tessilation_nmin=1
+    areal_units_constraint_nmin=1
     nAU_min=30
 
 
@@ -26,7 +26,7 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
     res = aegis_mesh( SPDF=meuse, resolution=1, spbuffer=50, output_type="grid" )
     res = aegis_mesh( SPDF=meuse, resolution=1, output_type="grid.count" )
     res = aegis_mesh( SPDF=meuse, resolution=1, spbuffer=50 )
-    res = aegis_mesh( SPDF=meuse, resolution=5, spbuffer=50, areal_units_tessilation_nmin=1 )
+    res = aegis_mesh( SPDF=meuse, resolution=5, spbuffer=50, areal_units_constraint_nmin=1 )
 
     mypalette = colorRampPalette(c("darkblue","blue3", "green", "yellow", "orange","red3", "darkred"), space = "Lab")(100)
 
@@ -91,7 +91,7 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
       vv = over( SP0, AU  )
       ww = tapply( rep(1, length(vv)), vv, sum, na.rm=T )
       toremove = which(
-        ww < areal_units_tessilation_nmin &
+        ww < areal_units_constraint_nmin &
         sa < median(sa)
       )
       ntr = length(toremove)
