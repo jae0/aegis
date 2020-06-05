@@ -7,7 +7,7 @@
 #' @examples
 #' color.code(type='colourblind1',n=2)
 #' [1] "#FFFFD8" "#071D58"
-#' @author  unknown, \email{<unknown>@@dfo-mpo.gc.ca}
+#' @author  Jae Choi, \email{choi.jae.seok@gmail.com}
 #' @export
   color.code = function( type="seis", n ) {
     # R create RGB colours 
