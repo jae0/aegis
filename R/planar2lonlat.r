@@ -1,5 +1,5 @@
 
-  planar2lonlat = function (x, proj.type, planar.coord.scale=NULL, newnames = c("lon", "lat")  ) {
+  planar2lonlat = function (x, proj.type, planar.coord.scale=NULL, input_names=c("plon", "plat"), newnames = c("lon", "lat")  ) {
     #// inverse projection: planar to lon/lat using proj
     #// convert planar coord systems (length scale defined in the CRS as +units=km or m)  to lon-lat
 
@@ -16,23 +16,27 @@
   # first try an internal conversion /lookup for CRS
     proj4.params = NULL
     pcrs = projection_proj4string(proj.type)
-    if (!is.null(pcrs)) proj4.params = try( sp::CRS( pcrs ), silent=TRUE )
+    if (!is.null(pcrs)) proj4.params = try(  sf::st_crs( pcrs ), silent=TRUE )
 
     # if internal lookup does not work then try to directly pass to CRS
     if ( is.null(proj4.params) | inherits(proj4.params, "try-error")) {
-      if (!is.null(proj.type))  proj4.params = try( sp::CRS( proj.type ), silent=TRUE )
+      if (!is.null(proj.type))  proj4.params = try(  sf::st_crs( proj.type ), silent=TRUE )
     }
     if ( inherits(proj4.params, "try-error") ) {
       print( proj.type )
       warning( "Projection not recognised")
     }
 
-    crsX = rgdal::CRSargs( proj4.params)
+    # crsX = rgdal::CRSargs( proj4.params)
+    crsX = proj4.params$input
     if ( ! grepl("units", crsX) ) {
       print (crsX)
       stop( "The proj4 CRS requires an explicit +units=km ")
     }
-    y = rgdal::project( as.matrix(x[,c("plon", "plat")]), crsX, inv=TRUE )
+
+    # y = rgdal::project( as.matrix(x[,c("plon", "plat")]), crsX, inv=TRUE )
+    y = sf::sf_project( from=proj4.params, to=sf::st_crs("EPSG:4326"), pts=as.matrix(x[, input_names ]) )
+
     colnames(y) = newnames
     for (i in 1:length( newnames)) {
       if ( newnames[i] %in% colnames(x) ) x[, newnames[i]] = NULL

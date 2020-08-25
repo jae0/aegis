@@ -84,7 +84,7 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
 
     finished = FALSE
     while(!finished) {
-      AU = tessellate(xy[good,]) # centroids via voronoi
+      AU = tessellate(xy[good,], outformat="sp") # centroids via voronoi
       sp::proj4string( AU ) = proj4string0
       AU = gIntersection(  bnd, AU, byid=TRUE ) # crop
       sa = gArea(AU, byid=TRUE)
@@ -102,11 +102,11 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
       if ( nAU <= nAU_min ) finished=TRUE
       if ( nAU == nAU_previous ) finished =TRUE
 
-      plot(AU)
+      # plot(AU)
       print(nAU)
     }
 
-    AU = tessellate(xy[good,]) # centroids via voronoi
+    AU = tessellate(xy[good,], outformat="sp") # centroids via voronoi
     sp::proj4string( AU ) = proj4string0
     AU = gIntersection(  bnd, AU, byid=TRUE ) # crop
 
