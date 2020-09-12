@@ -1,6 +1,6 @@
 
 
-aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, resolution=100, output_type="polygons", hull_multiplier=6, nreduceby=3, nAU_min=30, areal_units_constraint_nmin=1 ) {
+aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, resolution=100, output_type="polygons", hull_multiplier=6, nreduceby=3, nAU_min=30, areal_units_constraint_nmin=1, tus=NULL ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
   require(sp)
@@ -78,6 +78,7 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
     good = 1:nrow(M)
     nAU =  length(good)
     SP0 = as(SPDF, "SpatialPoints")
+    if (!is.null(tus)) TU = SPDF[[tus]]
     M= NULL
     SPDF = NULL
     gc()
@@ -89,11 +90,18 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
       AU = gIntersection(  bnd, AU, byid=TRUE ) # crop
       sa = gArea(AU, byid=TRUE)
       vv = over( SP0, AU  )
-      ww = tapply( rep(1, length(vv)), vv, sum, na.rm=T )
-      nden = ww / sa
-      toremove = which( ww < areal_units_constraint_nmin )
+      if (!is.null(tus)) {
+        ww = xtabs( ~ vv + TU, na.action=na.omit )
+        ww[ww>0] = 1
+        zz = rowSums(ww)  # number of unique time units in each areal unit
+        toremove = which( zz < areal_units_constraint_nmin )
+      } else {
+        ww = tapply( rep(1, length(vv)), vv, sum, na.rm=T )
+        toremove = which( ww < areal_units_constraint_nmin )
+      }
       ntr = length(toremove)
       if (ntr > 0 ) {
+        nden = ww / sa
         toremove = toremove[ order(nden[toremove]) ]
         good = setdiff( good, good[ toremove[ 1:min(nreduceby, ntr)]] )  #remove up to 3 a a time
       }
@@ -109,6 +117,8 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
     AU = tessellate(xy[good,], outformat="sp") # centroids via voronoi
     sp::proj4string( AU ) = proj4string0
     AU = gIntersection(  bnd, AU, byid=TRUE ) # crop
+
+    print( length(AU) )
 
     # plot(AU)
 
