@@ -42,7 +42,7 @@ data_spatial_openstreetmap = function( DS, p, redo=FALSE, fn=NULL, ... ) {
 
       pg = as( pg, "SpatialPolygonsDataFrame" )
       pg$id = 1
-      pg = try( gUnaryUnion(pg, id=pg@data$id), silent=TRUE  )
+      pg = try( gUnaryUnion(pg, id=slot(pg, "data")[,"id"]), silent=TRUE  )
 
       # sum(gIsValid(pg, byid=TRUE)==FALSE) # check if any bad polys?
       # pg = gBuffer(pg, byid=TRUE, width=0)
@@ -107,7 +107,7 @@ data_spatial_openstreetmap = function( DS, p, redo=FALSE, fn=NULL, ... ) {
 
         pg = as( pg, "SpatialPolygonsDataFrame" )
         pg$id = 1
-        pg = try( gUnaryUnion(pg, id=pg@data$id), silent=TRUE  )
+        pg = try( gUnaryUnion(pg, id=slot(pg, "data")[,"id"]), silent=TRUE  )
 
         # sum(gIsValid(pg, byid=TRUE)==FALSE) # check if any bad polys?
         # pg = gBuffer(pg, byid=TRUE, width=0)
@@ -156,7 +156,7 @@ data_spatial_openstreetmap = function( DS, p, redo=FALSE, fn=NULL, ... ) {
 
         pg = as( pg, "SpatialPolygonsDataFrame" )
         pg$id = 1
-        pg = try( gUnaryUnion(pg, id=pg@data$id), silent=TRUE  )
+        pg = try( gUnaryUnion(pg, id=slot(pg, "data")[,"id"]), silent=TRUE  )
 
         # sum(gIsValid(pg, byid=TRUE)==FALSE) # check if any bad polys?
         # pg = gBuffer(pg, byid=TRUE, width=0)
