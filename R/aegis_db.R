@@ -9,14 +9,14 @@
       # generic methods getting raw data
       out = switch( p$project_name,
         bathymetry   = bathymetry.db(p=p, DS=p$project_name ),
-        temperature  = temperature.db(p=p, DS=p$project_name ),
-        sizespectrum = sizespectrum.db(p=p, DS=p$project_name ),
+        temperature  = temperature_db(p=p, DS=p$project_name ),
+        sizespectrum = sizespectrum_db(p=p, DS=p$project_name ),
         metabolism   = metabolism.db( p=p, DS=p$project_name ),
-        speciesarea  = speciesarea.db( p=p, DS=p$project_name ),
-        speciescomposition = speciescomposition.db( p=p, DS=p$project_name ),
+        speciesarea  = speciesarea_db( p=p, DS=p$project_name ),
+        speciescomposition = speciescomposition_db( p=p, DS=p$project_name ),
         condition =    condition.db( p=p, DS=p$project_name ),
         biochem =      biochem.db( p=p, DS=p$project_name ),
-        survey =       survey.db( p=p, DS=p$project_name ),
+        survey =       survey_db( p=p, DS=p$project_name ),
         NULL
       )
       return(out)
@@ -31,14 +31,14 @@
 
       # depth is the primary constraint, baseline = area-prefiltered for depth/bounds
       PS = bathymetry.db( p=p, DS="baseline", varnames="all" )  # anything not NULL gives everything with bathymetry.db
-      PS = cbind( PS, substrate.db ( p=p, DS="complete"  ) )
+      PS = cbind( PS, substrate_db ( p=p, DS="complete"  ) )
 
       # override variable of interest to obtain results for static temperature vars
       pt = aegis.temperature::temperature_parameters( p=p)
       pt$stmv_variables = list(Y = "t")
       # p0 = spatial_parameters( p=p0, spatial_domain=p$spatial_domain ) # return to correct domain
 
-      tclim = temperature.db( p=pt, DS="complete" )
+      tclim = temperature_db( p=pt, DS="complete" )
       # names(PS)[which(names(PS)=="tamplitude.climatology")] = "tamplitude.climatology"
       PS = cbind( PS, tclim)
 
@@ -60,9 +60,9 @@
       # pt = spatial_parameters( p=pt, spatial_domain=p$spatial_domain ) # return to correct domain
 
       PS = list()
-      PS[["tslice"]] = temperature.db( p=pt, DS="timeslice", ret="mean", dyear_index=dyear_index ) # at the prediction timeslice
+      PS[["tslice"]] = temperature_db( p=pt, DS="timeslice", ret="mean", dyear_index=dyear_index ) # at the prediction timeslice
       for ( ret in pt$bstats ) { # ] "tmean"     "tsd"       "tmin"      "tmax"      "tamplitude" "degreedays"
-        PS[[ret]] = temperature.db( p=pt, DS="bottom.statistics.annual", ret=ret )
+        PS[[ret]] = temperature_db( p=pt, DS="bottom.statistics.annual", ret=ret )
       }
 
       return( PS )
@@ -81,7 +81,7 @@
         message( "At present only temperature varies at this scale .. nothing else needs to be done." )
         return(NULL)
       }
-      out = temperature.db(p=p, DS="spatial.annual.seasonal", ret=ret )
+      out = temperature_db(p=p, DS="spatial.annual.seasonal", ret=ret )
       return( out )
     }
 

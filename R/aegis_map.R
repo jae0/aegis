@@ -101,7 +101,7 @@
         }
 
         #coastline
-        coast = aegis.coastline::coastline.db(p=pp, project_to=projection_map_proj4string  )
+        coast = aegis.coastline::coastline_db(p=pp, project_to=projection_map_proj4string  )
         sp.polygons( coast, col="black", cex=1, fill=landfillcolour)
 
         #legend

@@ -5,7 +5,7 @@ aegis_lookup = function( p, DS="all", locsmap=NULL, locs=NULL, timestamp=NULL, v
 
   if (0) {
     # example of how to use this:
-    set = survey.db( p=p, DS="set" )
+    set = survey_db( p=p, DS="set" )
     newvars = c("tmean.climatology", "tmax.climatology")
     locsmap = match(
       stmv::array_map( "xy->1", set[,c("plon","plat")], gridparams=p$gridparams ),

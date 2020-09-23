@@ -43,7 +43,7 @@
       out$map.contours = isobath.db( p=p, DS="isobath", depths=p$map.depthcontours, project_to=project_to  )
 
       # add a small buffer around data and clip to make smaller
-      out$map.coastline = aegis.coastline::coastline.db( DS=" gshhg coastline highres redo ",
+      out$map.coastline = aegis.coastline::coastline_db( DS=" gshhg coastline highres redo ",
         xlim=p$corners$lon+c(-1,1), ylim=p$corners$lat+c(-1,1), no.clip=FALSE, level=1 )
 
       save( out, file=fn, compress=TRUE )

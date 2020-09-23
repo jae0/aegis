@@ -29,13 +29,13 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       # p$nw = 10  # from temperature.r, number of intervals in a year
       p$clusters = rep("localhost", detectCores() )
       p$varstomodel = c()
-      p$taxa.of.interest = aegis.survey::groundfish.variablelist("catch.summary")
+      p$taxa.of.interest = aegis.survey::groundfish_variablelist("catch.summary")
 
       if (!exists("areal_units_timeperiod", p)) p$areal_units_timeperiod = "pre2014"   # "pre2014" for older
       if (!exists("aegis_proj4string_lonlat", p)) p$aegis_proj4string_lonlat = projection_proj4string("lonlat_wgs84")
       if (!exists("areal_units_proj4string_planar_km", p)) p$areal_units_proj4string_planar_km = projection_proj4string("omerc_nova_scotia")  # oblique mercator, centred on Scotian Shelf rotated by 325 degrees
       if (!exists("boundingbox", p)) p$boundingbox = list( xlim = c(-70.5, -56.5), ylim=c(39.5, 47.5)) # bounding box for plots using spplot
-      if (!exists("trawlable_units", p)) p$trawlable_units = "standardtow"  # for groundfish.db
+      if (!exists("trawlable_units", p)) p$trawlable_units = "standardtow"  # for groundfish_survey_db
 
 
       # set up default map projection
@@ -181,7 +181,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
     }
 
     # extract covariates and supplent survey data via lookups
-    set = survey.db( p=p, DS="filter" )
+    set = survey_db( p=p, DS="filter" )
     set = set[ which(is.finite(set$lon + set$lat)),]
     # ensure we have some estimate of sweptarea and choose the appropriate
     # one based upon which trawlable units we are using
@@ -229,7 +229,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       set[,p$stmv_variables$Y][ii] = lowerbound ## arbitrary but close to detection limit
     }
 
-    coast = coastline.db( p=p, DS=coastline_source )
+    coast = coastline_db( p=p, DS=coastline_source )
     coast = spTransform( coast, CRS("+proj=longlat +datum=WGS84") )
     setcoord = SpatialPoints( as.matrix( set[, c("lon", "lat")]),  proj4string=CRS("+proj=longlat +datum=WGS84") )
     inside = sp::over( setcoord, coast )

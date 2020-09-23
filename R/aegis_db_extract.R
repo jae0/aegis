@@ -83,18 +83,18 @@ aegis_db_extract = function( vars, spatial_domain, yrs=NULL, dyear=NULL, dyear_i
       }
       if (is.null(dyear_index)) dyear_index = 7 # if a problem default to this = dyear=0.6 = July
 
-      pa$stmv_variables = list( Y="t" ) # force voi in temperature.db for these
+      pa$stmv_variables = list( Y="t" ) # force voi in temperature_db for these
       for (vn in environmentalvars_dynamic_seasonal) {
         # get timeslice
         nlocs = nrow( bathymetry.db(p=pa, DS="baseline"))
         nyears = length(yrs)
         out[[vn]] = matrix(NA, ncol=nyears, nrow=nlocs, dimnames=list(NULL, yrs))
-        pa$stmv_variables = list( Y="t" )  # force voi in temperature.db
+        pa$stmv_variables = list( Y="t" )  # force voi in temperature_db
         if (vn=="t") ret = "mean"
         if (vn=="tlb") ret = "lb"
         if (vn=="tub") ret = "ub"
         for ( r in 1:length(yrs) ) {
-          PS = temperature.db( p=pa, DS="predictions", yr=yrs[r], ret=ret  )
+          PS = temperature_db( p=pa, DS="predictions", yr=yrs[r], ret=ret  )
           if (!is.null(PS))  out[[vn]][,r] = PS[,dyear_index]
           PS = NULL
         }
@@ -104,9 +104,9 @@ aegis_db_extract = function( vars, spatial_domain, yrs=NULL, dyear=NULL, dyear_i
     environmentalvars_dynamic_annual = intersect( vars, pa$bstats )
     if ( length(environmentalvars_dynamic_annual) > 0 ) {
       # make years coherent
-      pa$stmv_variables = list( Y="t" ) # force voi in temperature.db for bstats
+      pa$stmv_variables = list( Y="t" ) # force voi in temperature_db for bstats
       for (vn in environmentalvars_dynamic_annual) {
-        PS = temperature.db( p=pa, DS="bottom.statistics.annual", ret=vn )
+        PS = temperature_db( p=pa, DS="bottom.statistics.annual", ret=vn )
         if (is.null(PS)) next()
         nrPS = nrow(PS)
         out[[vn]] = matrix( NA, nrow=nrPS, ncol=length(yrs), dimnames=list(NULL, yrs))
