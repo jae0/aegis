@@ -9,7 +9,7 @@ aegis_lookup = function( p, DS="all", locsmap=NULL, locs=NULL, timestamp=NULL, v
     newvars = c("tmean.climatology", "tmax.climatology")
     locsmap = match(
       stmv::array_map( "xy->1", set[,c("plon","plat")], gridparams=p$gridparams ),
-      stmv::array_map( "xy->1", bathymetry.db(p=p, DS="baseline"), gridparams=p$gridparams ) )
+      stmv::array_map( "xy->1", bathymetry_db(p=p, DS="baseline"), gridparams=p$gridparams ) )
 
     # for spatial-only
     sn = aegis_lookup( p=p, DS="spatial", locsmap=locsmap, varnames=newvars )
@@ -26,7 +26,7 @@ aegis_lookup = function( p, DS="all", locsmap=NULL, locs=NULL, timestamp=NULL, v
 
   if (is.null(locsmap)){
     grid = stmv::array_map( "xy->1", locs, gridparams=p$gridparams )
-    baid = stmv::array_map( "xy->1", bathymetry.db(p=p, DS="baseline"), gridparams=p$gridparams )
+    baid = stmv::array_map( "xy->1", bathymetry_db(p=p, DS="baseline"), gridparams=p$gridparams )
     locsmap = match( grid, baid )
   }
 

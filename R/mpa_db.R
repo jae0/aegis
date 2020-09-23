@@ -1,5 +1,5 @@
 
-  mpa.db = function( p=NULL, DS="polygons", project_to=NULL ) {
+  mpa_db = function( p=NULL, DS="polygons", project_to=NULL ) {
 
     mpadir = project.datadirectory( "aegis", "data")
 
@@ -25,22 +25,22 @@
       proj4string( bbox ) = project_to
       bbox = spTransform( bbox, CRS(project_to) )
 
-      aoi = aegis.polygons::polygon.db( polyid="StAnnsBank_AOI", returnvalue="sp.polygon", project_to=project_to )
-      z1 = aegis.polygons::polygon.db( polyid="StAnnsBank_Zone1", returnvalue="sp.polygon", project_to=project_to  )
-      z2 = aegis.polygons::polygon.db( polyid="StAnnsBank_Zone2", returnvalue="sp.polygon", project_to=project_to  )
-      z3 = aegis.polygons::polygon.db( polyid="StAnnsBank_Zone3", returnvalue="sp.polygon", project_to=project_to  )
-      z4 = aegis.polygons::polygon.db( polyid="StAnnsBank_Zone4", returnvalue="sp.polygon", project_to=project_to   )
+      aoi = aegis.polygons::polygon_db( polyid="StAnnsBank_AOI", returnvalue="sp.polygon", project_to=project_to )
+      z1 = aegis.polygons::polygon_db( polyid="StAnnsBank_Zone1", returnvalue="sp.polygon", project_to=project_to  )
+      z2 = aegis.polygons::polygon_db( polyid="StAnnsBank_Zone2", returnvalue="sp.polygon", project_to=project_to  )
+      z3 = aegis.polygons::polygon_db( polyid="StAnnsBank_Zone3", returnvalue="sp.polygon", project_to=project_to  )
+      z4 = aegis.polygons::polygon_db( polyid="StAnnsBank_Zone4", returnvalue="sp.polygon", project_to=project_to   )
 
       out$sab.polygons = bind( aoi, z1, z2, z3, z4, keepnames=TRUE )
 
-      mc = isobath.db( p=p, DS="isobath", depths=p$map.depthcontours, project_to=project_to  )
+      mc = isobath_db( p=p, DS="isobath", depths=p$map.depthcontours, project_to=project_to  )
       mcnames = names( mc)
       # must crop each one separately
       mcout = raster::crop( mc[1], bbox )
       for (i in 2:length(mc) ) {
         mcout = bind( mcout, raster::crop( mc[i], bbox ), keepnames=FALSE )
       }
-      out$map.contours = isobath.db( p=p, DS="isobath", depths=p$map.depthcontours, project_to=project_to  )
+      out$map.contours = isobath_db( p=p, DS="isobath", depths=p$map.depthcontours, project_to=project_to  )
 
       # add a small buffer around data and clip to make smaller
       out$map.coastline = aegis.coastline::coastline_db( DS=" gshhg coastline highres redo ",

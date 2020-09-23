@@ -86,7 +86,7 @@ aegis_db_extract = function( vars, spatial_domain, yrs=NULL, dyear=NULL, dyear_i
       pa$stmv_variables = list( Y="t" ) # force voi in temperature_db for these
       for (vn in environmentalvars_dynamic_seasonal) {
         # get timeslice
-        nlocs = nrow( bathymetry.db(p=pa, DS="baseline"))
+        nlocs = nrow( bathymetry_db(p=pa, DS="baseline"))
         nyears = length(yrs)
         out[[vn]] = matrix(NA, ncol=nyears, nrow=nlocs, dimnames=list(NULL, yrs))
         pa$stmv_variables = list( Y="t" )  # force voi in temperature_db
@@ -158,7 +158,7 @@ aegis_db_extract = function( vars, spatial_domain, yrs=NULL, dyear=NULL, dyear_i
 
   if (returntype=="data.frame" ) {
     # static vars: depth is the primary constraint, baseline = area-prefiltered for depth/bounds
-    AS = bathymetry.db( p=aegis.bathymetry::bathymetry_parameters( spatial_domain=spatial_domain ), DS="baseline", varnames=c("plon", "plat") )
+    AS = bathymetry_db( p=aegis.bathymetry::bathymetry_parameters( spatial_domain=spatial_domain ), DS="baseline", varnames=c("plon", "plat") )
 
     APS = NULL
     ncovars = length(out)

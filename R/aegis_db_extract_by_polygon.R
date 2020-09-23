@@ -14,7 +14,7 @@ aegis_db_extract_by_polygon = function( sppoly, spatial_domain="SSE", covfields=
 
     # aggregate summaries of covariate fields by polygons
     pb = aegis.bathymetry::bathymetry_parameters( spatial_domain=spatial_domain )
-    pts = bathymetry.db( p=pb, DS="baseline" )
+    pts = bathymetry_db( p=pb, DS="baseline" )
     pts = SpatialPoints(pts, proj4string=sp::CRS(pb$aegis_proj4string_planar_km) )
     pts = spTransform( pts, sp::CRS(proj4string(sppoly)) )
     # match each datum to an area

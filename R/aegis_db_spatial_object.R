@@ -7,7 +7,7 @@ aegis_db_spatial_object = function( spatial_domain="SSE", proj4string="+proj=utm
 
   pn = spatial_parameters( spatial_domain=spatial_domain )
 
-  bathymetry = bathymetry.db( p=pn, DS="complete" )
+  bathymetry = bathymetry_db( p=pn, DS="complete" )
   bathymetry = geo_subset( spatial_domain=spatial_domain, Z=bathymetry )
 
   spdf0 = SpatialPoints(bathymetry[, c("plon", "plat")], proj4string=sp::CRS(proj4string) )

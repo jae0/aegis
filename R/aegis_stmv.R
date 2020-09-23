@@ -268,7 +268,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       }
     }
 
-    LOCS = bathymetry.db(p=p, DS="baseline")
+    LOCS = bathymetry_db(p=p, DS="baseline")
 
     # collapse PS vars with time into APS (and regrid via raster)
     PS = aegis_db_extract(
@@ -310,7 +310,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
     if (length(sreg) < 1 ) return
 
     p0 = spatial_parameters( p=p ) # make explicit
-    L0 = bathymetry.db( p=p0, DS="baseline" )
+    L0 = bathymetry_db( p=p0, DS="baseline" )
     L0i = stmv::array_map( "xy->2", L0[, c("plon", "plat")], gridparams=p0$gridparams )
 
     for ( year in p$yrs ) {
@@ -323,7 +323,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       for ( gr in sreg ) {
         # warping
         p1 = spatial_parameters( p=p, spatial_domain=gr ) # 'warping' from p -> p1
-        L1 = bathymetry.db( p=p1, DS="baseline" )
+        L1 = bathymetry_db( p=p1, DS="baseline" )
         L1i = stmv::array_map( "xy->2", L1[, c("plon", "plat")], gridparams=p1$gridparams )
         L1 = planar2lonlat( L1, proj.type=p1$aegis_proj4string_planar_km )
         L1$plon_1 = L1$plon # store original coords
@@ -375,12 +375,12 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
     S0 = stmv_db( p=p, DS="stmv.stats" )
     Snames = colnames(S0)
     p0 = spatial_parameters( p=p ) # from
-    L0 = bathymetry.db( p=p0, DS="baseline" )
+    L0 = bathymetry_db( p=p0, DS="baseline" )
     L0i = stmv::array_map( "xy->2", L0[, c("plon", "plat")], gridparams=p0$gridparams )
 
     for ( gr in sreg ) {
       p1 = spatial_parameters( p=p, spatial_domain=gr ) # 'warping' from p -> p1
-      L1 = bathymetry.db( p=p1, DS="baseline" )
+      L1 = bathymetry_db( p=p1, DS="baseline" )
       L1i = stmv::array_map( "xy->2", L1[, c("plon", "plat")], gridparams=p1$gridparams )
       L1 = planar2lonlat( L1, proj.type=p1$aegis_proj4string_planar_km )
       L1$plon_1 = L1$plon # store original coords
@@ -429,7 +429,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
     for (gr in grids ) {
       p1 = spatial_parameters( p=p, spatial_domain=gr ) #target projection
       # p1$stmv_variables$Y = p$stmv_variables$Y # need to send this to get the correct results
-      L1 = bathymetry.db(p=p1, DS="baseline")
+      L1 = bathymetry_db(p=p1, DS="baseline")
       BS = aegis_stmv( p=p1, DS="stmv.stats" )
       colnames(BS) = paste(p$stmv_variables$Y, colnames(BS), sep=".")
       IC = cbind( L1, BS )
@@ -480,7 +480,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
         p1 = spatial_parameters( p=p, spatial_domain=gr ) #target projection
         projectdir = file.path(p$data_root, "modelled", p$stmv_variables$Y, p1$spatial_domain )
         dir.create( projectdir, recursive=T, showWarnings=F )
-        L1 = bathymetry.db(p=p1, DS="baseline")
+        L1 = bathymetry_db(p=p1, DS="baseline")
         nL1 = nrow(L1)
         TS = matrix( NA, nrow=nL1, ncol=p$ny )
         for (i in 1:p$ny ) {
@@ -530,7 +530,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
     for ( year in p$yrs ) {
         projectdir = file.path(p$data_root, "maps", p$stmv_variables$Y, p$spatial_domain, "annual" )
         dir.create( projectdir, recursive=T, showWarnings=F )
-        loc = bathymetry.db(p=p, DS="baseline" )
+        loc = bathymetry_db(p=p, DS="baseline" )
 
         # downscale and warp from p(0) -> p1
         # print(year)
@@ -634,7 +634,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
     for (vn in vnames) {
         projectdir = file.path(p$data_root, "maps", p$stmv_variables$Y, p$spatial_domain, "climatology" )
         dir.create( projectdir, recursive=T, showWarnings=F )
-        loc = bathymetry.db(p=p, DS="baseline" )
+        loc = bathymetry_db(p=p, DS="baseline" )
         H = aegis_stmv( p=p, DS="complete" )
         vnames = setdiff( names(H), c("plon", "plat" ))
 

@@ -85,7 +85,7 @@
         }
 
         if (depthcontours) {
-          isobs = aegis.bathymetry::isobath.db( p=pp, depths=c( 100, 200, 300, 400, 500, 600, 700 ), project_to=projection_map_proj4string )
+          isobs = aegis.bathymetry::isobath_db( p=pp, depths=c( 100, 200, 300, 400, 500, 600, 700 ), project_to=projection_map_proj4string )
           depths1 = c(100, 300, 500, 700 )
           depths2 = c(200, 400, 600)
           for ( i in depths1 ) sp.lines( isobs[as.character(i) ] , col = rgb(0.2,0.2,0.2,0.5), cex=0.6 )

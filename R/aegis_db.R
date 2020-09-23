@@ -8,13 +8,13 @@
     if (DS =="indicators") {
       # generic methods getting raw data
       out = switch( p$project_name,
-        bathymetry   = bathymetry.db(p=p, DS=p$project_name ),
+        bathymetry   = bathymetry_db(p=p, DS=p$project_name ),
         temperature  = temperature_db(p=p, DS=p$project_name ),
         sizespectrum = sizespectrum_db(p=p, DS=p$project_name ),
-        metabolism   = metabolism.db( p=p, DS=p$project_name ),
+        metabolism   = metabolism_db( p=p, DS=p$project_name ),
         speciesarea  = speciesarea_db( p=p, DS=p$project_name ),
         speciescomposition = speciescomposition_db( p=p, DS=p$project_name ),
-        condition =    condition.db( p=p, DS=p$project_name ),
+        condition =    condition_db( p=p, DS=p$project_name ),
         biochem =      biochem.db( p=p, DS=p$project_name ),
         survey =       survey_db( p=p, DS=p$project_name ),
         NULL
@@ -30,7 +30,7 @@
       # spatial only == static variables
 
       # depth is the primary constraint, baseline = area-prefiltered for depth/bounds
-      PS = bathymetry.db( p=p, DS="baseline", varnames="all" )  # anything not NULL gives everything with bathymetry.db
+      PS = bathymetry_db( p=p, DS="baseline", varnames="all" )  # anything not NULL gives everything with bathymetry_db
       PS = cbind( PS, substrate_db ( p=p, DS="complete"  ) )
 
       # override variable of interest to obtain results for static temperature vars
@@ -123,7 +123,7 @@
 
       locsmap = match(
         stmv::array_map( "xy->1", INP[,c("plon","plat")], gridparams=p$gridparams ),
-        stmv::array_map( "xy->1", bathymetry.db(p=p, DS="baseline"), gridparams=p$gridparams ) )
+        stmv::array_map( "xy->1", bathymetry_db(p=p, DS="baseline"), gridparams=p$gridparams ) )
 
       # spatial vars and climatologies
       # sp_vars = intersect( c("dZ", "ddZ", "substrate.grainsize", "tmean.climatology", "tsd.climatology", "b.sd", "b.range", "s.sd", "s.range", "t.range" ), p$stmv_variables$COV )
@@ -173,7 +173,7 @@
       PS = aegis_db( p=p, DS="prediction.surface" ) # a list object with static and annually varying stmv_variables
       PS = PS[ which(names(PS) %in% p$stmv_variables$COV ) ] # time vars, if they are part of the model will be created within stmv
 
-      OUT = list( LOCS=bathymetry.db(p=p, DS="baseline"), COV=PS )
+      OUT = list( LOCS=bathymetry_db(p=p, DS="baseline"), COV=PS )
 
       return (list(input=INP, output=OUT))
 
@@ -200,7 +200,7 @@
       }
 
       p0 = spatial_parameters( p=p ) # from
-      L0 = bathymetry.db( p=p0, DS="baseline" )
+      L0 = bathymetry_db( p=p0, DS="baseline" )
       L0i = stmv::array_map( "xy->2", L0[, c("plon", "plat")], gridparams=p0$gridparams )
       sreg = setdiff( p$spatial_domain_subareas, p$spatial_domain )
 
@@ -214,7 +214,7 @@
 
         for ( gr in sreg ) {
           p1 = spatial_parameters( p=p, spatial_domain=gr ) # 'warping' from p -> p1
-          L1 = bathymetry.db( p=p1, DS="baseline" )
+          L1 = bathymetry_db( p=p1, DS="baseline" )
           L1i = stmv::array_map( "xy->2", L1[, c("plon", "plat")], gridparams=p1$gridparams )
           L1 = planar2lonlat( L1, proj.type=p1$aegis_proj4string_planar_km )
           L1$plon_1 = L1$plon # store original coords
@@ -262,13 +262,13 @@
       S0 = stmv_db( p=p, DS="stmv.stats" )
       Snames = colnames(S0)
       p0 = spatial_parameters( p=p ) # from
-      L0 = bathymetry.db( p=p0, DS="baseline" )
+      L0 = bathymetry_db( p=p0, DS="baseline" )
       L0i = stmv::array_map( "xy->2", L0[, c("plon", "plat")], gridparams=p0$gridparams )
       sreg = setdiff( p$spatial_domain_subareas, p$spatial_domain )
 
       for ( gr in sreg ) {
         p1 = spatial_parameters( p=p, spatial_domain=gr ) # 'warping' from p -> p1
-        L1 = bathymetry.db( p=p1, DS="baseline" )
+        L1 = bathymetry_db( p=p1, DS="baseline" )
         L1i = stmv::array_map( "xy->2", L1[, c("plon", "plat")], gridparams=p1$gridparams )
         L1 = planar2lonlat( L1, proj.type=p1$aegis_proj4string_planar_km )
         L1$plon_1 = L1$plon # store original coords
@@ -321,7 +321,7 @@
         print(gr)
 
         p1 = spatial_parameters( p=p, spatial_domain=gr ) #target projection
-        L1 = bathymetry.db(p=p1, DS="baseline")
+        L1 = bathymetry_db(p=p1, DS="baseline")
 
         BS = aegis_db( p=p1, DS="stmv.stats" )
         colnames(BS) = paste(p1$stmv_variables$Y, colnames(BS), sep=".")
@@ -409,7 +409,7 @@
       for (gr in grids ) {
         # print(gr)
         p1 = spatial_parameters( p=p, spatial_domain=gr ) #target projection
-        L1 = bathymetry.db(p=p1, DS="baseline")
+        L1 = bathymetry_db(p=p1, DS="baseline")
         nL1 = nrow(L1)
         TS = matrix( NA, nrow=nL1, ncol=p$ny, dimnames=list(NULL, p$yrs) )
         for (i in 1:p$ny ) {

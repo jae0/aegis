@@ -36,7 +36,7 @@ aegis_db_map = function( ip=NULL, p=NULL, type="all", voi=NULL ) {
 
     # over-ride default dependent variable name if it exists
 
-    loc = bathymetry.db(p=p, DS="baseline" )
+    loc = bathymetry_db(p=p, DS="baseline" )
 
     for (iy in ip ) {
       y = p$runs[iy, "yrs"]
@@ -101,7 +101,7 @@ aegis_db_map = function( ip=NULL, p=NULL, type="all", voi=NULL ) {
     projectdir = file.path(p$data_root, "maps", voi, p$spatial_domain, "climatology" )
     dir.create( projectdir, recursive=T, showWarnings=F )
 
-    loc = bathymetry.db(p=p, DS="baseline" )
+    loc = bathymetry_db(p=p, DS="baseline" )
 
     H = aegis_db( p=p, DS="complete" )
     vnames = setdiff( names(H), c("plon", "plat" ))
