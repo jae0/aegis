@@ -79,8 +79,8 @@ spatial_parameters = function( p=NULL, ... ) {
 
      }
 
-    p$nlons = floor( diff(range(c(p$lon0,p$lon1)))/p$dres) + 1L
-    p$nlats = floor( diff(range(c(p$lat0,p$lat1)))/p$dres) + 1L
+    p$nlons = aegis_floor( diff(range(c(p$lon0,p$lon1)))/p$dres) + 1L
+    p$nlats = aegis_floor( diff(range(c(p$lat0,p$lat1)))/p$dres) + 1L
     corners = data.frame(lon=c(p$lon0,p$lon1), lat=c(p$lat0,p$lat1))
     corners = lonlat2planar( corners, proj.type=p$aegis_proj4string_planar_km )
     corners$plon = round( corners$plon, p$psignif)  # this matches the p$pres value of x km resolution
