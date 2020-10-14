@@ -6,7 +6,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
   # deal with additional passed parameters
   # ---------------------
 
-  p = parameters_control(p, list(...), control="add") # add passed args to parameter list, priority to args
+  p = parameters_add(p, list(...) ) # add passed args to parameter list, priority to args
 
   # ---------------------
   if (exists( "libs", p)) RLibrary( p$libs )

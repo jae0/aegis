@@ -6,7 +6,7 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
   ## consider moving bathymetry, temperature and substrate parameters here top to make things all centralized
 
   # ---------------------
-  p = parameters_control(p, list(...), control="add") # add passed args to parameter list, priority to args
+  p = parameters_add(p, list(...)) # add passed args to parameter list, priority to args
 
 
   # ---------------------
@@ -39,32 +39,31 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
     # aegis defaults ..
     p$libs =  RLibrary( unique( c( p$libs, "stmv" )  ) )
 
-    if (!exists("storage_backend", p)) p$storage_backend="bigmemory.ram"
-    if (!exists("clusters", p)) p$clusters = rep("localhost", detectCores() )
-    if (!exists("boundary", p)) p$boundary = FALSE
-    if (!exists("stmv_filter_depth_m", p)) p$stmv_filter_depth_m = 0 # depth (m) stats locations with elevation > 0 m as being on land (and so ignore)
+    p = parameters_add_without_overwriting( p,
+      storage_backend="bigmemory.ram",
+      clusters = rep("localhost", detectCores() ),
+      boundary = FALSE,
+      stmv_filter_depth_m = 0, # depth (m) stats locations with elevation > 0 m as being on land (and so ignore)
     # global model options
     # using covariates as a first pass essentially makes it ~ kriging with external drift
     # .. no space or time here .. only in the local model
-    if (!exists("stmv_global_modelengine", p)) p$stmv_global_modelengine ="none" #default
-    if (!exists("stmv_global_family", p)) p$stmv_global_family = gaussian(link="identity")
-
+      stmv_global_modelengine ="none", #default
+      stmv_global_family = gaussian(link="identity"),
     ## local model-specific options
-    if (!exists("stmv_local_modelengine", p)) p$stmv_local_modelengine ="none"
-
-    if (!exists("stmv_rsquared_threshold", p)) p$stmv_rsquared_threshold = 0.75 # lower threshold
-    if (!exists("stmv_distance_statsgrid", p)) p$stmv_distance_statsgrid = 5 # resolution (km) of data aggregation (i.e. generation of the ** statistics ** )
+      stmv_local_modelengine ="none",
+      stmv_rsquared_threshold = 0.75, # lower threshold
+      stmv_distance_statsgrid = 5, # resolution (km) of data aggregation (i.e. generation of the ** statistics ** )
     # if (!exists("stmv_distance_prediction", p)) p$stmv_distance_prediction  = p$stmv_distance_statsgrid *0.75 # this is a half window km
-    if (!exists("stmv_distance_scale", p)) p$stmv_distance_scale = c(25, 30, 40) # km ... approx guess of 95% AC range
-    if (!exists("stmv_nmin", p)) p$stmv_nmin = 30 # min number of data points req before attempting to model timeseries in a localized space
-    if (!exists("stmv_nmax", p)) p$stmv_nmax = 6000 # no real upper bound
-
-    if (!exists("Y", p$stmv_variables)) p$stmv_variables$Y = "not_defined" # this can be called to get covars.. do not stop
+      stmv_distance_scale = c(25, 30, 40), # km ... approx guess of 95% AC range
+      stmv_nmin = 30, # min number of data points req before attempting to model timeseries in a localized space
+      stmv_nmax = 6000, # no real upper bound
+      data_sources = c("groundfish", "snowcrab")
+    )
 
     # lookup temporal params for the SSE domain
-    if (!exists("data_sources", p)) p$data_sources = c("groundfish", "snowcrab")
     # obtain current temperature years
 
+    if (!exists("Y", p$stmv_variables)) p$stmv_variables$Y = "not_defined" # this can be called to get covars.. do not stop
     p = aegis_stmv_modelformula(p=p)  # use generic models if none are specified
     p = stmv_variablelist(p=p)  # decompose into covariates from formulas , etc
 

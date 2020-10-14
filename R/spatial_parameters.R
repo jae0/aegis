@@ -1,7 +1,7 @@
 
 spatial_parameters = function( p=NULL, ... ) {
 
-  p = parameters_control(p, list(...), control="add") # add passed args to parameter list, priority to args
+  p = parameters_add(p, list(...) ) # add passed args to parameter list, priority to args
 
     if ( p$spatial_domain %in% c("snowcrab") ) {
 

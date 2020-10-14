@@ -2,7 +2,7 @@ data_spatial_openstreetmap = function( DS, p, redo=FALSE, fn=NULL, ... ) {
 
   # testing open street maps data ...
 
-  p = parameters_control(p, list(...), control="add") # add passed args to parameter list, priority to args
+  p = parameters_add(p, list(...) ) # add passed args to parameter list, priority to args
 
 
   # -----------------------------
