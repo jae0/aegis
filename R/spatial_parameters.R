@@ -1,5 +1,5 @@
 
-spatial_parameters = function( p=NULL, ... ) {
+spatial_parameters = function( p=list(), ... ) {
 
   p = parameters_add(p, list(...) ) # add passed args to parameter list, priority to args
 
