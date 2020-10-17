@@ -5,8 +5,10 @@ parameters_reset = function( parameter_list, ... ) {
   if ( n == 0 ) {
     # default usage is in carstm ..
     vns = c(
+      "project_name",
       "data_root", # reset data locations
       "datadir",  # reset data locations ( in aggregated_rawdata )
+      "modeldir",
       "variabletomodel",  # in case we need to run the modelling step on the fly  and data access
       "carstm_model_call",  # in case we need to run the modelling step on the fly
       "aegis_dimensionality", # in case we need to run modelling on the fly
@@ -18,9 +20,7 @@ parameters_reset = function( parameter_list, ... ) {
     vns = names( to_reset )
   }
 
-  for ( i in 1:n) {
-    parameter_list[[vns[i]]] = NULL
-  }
+  for ( i in 1:n) parameter_list[[vns[i]]] = NULL
 
   return (parameter_list)
 }
