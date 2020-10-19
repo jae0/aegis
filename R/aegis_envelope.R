@@ -42,7 +42,6 @@ aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returnty
       # plot(bnd)
   }
 
-
   if (returntype=="xy") {
     bnd = coordinates(bnd)
     attr( bnd, "proj4string" ) =  proj4string
