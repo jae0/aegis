@@ -43,16 +43,16 @@ spatialpolygon_to_raster = function( sp_poly, res=100, vn="dummy_value", return.
 
       if (0) {
         # only examples of working with polygons:
-        b <- spChFIDs(b, paste("b", row.names(b), sep="."))
+        b = spChFIDs(b, paste("b", row.names(b), sep="."))
         library(rgeos)
-        p<-SpatialPoints(list(lng,lat), proj4string=crswgs84)
+        p=SpatialPoints(list(lng,lat), proj4string=crswgs84)
         gContains(fdg,pt)
 
         p=list()
         p$root.directory = file.path( "/home", "nath") # Jae -- linux
         p$project.directory = file.path( p$root.directory, "NSspatial")
         p$data.directory    = file.path( p$project.directory, "data" )
-        p$mypalette <- brewer.pal(6, "YlOrRd")
+        p$mypalette = brewer.pal(6, "YlOrRd")
         p$aegis_proj4string_planar_km = CRS( "+proj=omerc +lat_0=44.6475 +lonc=-63.580278 +gamma=0.0 +k=1 +alpha=332 +x_0=0 +y_0=0 +ellps=WGS84 +units=km" )
 
         if (exists("aegis_proj4string_planar_km", p)) spdata = spTransform( spdata, sp::CRS(p$aegis_proj4string_planar_km) )
