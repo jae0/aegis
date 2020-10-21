@@ -1,32 +1,32 @@
 
 
-aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, resolution=100, output_type="polygons", hull_multiplier=6, nreduceby=3, nAU_min=30, areal_units_constraint_nmin=1, tus=NULL ) {
+aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=100, output_type="polygons", hull_multiplier=6, fraction_cv=0.5, fraction_good_bad=0.75, nAU_min=5, areal_units_constraint_nmin=1, tus=NULL ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
-  require(sp)
-  require(rgeos)
+  #require(sp)
+  #require(rgeos)
+  require(sf)
 
   if (0) {
     data(meuse)
     coordinates(meuse) = ~ x+y
     sp::proj4string(meuse) = CRS("+init=epsg:28992")
-    SPDF = meuse
-    SPDF_boundary="non_convex_hull"
+    pts = as(meuse, "sf")
+    boundary="non_convex_hull"
     spbuffer=NULL
     resolution=100
     output_type="polygons"
     hull_multiplier=6
-    nreduceby=3
+    fraction_reduceby=0.01  # fraction of candidates to drop
     areal_units_constraint_nmin=1
     nAU_min=30
 
-
-    res = aegis_mesh( SPDF=meuse) # 50m snap buffer
-    res = aegis_mesh( SPDF=meuse, spbuffer=50 ) # 50m snap buffer
-    res = aegis_mesh( SPDF=meuse, resolution=1, spbuffer=50, output_type="grid" )
-    res = aegis_mesh( SPDF=meuse, resolution=1, output_type="grid.count" )
-    res = aegis_mesh( SPDF=meuse, resolution=1, spbuffer=50 )
-    res = aegis_mesh( SPDF=meuse, resolution=5, spbuffer=50, areal_units_constraint_nmin=1 )
+    res = aegis_mesh( pts=meuse ) # 0 snap buffer
+    res = aegis_mesh( pts=meuse, spbuffer=50 ) # 50m snap buffer
+    res = aegis_mesh( pts=meuse, resolution=1, spbuffer=50, output_type="grid" )
+    res = aegis_mesh( pts=meuse, resolution=1, output_type="grid.count" )
+    res = aegis_mesh( pts=meuse, resolution=1, spbuffer=50 )
+    res = aegis_mesh( pts=meuse, resolution=5, spbuffer=50, areal_units_constraint_nmin=1 )
 
     mypalette = colorRampPalette(c("darkblue","blue3", "green", "yellow", "orange","red3", "darkred"), space = "Lab")(100)
 
@@ -34,34 +34,32 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
 
   }
 
-  message( "Warning: 'aegis_mesh' expects the projection to be in planar coordinates and also the same units as the resolution.")
+  pts_crs = st_crs( pts )
 
-  proj4string0 = sp::proj4string( SPDF )
+  message( "'aegis_mesh' expects the projection to be in planar coordinates and also the same units as the resolution.")
 
-  if (is.na(proj4string0)) stop("Input data does not have a projection")
+  if (is.na(pts_crs)) stop("Input data does not have a projection?")
 
 
   if ( output_type=="grid" ) {
     require(raster)
-    raster_template = raster(extent(sp::bbox(SPDF))) # +1 to increase the area
+    raster_template = raster(extent(pts))
     res(raster_template) = resolution
-    crs(raster_template) = sp::CRS(proj4string0) # projection(SPDF) # transfer the coordinate system to the raster
-    rast = rasterize(SPDF, raster_template, names(SPDF), fun=mean, na.rm=TRUE) # not meaningful fir factors
-    O = as(rast, "SpatialGridDataFrame")
+    crs(raster_template) = crs(pts_crs$proj4string) # projection(pts) # transfer the coordinate system to the raster
+    rast = rasterize( as(pts, "Spatial"), raster_template, setdiff(names(pts), "geometry"), fun=mean, na.rm=TRUE) # not meaningful fir factors
+    O = as( as(rast, "SpatialPolygonsDataFrame"), "sf")
     return(O)
   }
 
 
   if ( output_type=="grid.count" ) {
-    require(fasterize)
     require(raster)
-    raster_template = raster(extent(sp::bbox(SPDF))) # +1 to increase the area
+    raster_template = raster(extent(pts)) # +1 to increase the area
     res(raster_template) = resolution
-    crs(raster_template) = sp::CRS(proj4string0) # projection(SPDF) # transfer the coordinate system to the raster
-    SPDF$count = 1
-    rast = rasterize( SPDF, raster_template, field="count", fun="count", background=0) # not meaningful fir factors
-    O = as(rast, "SpatialGridDataFrame")
-    O = as(O, "SpatialPointsDataFrame")
+    crs(raster_template) = crs(pts_crs$proj4string) # projection(pts) # transfer the coordinate system to the raster
+    pts$count = 1
+    rast = rasterize( as(pts, "Spatial"), raster_template, field="count", fun="count", background=0) # not meaningful fir factors
+    O = as( as( as(rast, "SpatialGridDataFrame"), "SpatialPointsDataFrame"), "sf")
     O = O[ O$layer > 0, ]
     return(O)
   }
@@ -71,60 +69,76 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
   if ( output_type=="polygons" ) {
 
     # fine grid representation
-    M = aegis_mesh( SPDF=SPDF,  resolution=resolution, output_type="grid.count" )
-    xy = coordinates( M )
+    M = aegis_mesh( pts=pts,  resolution=resolution, output_type="grid.count" )
+    xy = st_coordinates( M )
 
-    if ( is.character(SPDF_boundary) ) {
-      bnd = aegis_envelope( xy=xy, method=SPDF_boundary, spbuffer=spbuffer, returntype="SpatialPolygons", proj4string=proj4string0,   hull_multiplier=hull_multiplier )
+    if ( is.character(boundary) ) {
+#      bnd = aegis_envelope( xy=xy, method=boundary, spbuffer=spbuffer, proj4string=pts_crs,  hull_multiplier=hull_multiplier )
+      bnd = aegis_envelope( xy=xy, method=boundary, spbuffer=spbuffer,  hull_multiplier=hull_multiplier )
     } else {
-      bnd = as(SPDF_boundary, "SpatialPolygons")
+      bnd = st_buffer( boundary, spbuffer )
     }
+    st_crs(bnd) = pts_crs
 
     good = 1:nrow(M)
     nAU =  length(good)
-    SP0 = as(SPDF, "SpatialPoints")
-    if (!is.null(tus)) TU = SPDF[[tus]]
-    M= NULL
-    SPDF = NULL
-    gc()
+
+    if (!is.null(tus)) tuid = st_drop_geometry(pts) [, tus]
+
+    message( "number of total areal units / number of candidate locations from which to drop / likely final no units" )
 
     finished = FALSE
     while(!finished) {
-      AU = tessellate(xy[good,], outformat="sp") # centroids via voronoi
-      sp::proj4string( AU ) = proj4string0
-      AU = gIntersection(  bnd, AU, byid=TRUE ) # crop
-      sa = gArea(AU, byid=TRUE)
-      vv = over( SP0, AU  )
-      if (!is.null(tus)) {
-        ww = xtabs( ~ vv + TU, na.action=na.omit )
-        ww[ww>0] = 1
-        zz = rowSums(ww)  # number of unique time units in each areal unit
-        toremove = which( zz < areal_units_constraint_nmin )
-      } else {
+      AU = tessellate( xy[good,], outformat="sf", crs=pts_crs) # centroids via voronoi
+      AU = st_sf( st_intersection( AU, bnd ) )# crop
+      AU$auid = 1:nrow(AU)
+      vv = unlist(st_intersects(pts, AU))
+      if (is.null(tus)) {
         ww = tapply( rep(1, length(vv)), vv, sum, na.rm=T )
-        toremove = which( ww < areal_units_constraint_nmin )
+      } else {
+        xx = xtabs(  ~ vv + tuid, na.action=na.omit )
+        xx[xx > 0] = 1
+        ww = rowSums(xx) # number of unique time units in each areal unit
       }
+      AU$ww = ww[match( as.character(AU$auid), names(ww) ) ]
+
+      AU$sa = st_area(AU) # [ match( names(ww), as.character(AU$auid) )]
+      AU$nden = AU$ww / AU$sa
+
+      toremove = which( AU$ww < areal_units_constraint_nmin )
       ntr = length(toremove)
-      if (ntr > 0 ) {
-        nden = ww / sa
-        toremove = toremove[ order(nden[toremove]) ]
-        good = setdiff( good, good[ toremove[ 1:min(nreduceby, ntr)]] )  #remove up to 3 a a time
+
+      if (ntr > 0) {
+        # nj = max(1, min( floor(fraction_reduceby*ntr ), ntr ))
+        omin = min( unique( AU$ww[toremove] ))
+        toremove = which( AU$ww == omin)
+        if (length(toremove) > 0) good =  good[-toremove]   #remove up to x% at a time
       }
+
       nAU_previous = nAU
       nAU = length(good)
+      # check for convergence
+      ntmean = mean( AU$ww, na.rm=TRUE)
+      ntsd = sd( AU$ww, na.rm=TRUE)
+      if (  (  ntsd/ntmean ) < fraction_cv ) {
+        # when var is more constrained and mean is greater than target
+        if ( areal_units_constraint_nmin < ntmean  ) finished=TRUE  # 1SD
+      }
+      if ( (nAU-ntr)/nAU > fraction_good_bad ) finished=TRUE
+      if ( ntr == 0 ) finished =TRUE
       if ( nAU <= nAU_min ) finished=TRUE
       if ( nAU == nAU_previous ) finished =TRUE
-
-      # plot(AU)
-      print(nAU)
+      message( nAU, "/ ", ntr, "/ ", nAU-ntr )
+      # plot(AU[,"ww"])
+      # (finished)
+      # print (AU$ww[toremove] )
+      # print( good)
     }
 
-    AU = tessellate(xy[good,], outformat="sp") # centroids via voronoi
-    sp::proj4string( AU ) = proj4string0
-    AU = gIntersection(  bnd, AU, byid=TRUE ) # crop
+    AU = tessellate(xy[good,], outformat="sf", crs=pts_crs) # centroids via voronoi
+    AU = st_intersection( AU, bnd ) # crop
 
-    print( length(AU) )
-
+    message( "Total number of areal units:  ", length(AU) )
     # plot(AU)
 
     return(AU)
@@ -133,18 +147,18 @@ aegis_mesh = function( SPDF, SPDF_boundary="non_convex_hull", spbuffer=NULL, res
 
     if (0) {
       # make sure it is OK
-      plot( coordinates(SPDF)[,2] ~ coordinates(O)[,2] )
-      plot( coordinates(SPDF)[,1] ~ coordinates(O)[,1] )
-      plot( SPDF$zinc ~ O$zinc )
+      plot( coordinates(pts)[,2] ~ coordinates(O)[,2] )
+      plot( coordinates(pts)[,1] ~ coordinates(O)[,1] )
+      plot( pts$zinc ~ O$zinc )
 
       mypalette = colorRampPalette(c("darkblue","blue3", "green", "yellow", "orange","red3", "darkred"), space = "Lab")(100)
       # mypalette = rev( heat.colors( 150 ) )
       #mypalette <- brewer.pal(8, "YlOrRd")
 
-      SPDF$logz = log( SPDF$zinc )
+      pts$logz = log( pts$zinc )
       O$logz = log( O$zinc )
 
-      spplot( SPDF, "zinc", col.regions=mypalette )
+      spplot( pts, "zinc", col.regions=mypalette )
       spplot( O, "zinc", col.regions=mypalette )
     }
 

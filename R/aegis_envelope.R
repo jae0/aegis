@@ -1,4 +1,4 @@
-aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returntype="SpatialPolygons", proj4string=NULL, hull_multiplier=1 ) {
+aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returntype="sf", proj4string=NULL, hull_multiplier=1 ) {
 
   # obtain boundary of a bunch of points .. expect spatiial points
   drange = range( c( diff(range( xy[,1] )), diff(range(xy[,2] )) ) )
@@ -24,7 +24,7 @@ aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returnty
     # plot(bnd)
   }
 
-  if (method=="concave.hull") {
+  if (method=="concave.hull.sp") {
     v = concave.hull( xy, ub=spbuffer*hull_multiplier)
     if ( any( !is.finite(v) )) next()
     w = list( Polygons(list( Polygon( as.matrix( v ) )), ID="boundary" ))
@@ -33,7 +33,7 @@ aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returnty
     # plot(bnd)
   }
 
-  if (method=="non_convex_hull") {
+  if (method=="non_convex_hull.sp") {
     v = non_convex_hull( xy, alpha=spbuffer*hull_multiplier  )
     if ( any( !is.finite(v) )) next()
     w = list( Polygons(list( Polygon( as.matrix( v ) )), ID="boundary" ))
@@ -42,11 +42,49 @@ aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returnty
       # plot(bnd)
   }
 
+  if (method=="concave.hull") {
+    v = concave.hull( xy, ub=spbuffer*hull_multiplier)
+    if ( any( !is.finite(v) )) next()
+    bnd = (
+#      st_sfc( st_multipoint( xy ), crs=st_crs(proj4string) )
+      st_sfc( st_multipoint( xy ) )
+      %>% st_buffer(spbuffer)
+      %>% st_union()
+      %>% st_buffer(spbuffer)
+      %>% st_simplify()
+            %>% st_buffer(0)
+
+      %>% st_cast("POLYGON" )
+      %>% st_make_valid()
+    )
+    # plot(bnd)
+  }
+
+  if (method=="non_convex_hull") {
+    v = non_convex_hull( xy, alpha=spbuffer*hull_multiplier  )
+    if ( any( !is.finite(v) )) next()
+    bnd = (
+#      st_sfc( st_multipoint( xy ), crs=st_crs(proj4string) )
+       st_sfc( st_multipoint( xy ) )
+      %>% st_buffer(spbuffer)
+      %>% st_union()
+      %>% st_buffer(spbuffer)
+      %>% st_simplify()
+      %>% st_buffer(0)
+      %>% st_cast("POLYGON" )
+      %>% st_make_valid()
+    )
+      # plot(bnd)
+  }
+
+
   if (returntype=="xy") {
-    bnd = coordinates(bnd)
+    bnd =st_coordinates(bnd)
     attr( bnd, "proj4string" ) =  proj4string
+  } else if (returntype!="sf"){
+    bnd = as( bnd, returntype )
   } else {
-    bnd = as(bnd, returntype )
+    #nothing to do
   }
 
   return (bnd)
