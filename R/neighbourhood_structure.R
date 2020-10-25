@@ -12,7 +12,7 @@ neighbourhood_structure = function( sppoly, areal_units_source="lattice" ) {
 
       sppoly$AUID = as.character(sppoly$AUID)
       row.names(sppoly) = sppoly$AUID
-      sppoly = sp::spChFIDs( sppoly, row.names(sppoly) )  #fix id's
+      # sppoly = sp::spChFIDs( sppoly, row.names(sppoly) )  #fix id's
       sppoly = sppoly[order(sppoly$AUID),]
       sppoly <<- sppoly  ## overwrite in parent data frame
     }

@@ -1,6 +1,6 @@
 
 
-aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=100, output_type="polygons", hull_multiplier=6, fraction_cv=0.5, fraction_good_bad=0.75, nAU_min=5, areal_units_constraint_nmin=1, tus=NULL ) {
+aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=100, output_type="polygons", hull_multiplier=6, fraction_cv=0.5, fraction_good_bad=0.9, nAU_min=5, areal_units_constraint_nmin=1, tus=NULL ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
   #require(sp)
@@ -92,7 +92,7 @@ aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=1
       AU = tessellate( xy[good,], outformat="sf", crs=pts_crs) # centroids via voronoi
       AU = st_sf( st_intersection( AU, bnd ) )# crop
       AU$auid = 1:nrow(AU)
-      vv = unlist(st_intersects(pts, AU))
+      vv = AU$auid[ unlist(st_intersects(pts, AU))] # index of matching AU
       if (is.null(tus)) {
         ww = tapply( rep(1, length(vv)), vv, sum, na.rm=T )
       } else {
