@@ -1,6 +1,6 @@
 
 
-aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=100, output_type="polygons", hull_multiplier=6, fraction_cv=0.5, fraction_good_bad=0.9, nAU_min=5, areal_units_constraint_nmin=1, tus=NULL ) {
+aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=100, output_type="polygons", hull_multiplier=6, fraction_cv=1.0, fraction_good_bad=0.75, nAU_min=5, areal_units_constraint_nmin=1, tus=NULL ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
   #require(sp)
@@ -81,11 +81,12 @@ aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=1
     st_crs(bnd) = pts_crs
 
     good = 1:nrow(M)
-    nAU =  length(good)
+    nAU =  length(good) + 1
+    ntr = length(good) + 1
 
     if (!is.null(tus)) tuid = st_drop_geometry(pts) [, tus]
 
-    message( "number of total areal units / number of candidate locations from which to drop / likely final no units" )
+    message( "number of total areal units / number of candidate locations from which to drop " )
 
     finished = FALSE
     while(!finished) {
@@ -106,6 +107,8 @@ aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=1
       AU$nden = AU$ww / AU$sa
 
       toremove = which( AU$ww < areal_units_constraint_nmin )
+
+      ntr_previous = ntr
       ntr = length(toremove)
 
       if (ntr > 0) {
@@ -126,9 +129,10 @@ aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=1
       }
       if ( (nAU-ntr)/nAU > fraction_good_bad ) finished=TRUE
       if ( ntr == 0 ) finished =TRUE
+      if ( ntr == ntr_previous ) finished = TRUE
       if ( nAU <= nAU_min ) finished=TRUE
       if ( nAU == nAU_previous ) finished =TRUE
-      message( nAU, "/ ", ntr, "/ ", nAU-ntr )
+      message( nAU, "/ ", ntr  )
       # plot(AU[,"ww"])
       # (finished)
       # print (AU$ww[toremove] )
