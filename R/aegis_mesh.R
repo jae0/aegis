@@ -1,6 +1,6 @@
 
 
-aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=100, output_type="polygons", hull_multiplier=6, fraction_cv=1.0, fraction_good_bad=0.75, nAU_min=5, areal_units_constraint_nmin=1, tus=NULL ) {
+aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=100, output_type="polygons", hull_multiplier=6, fraction_cv=1.0, fraction_good_bad=0.9, nAU_min=5, areal_units_constraint_nmin=1, tus=NULL ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
   #require(sp)
@@ -81,72 +81,67 @@ aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=1
     st_crs(bnd) = pts_crs
 
     good = 1:nrow(M)
-    nAU =  length(good) + 1
-    ntr = length(good) + 1
+    nAU =  length(good) + 100  # offsets to start
+    ntr = length(good) + 100
 
     if (!is.null(tus)) tuid = st_drop_geometry(pts) [, tus]
+
 
     message( "number of total areal units / number of candidate locations from which to drop " )
 
     finished = FALSE
     while(!finished) {
       AU = tessellate( xy[good,], outformat="sf", crs=pts_crs) # centroids via voronoi
-      AU = st_sf( st_intersection( AU, bnd ) )# crop
+      AU = st_sf( st_intersection( AU, bnd ) ) # crop
       AU$auid = 1:nrow(AU)
+      AU_previous = AU
       vv = AU$auid[ unlist(st_intersects(pts, AU))] # index of matching AU
-      if (is.null(tus)) {
-        ww = tapply( rep(1, length(vv)), vv, sum, na.rm=T )
-      } else {
-        xx = xtabs(  ~ vv + tuid, na.action=na.omit )
-        xx[xx > 0] = 1
-        ww = rowSums(xx) # number of unique time units in each areal unit
-      }
-      AU$ww = ww[match( as.character(AU$auid), names(ww) ) ]
-
-      AU$sa = st_area(AU) # [ match( names(ww), as.character(AU$auid) )]
-      AU$nden = AU$ww / AU$sa
-
-      toremove = which( AU$ww < areal_units_constraint_nmin )
-
-      ntr_previous = ntr
-      ntr = length(toremove)
-
-      if (ntr > 0) {
-        # nj = max(1, min( floor(fraction_reduceby*ntr ), ntr ))
-        omin = min( unique( AU$ww[toremove] ))
-        toremove = which( AU$ww == omin)
-        if (length(toremove) > 0) good =  good[-toremove]   #remove up to x% at a time
-      }
-
-      nAU_previous = nAU
-      nAU = length(good)
-      # check for convergence
-      ntmean = mean( AU$ww, na.rm=TRUE)
-      ntsd = sd( AU$ww, na.rm=TRUE)
-      if (  (  ntsd/ntmean ) < fraction_cv ) {
-        # when var is more constrained and mean is greater than target
-        if ( areal_units_constraint_nmin < ntmean  ) finished=TRUE  # 1SD
-      }
-      if ( (nAU-ntr)/nAU > fraction_good_bad ) finished=TRUE
-      if ( ntr == 0 ) finished =TRUE
-      if ( ntr == ntr_previous ) finished = TRUE
-      if ( nAU <= nAU_min ) finished=TRUE
-      if ( nAU == nAU_previous ) finished =TRUE
-      message( nAU, "/ ", ntr  )
-      # plot(AU[,"ww"])
-      # (finished)
-      # print (AU$ww[toremove] )
-      # print( good)
+        if (is.null(tus)) {
+          ww = tapply( rep(1, length(vv)), vv, sum, na.rm=T )
+        } else {
+          if ( length(vv) == length(tuid) ) {
+            xx = xtabs(  ~ vv + tuid, na.action=na.omit )
+            xx[xx > 0] = 1
+            ww = rowSums(xx) # number of unique time units in each areal unit
+          } else {
+            break()
+          }
+        }
+        AU$ww = ww[ match( as.character(AU$auid), names(ww) ) ]
+        # AU$sa = st_area(AU) # [ match( names(ww), as.character(AU$auid) )]
+        # AU$nden = AU$ww / AU$sa
+        toremove = which( AU$ww < areal_units_constraint_nmin )
+        ntr_previous = ntr
+        ntr = length(toremove)
+        ntr_delta = ntr_previous - ntr
+        if (ntr > 1) {
+          omin = min( unique( AU$ww[toremove] ))
+          toremove_min = which( AU$ww == omin)
+          if (length(toremove_min) > 0)  good =  good[-toremove_min]   #remove up to x% at a time
+        }
+        # check for convergence
+        nAU_previous = nAU
+        nAU = length(good)
+        ntmean = mean( AU$ww, na.rm=TRUE)
+        ntsd = sd( AU$ww, na.rm=TRUE)
+        if (  (  ntsd/ntmean ) < fraction_cv ) if ( areal_units_constraint_nmin < ntmean  ) finished=TRUE   # when var is more constrained and mean is greater than target
+        if ( (nAU-ntr) / nAU > fraction_good_bad ) finished=TRUE
+        if ( ntr <= 1 ) finished =TRUE
+        if ( ntr_delta <= 1  ) finished = TRUE
+        if ( nAU == nAU_previous ) finished =TRUE
+        if ( nAU <= nAU_min ) finished=TRUE
+        message( nAU, "/ ", ntr  )
+        # plot(AU[,"ww"])
+        # (finished)
+        # print (AU$ww[toremove] )
+        # print( good)
     }
 
     AU = tessellate(xy[good,], outformat="sf", crs=pts_crs) # centroids via voronoi
     AU = st_intersection( AU, bnd ) # crop
-
     message( "Total number of areal units:  ", length(AU) )
     # plot(AU)
-
     return(AU)
-
   }
 
     if (0) {
