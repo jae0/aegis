@@ -107,7 +107,9 @@ aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=1
             break()
           }
         }
-        AU$ww = ww[ match( as.character(AU$auid), names(ww) ) ]
+        AU$ww = 0
+        AU$ww [as.numeric(names(ww)) ] = ww[ match( as.character(AU$auid), names(ww) ) ]
+        AU$ww[ which(!is.finite(AU$ww)) ] = 0
         # AU$sa = st_area(AU) # [ match( names(ww), as.character(AU$auid) )]
         # AU$nden = AU$ww / AU$sa
         toremove = which( AU$ww < areal_units_constraint_nmin )
