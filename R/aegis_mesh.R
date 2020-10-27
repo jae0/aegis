@@ -1,6 +1,6 @@
 
 
-aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=100, output_type="polygons", hull_multiplier=6, fraction_cv=1.0, fraction_good_bad=0.9, nAU_min=5, areal_units_constraint_nmin=1, tus=NULL ) {
+aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=100, output_type="polygons", hull_multiplier=6, fraction_cv=1.0, fraction_good_bad=0.8, nAU_min=5, areal_units_constraint_nmin=1, tus=NULL ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
   #require(sp)
@@ -118,7 +118,7 @@ aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=1
         ntr_delta = ntr_previous - ntr
         if (ntr > 1) {
           omin = min( unique( AU$ww[toremove] ))
-          toremove_min = which( AU$ww == omin)
+          toremove_min = which( AU$ww == omin )
           if (length(toremove_min) > 0)  good =  good[-toremove_min]   #remove up to x% at a time
         }
         # check for convergence
