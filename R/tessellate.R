@@ -1,8 +1,8 @@
 
-tessellate = function(xy, outformat="sf", crs=NULL ) {
+tessellate = function(xy, outformat="sf", method="sf", crs=NULL ) {
   # create a tiled geometry
 
-  if (outformat=="sp") {
+  if (method=="deldir") {
     require(deldir)
     # triangulate and tessilate
     vd = deldir::deldir( xy[,1], xy[,2], z=1:nrow(xy) )
@@ -15,19 +15,22 @@ tessellate = function(xy, outformat="sf", crs=NULL ) {
       polys[[i]] = Polygons(list(Polygon(pcrds)), ID=as.character(i) )
     }
     spp = SpatialPolygons(polys)
-    if (!is.null(crs)) CRS(spp) = crs
-    return(spp)
+    sfpoly = as( spp, "sf")
+    if (!is.null(crs)) st_crs(sfpoly) = crs
+    sfpoly = st_make_valid(sfpoly)
   }
 
-  if (outformat=="sf") {
+  if (method=="sf") {
     require(sf)
     mp = st_multipoint(xy)
     bbox =  st_as_sfc(st_bbox( mp ))
     sfpoly = st_sfc(st_collection_extract( st_voronoi(mp, bbox)  ) ) #  plot(sfpoly, col=0)
     if (!is.null(crs)) st_crs(sfpoly) = crs
     sfpoly = st_make_valid(sfpoly)
-    return(sfpoly)
   }
+
+  if (outformat=="sf") return( sfpoly )
+  if (outformat=="sp") return( as(sfpoly, "Spatial") )
 
   if (0) {
         # matching Voronoi polygons to data points:

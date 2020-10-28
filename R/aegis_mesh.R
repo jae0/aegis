@@ -3,11 +3,11 @@
 aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=100, output_type="polygons", hull_multiplier=6, fraction_cv=1.0, fraction_good_bad=0.8, nAU_min=5, areal_units_constraint_nmin=1, tus=NULL ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
-  #require(sp)
   #require(rgeos)
   require(sf)
 
   if (0) {
+    require(sp)
     data(meuse)
     coordinates(meuse) = ~ x+y
     sp::proj4string(meuse) = CRS("+init=epsg:28992")
@@ -21,12 +21,12 @@ aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=1
     areal_units_constraint_nmin=1
     nAU_min=30
 
-    res = aegis_mesh( pts=meuse ) # 0 snap buffer
-    res = aegis_mesh( pts=meuse, spbuffer=50 ) # 50m snap buffer
-    res = aegis_mesh( pts=meuse, resolution=1, spbuffer=50, output_type="grid" )
-    res = aegis_mesh( pts=meuse, resolution=1, output_type="grid.count" )
-    res = aegis_mesh( pts=meuse, resolution=1, spbuffer=50 )
-    res = aegis_mesh( pts=meuse, resolution=5, spbuffer=50, areal_units_constraint_nmin=1 )
+    res = aegis_mesh( pts=pts ) # 0 snap buffer
+    res = aegis_mesh( pts=pts, spbuffer=50 ) # 50m snap buffer
+    res = aegis_mesh( pts=pts, resolution=1, spbuffer=50, output_type="grid" )
+    res = aegis_mesh( pts=pts, resolution=1, output_type="grid.count" )
+    res = aegis_mesh( pts=pts, resolution=1, spbuffer=50 )
+    res = aegis_mesh( pts=pts, resolution=5, spbuffer=50, areal_units_constraint_nmin=1 )
 
     mypalette = colorRampPalette(c("darkblue","blue3", "green", "yellow", "orange","red3", "darkred"), space = "Lab")(100)
 
@@ -36,7 +36,7 @@ aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=1
 
   pts_crs = st_crs( pts )
 
-  message( "'aegis_mesh' expects the projection to be in planar coordinates and also the same units as the resolution.")
+  # message( "'aegis_mesh' expects the projection to be in planar coordinates and also the same units as the resolution.")
 
   if (is.na(pts_crs)) stop("Input data does not have a projection?")
 
@@ -76,9 +76,15 @@ aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=1
 #      bnd = aegis_envelope( xy=xy, method=boundary, spbuffer=spbuffer, proj4string=pts_crs,  hull_multiplier=hull_multiplier )
       bnd = aegis_envelope( xy=xy, method=boundary, spbuffer=spbuffer,  hull_multiplier=hull_multiplier )
     } else {
-      bnd = st_buffer( boundary, spbuffer )
+      bnd = boundary
     }
+    bnd = st_buffer( bnd, spbuffer )
     st_crs(bnd) = pts_crs
+
+if (0) {
+  plot(bnd)
+  plot(M, add=T)
+}
 
     good = 1:nrow(M)
     nAU =  length(good) + 100  # offsets to start
@@ -86,12 +92,17 @@ aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=1
 
     if (!is.null(tus)) tuid = st_drop_geometry(pts) [, tus]
 
-
     message( "number of total areal units / number of candidate locations from which to drop " )
 
     finished = FALSE
     while(!finished) {
       AU = tessellate( xy[good,], outformat="sf", crs=pts_crs) # centroids via voronoi
+      if(0) {
+        x11();
+        plot(AU)
+        plot(M, add=T)
+        plot(bnd, add=T)
+      }
       AU = st_sf( st_intersection( AU, bnd ) ) # crop
       AU$auid = 1:nrow(AU)
       AU_previous = AU
@@ -140,11 +151,12 @@ aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=1
     }
 
     AU = tessellate(xy[good,], outformat="sf", crs=pts_crs) # centroids via voronoi
-    AU = st_intersection( AU, bnd ) # crop
+    AU = st_sf( st_intersection( AU, bnd ) ) # crop
     message( "Total number of areal units:  ", length(AU) )
     # plot(AU)
     return(AU)
   }
+
 
     if (0) {
       # make sure it is OK
