@@ -58,7 +58,7 @@ aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=1
     res(raster_template) = resolution
     crs(raster_template) = crs(pts_crs$proj4string) # projection(pts) # transfer the coordinate system to the raster
     pts$count = 1
-    rast = rasterize( as(pts, "Spatial"), raster_template, field="count", fun="count", background=0) # not meaningful fir factors
+    rast = rasterize( as( st_geometry(pts), "Spatial"), raster_template, field="count", fun="count", background=0) # not meaningful fir factors
     O = as( as( as(rast, "SpatialGridDataFrame"), "SpatialPointsDataFrame"), "sf")
     O = O[ O$layer > 0, ]
     return(O)
