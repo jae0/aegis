@@ -105,14 +105,15 @@ aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=1
       }
       AU = st_sf( st_intersection( AU, bnd ) ) # crop
       AU$auid = 1:nrow(AU)
-      vv = st_join( pts, AU, join=st_within )
+      # vv = st_join( pts, AU, join=st_within )
+      pts_auid = st_points_in_polygons( pts, AU, varname="auid" )
       AU$ww  = 0
-
       if (is.null(tus)) {
-        ww = tapply( rep(1, nrow(vv)), vv$auid, sum, na.rm=T )
+        # ww = tapply( rep(1, nrow(vv)), vv$auid, sum, na.rm=T )
+        ww = tapply( rep(1, length(pts_auid)), pts$auid, sum, na.rm=T )
       } else {
-        if ( nrow(vv) == length(tuid) ) {
-          xx = xtabs(  ~ vv$auid + tuid, na.action=na.omit )
+        if ( length(pts_auid) == length(tuid) ) {
+          xx = xtabs(  ~  pts_auid + tuid, na.action=na.omit )
           xx[xx > 0] = 1
           ww = rowSums(xx) # number of unique time units in each areal unit
         } else {
