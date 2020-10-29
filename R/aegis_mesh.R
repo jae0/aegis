@@ -81,10 +81,10 @@ aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=1
     bnd = st_buffer( bnd, spbuffer )
     st_crs(bnd) = pts_crs
 
-if (0) {
-  plot(bnd)
-  plot(M, add=T)
-}
+    if (0) {
+      plot(bnd)
+      plot(M, add=T)
+    }
 
     good = 1:nrow(M)
     nAU =  length(good) + 100  # offsets to start
@@ -105,49 +105,49 @@ if (0) {
       }
       AU = st_sf( st_intersection( AU, bnd ) ) # crop
       AU$auid = 1:nrow(AU)
-      AU_previous = AU
-      vv = AU$auid[ unlist(st_intersects(pts, AU))] # index of matching AU
-        if (is.null(tus)) {
-          ww = tapply( rep(1, length(vv)), vv, sum, na.rm=T )
+      vv = st_join( pts, AU, join=st_within )
+      AU$ww  = 0
+
+      if (is.null(tus)) {
+        ww = tapply( rep(1, nrow(vv)), vv$auid, sum, na.rm=T )
+      } else {
+        if ( nrow(vv) == length(tuid) ) {
+          xx = xtabs(  ~ vv$auid + tuid, na.action=na.omit )
+          xx[xx > 0] = 1
+          ww = rowSums(xx) # number of unique time units in each areal unit
         } else {
-          if ( length(vv) == length(tuid) ) {
-            xx = xtabs(  ~ vv + tuid, na.action=na.omit )
-            xx[xx > 0] = 1
-            ww = rowSums(xx) # number of unique time units in each areal unit
-          } else {
-            break()
-          }
+          break()
         }
-        AU$ww = 0
-        AU$ww [as.numeric(names(ww)) ] = ww[ match( as.character(AU$auid), names(ww) ) ]
-        AU$ww[ which(!is.finite(AU$ww)) ] = 0
-        # AU$sa = st_area(AU) # [ match( names(ww), as.character(AU$auid) )]
-        # AU$nden = AU$ww / AU$sa
-        toremove = which( AU$ww < areal_units_constraint_nmin )
-        ntr_previous = ntr
-        ntr = length(toremove)
-        ntr_delta = ntr_previous - ntr
-        if (ntr > 1) {
-          omin = min( unique( AU$ww[toremove] ))
-          toremove_min = which( AU$ww == omin )
-          if (length(toremove_min) > 0)  good =  good[-toremove_min]   #remove up to x% at a time
-        }
-        # check for convergence
-        nAU_previous = nAU
-        nAU = length(good)
-        ntmean = mean( AU$ww, na.rm=TRUE)
-        ntsd = sd( AU$ww, na.rm=TRUE)
-        if (  (  ntsd/ntmean ) < fraction_cv ) if ( areal_units_constraint_nmin < ntmean  ) finished=TRUE   # when var is more constrained and mean is greater than target
-        if ( (nAU-ntr) / nAU > fraction_good_bad ) finished=TRUE
-        if ( ntr <= 1 ) finished =TRUE
-        if ( ntr_delta <= 1  ) finished = TRUE
-        if ( nAU == nAU_previous ) finished =TRUE
-        if ( nAU <= nAU_min ) finished=TRUE
-        message( nAU, "/ ", ntr  )
-        # plot(AU[,"ww"])
-        # (finished)
-        # print (AU$ww[toremove] )
-        # print( good)
+      }
+      AU$ww[ as.numeric(names(ww))] = ww
+      AU$ww[ which(!is.finite(AU$ww)) ] = 0
+      # AU$sa = st_area(AU) # [ match( names(ww), as.character(AU$auid) )]
+      # AU$nden = AU$ww / AU$sa
+      toremove = which( AU$ww < areal_units_constraint_nmin )
+      ntr_previous = ntr
+      ntr = length(toremove)
+      ntr_delta = ntr_previous - ntr
+      if (ntr > 1) {
+        omin = min( unique( AU$ww[toremove] ))
+        toremove_min = which( AU$ww == omin )
+        if (length(toremove_min) > 0)  good =  good[-toremove_min]   #remove up to x% at a time
+      }
+      # check for convergence
+      nAU_previous = nAU
+      nAU = length(good)
+      ntmean = mean( AU$ww, na.rm=TRUE)
+      ntsd = sd( AU$ww, na.rm=TRUE)
+      if (  (  ntsd/ntmean ) < fraction_cv ) if ( areal_units_constraint_nmin < ntmean  ) finished=TRUE   # when var is more constrained and mean is greater than target
+      if ( (nAU-ntr) / nAU > fraction_good_bad ) finished=TRUE
+      if ( ntr <= 1 ) finished =TRUE
+      if ( ntr_delta <= 1  ) finished = TRUE
+      if ( nAU == nAU_previous ) finished =TRUE
+      if ( nAU <= nAU_min ) finished=TRUE
+      message( nAU, "/ ", ntr  )
+      # plot(AU[,"ww"])
+      # (finished)
+      # print (AU$ww[toremove] )
+      # print( good)
     }
 
     AU = tessellate(xy[good,], outformat="sf", crs=pts_crs) # centroids via voronoi
