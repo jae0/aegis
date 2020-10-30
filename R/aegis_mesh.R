@@ -153,7 +153,7 @@ aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=1
 
     AU = tessellate(xy[good,], outformat="sf", crs=pts_crs) # centroids via voronoi
     AU = st_sf( st_intersection( AU, bnd ) ) # crop
-    message( "Total number of areal units:  ", length(AU) )
+    message( "After tessilation, there are:  ", nrow(AU), " areal units." )
     # plot(AU)
     return(AU)
   }
