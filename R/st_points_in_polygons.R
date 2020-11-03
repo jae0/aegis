@@ -72,10 +72,11 @@ st_points_in_polygons = function( pts, polys, proj4string=projection_proj4string
 
   if (0) {
     # example
+    crs_lonlat = st_crs( projection_proj4string("lonlat_wgs84") )
     M$AUID = st_points_in_polygons(
-    pts=st_as_sf( M, coords=c("lon","lat"), crs=crs_lonlat ),
-    polys=st_transform(sppoly, crs=crs_lonlat )[, "AUID"],
-    varname="AUID"
-  )
+      pts=st_as_sf( M, coords=c("lon","lat"), crs=crs_lonlat ),
+      polys=st_transform(sppoly, crs=crs_lonlat )[, "AUID"],
+      varname="AUID"
+    )
   }
 }

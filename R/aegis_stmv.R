@@ -229,10 +229,16 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       set[,p$stmv_variables$Y][ii] = lowerbound ## arbitrary but close to detection limit
     }
 
-    coast = coastline_db( p=p, DS=coastline_source )
-    coast = spTransform( coast, CRS("+proj=longlat +datum=WGS84") )
-    setcoord = SpatialPoints( as.matrix( set[, c("lon", "lat")]),  proj4string=CRS("+proj=longlat +datum=WGS84") )
-    inside = sp::over( setcoord, coast )
+    crs_lonlat = st_crs(projection_proj4string("lonlat_wgs84"))
+    coast = st_transform( coastline_db( p=p, DS=coastline_source ), crs_lonlat )
+    coast$inside = TRUE
+
+    inside = st_points_in_polygons(
+      pts = st_as_sf( set[, c("lon", "lat")], coords=c("lon","lat"), crs=crs_lonlat ),
+      polys = coast,
+      varname = "inside"
+    )
+
     onland = which (is.finite(inside))
     if (length(onland)>0) set = set[-onland, ]
 

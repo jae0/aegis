@@ -24,8 +24,7 @@ neighbourhood_structure = function( sppoly, areal_units_source="lattice" ) {
 
   if (areal_units_source == "stratanal_polygons") {
     # predefined polygons with customized list of neighbours
-    W.nb = spdep::poly2nb(sppoly, row.names=sppoly$AUID, queen=TRUE )
-    W.nb = maritimes_groundfish_strata( W.nb=W.nb, returntype="neighbourhoods" )  # customized neighbourshood structure
+    W.nb = maritimes_groundfish_strata( returntype="neighbourhoods" )  # customized neighbourshood structure
     attr(sppoly, "nb") = W.nb
     return( sppoly )
   }

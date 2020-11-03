@@ -52,8 +52,7 @@ aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returnty
       %>% st_union()
       %>% st_buffer(spbuffer)
       %>% st_simplify()
-            %>% st_buffer(0)
-
+      %>% st_buffer(0)
       %>% st_cast("POLYGON" )
       %>% st_make_valid()
     )
@@ -65,7 +64,7 @@ aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returnty
     if ( any( !is.finite(v) )) next()
     bnd = (
 #      st_sfc( st_multipoint( xy ), crs=st_crs(proj4string) )
-       st_sfc( st_multipoint( xy ) )
+      st_sfc( st_multipoint( xy ) )
       %>% st_buffer(spbuffer)
       %>% st_union()
       %>% st_buffer(spbuffer)

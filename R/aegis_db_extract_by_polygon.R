@@ -14,15 +14,20 @@ aegis_db_extract_by_polygon = function( sppoly, spatial_domain="SSE", covfields=
 
     # aggregate summaries of covariate fields by polygons
     pb = aegis.bathymetry::bathymetry_parameters( spatial_domain=spatial_domain )
-    pts = bathymetry_db( p=pb, DS="baseline" )
-    pts = SpatialPoints(pts, proj4string=sp::CRS(pb$aegis_proj4string_planar_km) )
-    pts = spTransform( pts, sp::CRS(proj4string(sppoly)) )
-    # match each datum to an area
-    o = over( pts, sppoly)
-    pts$AUID = as.character( o$AUID )
-    pts$rowindex = 1:nrow(pts)
+    pts = st_transform(
+      st_as_sf(
+        bathymetry_db( p=pb, DS="baseline" ),
+        coords=c("lon","lat"),
+        crs=pb$aegis_proj4string_planar_km ),
+      st_crs(sppoly)
+    )
+    pts$AUID = st_points_in_polygons(
+      pts = pts,
+      polys = sppoly[, "AUID"],
+      varname="AUID"
+    )
 
-    o = NULL
+    pts$rowindex = 1:nrow(pts)
 
     if (is.null(covfields)) covfields = aegis_db_extract(spatial_domain=spatial_domain, ... )
 
@@ -55,6 +60,7 @@ aegis_db_extract_by_polygon = function( sppoly, spatial_domain="SSE", covfields=
     datatype = list()
 
     auid = as.character( sppoly$AUID )
+
     cvn = names(covfields)
 
     for ( vn in cvn ) {
