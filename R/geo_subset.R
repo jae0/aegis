@@ -26,8 +26,10 @@ geo_subset = function( spatial_domain, Z ) {
 
   if ( spatial_domain == "SSE.mpa" ) {
     Z = Z[ which(Z$z < 2000 & Z$z > 0 ) ,]
-    bnd = polygon_db( polyid="scotia.fundy.with.buffer", returntype="list" )
-    bnd = lonlat2planar( bnd, proj.type=ps$aegis_proj4string_planar_km ) # convert to internal projection
+    bnd = as.data.frame( st_coordinates( polygon_db( polyid="scotia.fundy.with.buffer" ) ) )
+    colnames(bnd)[which(colnames(bnd)=="X")] = "lon"
+    colnames(bnd)[which(colnames(bnd)=="Y")] = "lat"
+    bnd = lonlat2planar( bnd[ , c("lon", "lat")], proj.type=ps$aegis_proj4string_planar_km ) # convert to internal projection
     jj = which( sp::point.in.polygon( Z$plon, Z$plat, bnd$plon, bnd$plat) != 0 )
     if (length( jj) > 0) Z = Z[ jj, ]
   }
