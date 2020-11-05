@@ -122,8 +122,8 @@
       INP$tiyr = lubridate::decimal_date( INP$timestamp )
 
       locsmap = match(
-        stmv::array_map( "xy->1", INP[,c("plon","plat")], gridparams=p$gridparams ),
-        stmv::array_map( "xy->1", bathymetry_db(p=p, DS="baseline"), gridparams=p$gridparams ) )
+        array_map( "xy->1", INP[,c("plon","plat")], gridparams=p$gridparams ),
+        array_map( "xy->1", bathymetry_db(p=p, DS="baseline"), gridparams=p$gridparams ) )
 
       # spatial vars and climatologies
       # sp_vars = intersect( c("dZ", "ddZ", "substrate.grainsize", "tmean.climatology", "tsd.climatology", "b.sd", "b.range", "s.sd", "s.range", "t.range" ), p$stmv_variables$COV )
@@ -201,7 +201,7 @@
 
       p0 = spatial_parameters( p=p ) # from
       L0 = bathymetry_db( p=p0, DS="baseline" )
-      L0i = stmv::array_map( "xy->2", L0[, c("plon", "plat")], gridparams=p0$gridparams )
+      L0i = array_map( "xy->2", L0[, c("plon", "plat")], gridparams=p0$gridparams )
       sreg = setdiff( p$spatial_domain_subareas, p$spatial_domain )
 
       for (yr in p$yrs) {
@@ -215,7 +215,7 @@
         for ( gr in sreg ) {
           p1 = spatial_parameters( p=p, spatial_domain=gr ) # 'warping' from p -> p1
           L1 = bathymetry_db( p=p1, DS="baseline" )
-          L1i = stmv::array_map( "xy->2", L1[, c("plon", "plat")], gridparams=p1$gridparams )
+          L1i = array_map( "xy->2", L1[, c("plon", "plat")], gridparams=p1$gridparams )
           L1 = planar2lonlat( L1, proj.type=p1$aegis_proj4string_planar_km )
           L1$plon_1 = L1$plon # store original coords
           L1$plat_1 = L1$plat
@@ -263,13 +263,13 @@
       Snames = colnames(S0)
       p0 = spatial_parameters( p=p ) # from
       L0 = bathymetry_db( p=p0, DS="baseline" )
-      L0i = stmv::array_map( "xy->2", L0[, c("plon", "plat")], gridparams=p0$gridparams )
+      L0i = array_map( "xy->2", L0[, c("plon", "plat")], gridparams=p0$gridparams )
       sreg = setdiff( p$spatial_domain_subareas, p$spatial_domain )
 
       for ( gr in sreg ) {
         p1 = spatial_parameters( p=p, spatial_domain=gr ) # 'warping' from p -> p1
         L1 = bathymetry_db( p=p1, DS="baseline" )
-        L1i = stmv::array_map( "xy->2", L1[, c("plon", "plat")], gridparams=p1$gridparams )
+        L1i = array_map( "xy->2", L1[, c("plon", "plat")], gridparams=p1$gridparams )
         L1 = planar2lonlat( L1, proj.type=p1$aegis_proj4string_planar_km )
         L1$plon_1 = L1$plon # store original coords
         L1$plat_1 = L1$plat

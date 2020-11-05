@@ -22,6 +22,8 @@ st_points_in_polygons = function( pts, polys, proj4string=projection_proj4string
     if (inherits(pts, c("data.frame", "matrix"))  ) pts = st_as_sf( pts, coords = c(1,2), crs=sf::st_crs(polys) )
     if (inherits(pts, "Spatial")) pts=as(pts, "sf")
     if (inherits(polys, "Spatial")) polys=as(polys, "sf")
+    if (inherits(polys, "sfc")) polys=st_as_sf(polys)
+
     crs_pts = st_crs(pts)
     crs_polys = st_crs(polys)
     if ( is.na(crs_pts) ) {
@@ -38,7 +40,8 @@ st_points_in_polygons = function( pts, polys, proj4string=projection_proj4string
     if (st_crs(polys) != st_crs(pts) ) {
       polys = st_transform(polys, st_crs(pts) )
     }
-    if (is.null(varname)) varname=1
+    if (is.null(varname)) varname="inside"
+    if (!exists(varname, polys)) polys[,varname] = TRUE
     return( st_drop_geometry(polys)[ sapply( st_intersects( pts, polys), function(z) if (length(z)==0) NA_integer_ else z[1] ), varname] )
   }
 
@@ -49,6 +52,8 @@ st_points_in_polygons = function( pts, polys, proj4string=projection_proj4string
     if (inherits(pts, c("data.frame", "matrix"))  ) pts = st_as_sf( pts, coords = c(1,2), crs=sf::st_crs(polys) )
     if (inherits(pts, "Spatial")) pts=as(pts, "sf")
     if (inherits(polys, "Spatial")) polys=as(polys, "sf")
+    if (inherits(polys, "sfc")) polys=st_as_sf(polys)
+
     crs_pts = st_crs(pts)
     crs_polys = st_crs(polys)
     if ( is.na(crs_pts) ) {
@@ -65,7 +70,8 @@ st_points_in_polygons = function( pts, polys, proj4string=projection_proj4string
     if (st_crs(polys) != st_crs(pts) ) {
       polys = st_transform(polys, st_crs(pts) )
     }
-    if (is.null(varname)) varname=1
+    if (is.null(varname)) varname="inside"
+    if (!exists(varname, polys)) polys[,varname] = TRUE
     polys = polys[,varname]
     return( st_join( pts, polys)[,varname] )
   }
