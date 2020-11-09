@@ -1,71 +1,51 @@
 
 geo_subset = function( spatial_domain, Z ) {
+
   #\\ filter locations based upon depths and location of spatial_domain
   #\\ most are in planar coords (so require plon, plat and z {depth} )
 
   # trim to extents
   ps = spatial_parameters( spatial_domain=spatial_domain ) # obtain internal projection params
-  inside = which(
-    Z$plon >= ps$corners$plon[1] & Z$plon <= ps$corners$plon[2] &
-    Z$plat >= ps$corners$plat[1] & Z$plat <= ps$corners$plat[2]  )
-  if (length( inside ) > 0) Z = Z[ inside, ]
+  corners =  rbind(
+    c( ps$corners$lon[1], ps$corners$lat[2] ),
+    c( ps$corners$lon[2], ps$corners$lat[2] ),
+    c( ps$corners$lon[2], ps$corners$lat[1] ),
+    c( ps$corners$lon[1], ps$corners$lat[1] ),
+    c( ps$corners$lon[1], ps$corners$lat[2] )
+  )
+  bnd = (
+    st_multipoint( corners )
+    %>% st_sfc( crs=st_crs(projection_proj4string("lonlat_wgs84")) )
+    %>% st_cast("POLYGON" )
+    %>% st_make_valid()
+  )
 
-
-  if ( spatial_domain == "canada.east.superhighres" ) {
-    Z = Z[ which( Z$z < 5000 & Z$z > 0) , ]
+  if (!inherits("sf", Z)) {
+    if (exists("lon", Z)) {
+      Z = sf::st_as_sf( Z, coords = c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84"))  )
+    } else if (exists("plon", Z)) {
+      Z = sf::st_as_sf( Z, coords = c("plon","plat"), crs=st_crs(ps$aegis_proj4string_planar_km) )
+    } else {
+      Z = sf::st_as_sf( Z, coords = c(1,2), crs=st_crs(projection_proj4string("lonlat_wgs84")) )
+    }
   }
 
-
-  if ( spatial_domain == "canada.east.highres" ) {
-    Z = Z[ which( Z$z < 5000 & Z$z > 0) , ]
-  }
-
-  if ( spatial_domain == "canada.east" ) {
-    Z = Z[ which(Z$z < 5000 & Z$z > 0 ) ,]
+  if ( spatial_domain %in% c( "canada.east.superhighres", "canada.east.highres", "canada.east" ) ) {
+    inside = which( st_points_in_polygons( Z, st_transform(bnd, crs=st_crs(Z) ) ) & Z$z < 5000 & Z$z > 0 )
   }
 
   if ( spatial_domain == "SSE.mpa" ) {
-    Z = Z[ which(Z$z < 2000 & Z$z > 0 ) ,]
-    bnd = as.data.frame( st_coordinates( polygon_db( polyid="scotia.fundy.with.buffer" ) ) )
-    colnames(bnd)[which(colnames(bnd)=="X")] = "lon"
-    colnames(bnd)[which(colnames(bnd)=="Y")] = "lat"
-    bnd = lonlat2planar( bnd[ , c("lon", "lat")], proj.type=ps$aegis_proj4string_planar_km ) # convert to internal projection
-    jj = which( sp::point.in.polygon( Z$plon, Z$plat, bnd$plon, bnd$plat) != 0 )
-    if (length( jj) > 0) Z = Z[ jj, ]
+    inside = which( st_points_in_polygons( Z, st_transform(bnd, crs=st_crs(Z) )  ) & Z$z < 2000 & Z$z > 0 )
   }
 
   if ( spatial_domain =="SSE" ) {
-    Z = Z[ which(Z$z < 800 & Z$z > 0 ) ,]
+    inside = which( st_points_in_polygons( Z, st_transform(bnd, crs=st_crs(Z) )  ) & Z$z <  800 & Z$z > 0 )
   }
 
   if ( spatial_domain == "snowcrab" ) {
-    #\\ NOTE::: snowcrab baseline == SSE baseline, except it is a subset
-
-    kk = which( Z$z < 350 & Z$z > 10  )
-    if (length( kk) > 0) Z = Z[ kk, ]
-
-    jj = polygon_inside( Z[,c(1:2)], region="cfaall", planar=T, proj.type=ps$aegis_proj4string_planar_km )
-    if (length( jj) > 0) Z = Z[ jj, ]
-
-    # filter out area 4X
-    corners = data.frame( cbind(
-      lon = c(-63, -65.5, -56.8, -66.3 ),
-      lat = c( 44.75, 43.8, 47.5, 42.8 )
-    ) )
-    corners = lonlat2planar( corners, proj.type=ps$aegis_proj4string_planar_km )
-    dd1 = which( Z$plon < corners$plon[1] & Z$plat > corners$plat[1]  )
-    if (length( dd1) > 0) Z = Z[- dd1, ]
-    dd2 = which( Z$plon < corners$plon[2] & Z$plat > corners$plat[2]  )
-    if (length( dd2) > 0) Z = Z[- dd2, ]
-    dd3 = which( Z$plon > corners$plon[3] ) # east lim
-    if (length( dd3) > 0) Z = Z[- dd3, ]
-    dd4 = which( Z$plon < corners$plon[4] )  #west lim
-    if (length( dd4) > 0) Z = Z[- dd4, ]
-    dd5 = which( Z$plat > corners$plat[3]  ) # north lim
-    if (length( dd5) > 0) Z = Z[- dd5, ]
-    dd6 = which( Z$plat < corners$plat[4]  )  #south lim
-    if (length( dd6) > 0) Z = Z[- dd6, ]
+    #\\ NOTE::: snowcrab baseline == SSE baseline, except it is a subset with the following modifications:
+    inside = which( st_points_in_polygons( Z, st_transform(bnd, crs=st_crs(Z) )  ) & Z$z < 350 & Z$z > 10 )
   }
-  return(Z)
+  return(inside)
 }
 
