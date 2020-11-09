@@ -20,7 +20,8 @@ geo_subset = function( spatial_domain, Z ) {
     %>% st_make_valid()
   )
 
-  if (!inherits("sf", Z)) {
+
+  if (!inherits(Z, "sf")) {
     if (exists("lon", Z)) {
       Z = sf::st_as_sf( Z, coords = c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84"))  )
     } else if (exists("plon", Z)) {
