@@ -1,6 +1,10 @@
 aegis_stmv_modelformula = function(p) {
 
+  # generic models forms & var names, common to most aegis projects
+
   if (!exists("Y", p$stmv_variables)) p$stmv_variables$Y = "not_defined" # this can be called to get covars.. do not stop
+
+  if (!exists("LOCS", p$stmv_variables)) p$stmv_variables$LOCS = c("plon", "plat")
 
   if ( exists("stmv_global_modelengine", p)) {
     if ( p$stmv_global_modelengine != "none" ) {
