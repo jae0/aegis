@@ -63,7 +63,6 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
     # lookup temporal params for the SSE domain
     # obtain current temperature years
 
-    if (!exists("Y", p$stmv_variables)) p$stmv_variables$Y = "not_defined" # this can be called to get covars.. do not stop
     p = aegis_stmv_modelformula(p=p)  # use generic models if none are specified
     p = stmv_variablelist(p=p)  # decompose into covariates from formulas , etc
 
