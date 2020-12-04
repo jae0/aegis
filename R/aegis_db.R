@@ -330,8 +330,8 @@
         # climatology
         nL1 = nrow(L1)
         PS = PSlb = PSub = matrix( NA, nrow=nL1, ncol=p$ny )
-        p1$stmvSaveDir = file.path(p1$data_root, "modelled", p1$stmv_variables$Y, p1$spatial_domain )
 
+        p$stmvSaveDir = file.path( p1$modeldir, p1$stmv_model_label, p1$project_class, paste(  p1$stmv_global_modelengine, stmv_local_modelengine, sep="_"), p1$stmv_variables$Y, p1$spatial_domain)
 
         for (iy in 1:p$ny) {
           yr = p$yrs[iy]
