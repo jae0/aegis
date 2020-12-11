@@ -113,7 +113,6 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
         #   p$stmv_variables$Y, '~ s(yr, k=10, bs="ts") + s(cos.w, k=3, bs="ts") + s(sin.w, k=3, bs="ts") ',
         #     ' + s(cos.w, sin.w, yr, bs="ts", k=20) ',
         #     ' + s(plon, k=3, bs="ts") + s(plat, k=3, bs="ts") + s(plon, plat, k=20, bs="ts") ' ) )
-        if (!exists("stmv_local_model_distanceweighted", p)) p$stmv_local_model_distanceweighted = TRUE
         if (!exists("stmv_gam_optimizer", p)) p$stmv_gam_optimizer=c("outer", "bfgs")
 
         if (!exists("stmv_twostep_time", p))  p$stmv_twostep_time = "gam"
@@ -143,7 +142,6 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
           p$stmv_variables$Y, '~ s(yr, bs="ts") + s(cos.w, k=3, bs="ts") + s(sin.w, k=3, bs="ts") ',
             ' + s(cos.w, sin.w, yr, bs="ts", k=25)  ',
             ' + s(plon, k=3, bs="ts") + s(plat, k=3, bs="ts") + s(plon, plat, k=25, bs="ts") ' ) )
-        if (!exists("stmv_local_model_distanceweighted", p)) p$stmv_local_model_distanceweighted = TRUE
         # if (!exists("stmv_gam_optimizer", p)) p$stmv_gam_optimizer="perf"
         if (!exists("stmv_gam_optimizer", p)) p$stmv_gam_optimizer=c("outer", "bfgs")
 
@@ -157,7 +155,6 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
             # te is tensor spline
         )
         p$stmv_local_model_bayesxmethod="MCMC"
-        p$stmv_local_model_distanceweighted = FALSE
       } else {
         message( "The specified stmv_local_modelengine is not tested/supported ... you are on your own ;) ..." )
       }

@@ -29,7 +29,8 @@ ram_local = function( returnvalue="ram", ram_main=NULL, ram_process=NULL ) {
 
   if (returnvalue=="ncores") {
     ncores_total = parallel::detectCores() 
-    ncores_required = aegis_floor( (out - ram_main) / ram_process ) 
-    return( min( ncores_total, ncores_required ) )
+    ncores_required = min( ncores_total, floor( (out - ram_main) / ram_process ) )
+    return( ncores_required )
   }
+
 }
