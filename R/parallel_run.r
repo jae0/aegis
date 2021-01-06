@@ -1,15 +1,13 @@
 #'  Run a parallel process .. wrapper for snow/parallel. Expectation of all relevant parameters in a list 'p'.
 
 parallel_run = function( p, FUNC=NULL, runindex=NULL,
-  clusters=NULL, clustertype=NULL, clusterexport=NULL,
+  clusters=NULL, clustertype=NULL, clusterexport=NULL, clusterLoadBalance=TRUE,
   rndseed=NULL, verbose=FALSE, ... ) {
 
   require(parallel)
 
   if (is.null(runindex)) if (exists("runindex", p)) runindex = p$runindex
-  if (is.null(runindex)) {
-    stop( "'runindex' needs to be defined" )
-  }
+  if (is.null(runindex)) stop( "'runindex' needs to be defined" )
 
   nvars = length(runindex)  # runindex must be a list
   p$runs = expand.grid(runindex, stringsAsFactors=FALSE, KEEP.OUT.ATTRS=FALSE)
@@ -44,37 +42,54 @@ parallel_run = function( p, FUNC=NULL, runindex=NULL,
   out = NULL
 
   if ( length(p$clusters) == 1 | p$nruns==1 ) {
+
     out = FUNC( p=p, ... )
-  } else if ( p$nruns < length( p$clusters ) ) {
-    p$clusters = sample( p$clusters, p$nruns )  # if very few runs, use only what is required
-  }
+    return ( out )
 
+  } 
 
+  if (p$nruns < length(p$clusters)) p$clusters = sample(p$clusters, p$nruns)
 
-  if ( length(p$clusters) > 1 ) {
-    if ( p$clustertype=="FORK" ) p$clusters = length( p$clusters)
-    cl = makeCluster( spec=p$clusters, type=p$clustertype ) # SOCK works well but does not load balance as MPI
-    RNGkind("L'Ecuyer-CMRG")  # multiple streams of pseudo-random numbers.
-    clusterSetRNGStream(cl, iseed=p$rndseed )
-    if ( !is.null(clusterexport)) clusterExport( cl, clusterexport )
-    uv = unique(p$runs_uid)
-    uvl = length(uv)
-    lc = length(p$clusters)
-    lci = 1:lc
-    ssplt = list()
-    for(j in 1:uvl) ssplt[[j]]  = which(p$runs_uid == uv[j])
+  if ( p$clustertype=="FORK" ) p$clusters = length( p$clusters)
+
+  cl = makeCluster( spec=p$clusters, type=p$clustertype ) # SOCK works well but does not load balance as MPI
+  RNGkind("L'Ecuyer-CMRG")  # multiple streams of pseudo-random numbers.
+  clusterSetRNGStream(cl, iseed=p$rndseed )
+  if ( !is.null(clusterexport)) clusterExport( cl, clusterexport )
+
+  uv = unique(p$runs_uid)
+  uvl = length(uv)
+  lc = length(p$clusters)
+  lci = 1:lc
+  ssplt = list()
+
+  if (clusterLoadBalance) {
+    for (j in 1:uvl) ssplt[[j]]  = which(p$runs_uid == uv[j])
+    nchunks =  max( length(cl), ceiling( uvl / length(cl) ) ) 
+    clustertasklist = rep(list(numeric()),nchunks)
+    for (j in 1:uvl) {
+      k=j
+      if (j>nchunks) k = j%%nchunks+1
+      clustertasklist[[k]] = c(clustertasklist[[k]], ssplt[[j]])
+    }
+    ssplt = NULL
+    out = clusterApplyLB( cl, clustertasklist, FUNC, p=p, ... )
+    
+  } else {
+    for (j in 1:uvl) ssplt[[j]]  = which(p$runs_uid == uv[j])
     clustertasklist = rep(list(numeric()),lc)
-    if (uvl>lc) {
-      for(j in 1:uvl) {
-        k=j
-        if(j>lc) k = j%%lc+1
-        clustertasklist[[k]] <- c(clustertasklist[[k]],ssplt[[j]])
-      }
+    for (j in 1:uvl) {
+      k=j
+      if (j>lc) k = j%%lc+1
+      clustertasklist[[k]] = c(clustertasklist[[k]], ssplt[[j]])
     }
     ssplt = NULL
     out = clusterApply( cl, clustertasklist, FUNC, p=p, ... )
-    stopCluster( cl )
   }
 
+  stopCluster( cl )
+   
   return ( out )
+
+
 }
