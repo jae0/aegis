@@ -1,7 +1,26 @@
-neighbourhood_structure = function( sppoly, areal_units_source="lattice" ) {
+neighbourhood_structure = function( sppoly, areal_units_type="lattice" ) {
 
-  if (areal_units_source == "lattice") {
-    # generic lattice
+  
+  # customized neighbourshood structure (hand edited)
+  if (areal_units_type %in% c( "stratanal_polygons_pre2014", "stratanal_polygons", "groundfish_strata") ) {
+    # predefined polygons with customized list of neighbours
+    W.nb = maritimes_groundfish_strata(  areal_units_timeperiod="pre2014" ,returntype="neighbourhoods" )  
+    attr(sppoly, "nb") = W.nb
+    return( sppoly )
+  }
+
+  
+  # customized neighbourshood structure (hand edited)
+  if (areal_units_type %in% c( "stratanal_polygons_post2014" ) ) {
+    # predefined polygons with customized list of neighbours
+    W.nb = maritimes_groundfish_strata(  areal_units_timeperiod="post2014" ,returntype="neighbourhoods" )  
+    attr(sppoly, "nb") = W.nb
+    return( sppoly )
+  }
+
+  # ------------------------------------------------
+  # otherwise, generic lattice, "tessilation", or "inla_mesh" 
+  
     W.nb = poly2nb(sppoly, row.names=sppoly$AUID, queen=TRUE)  # slow .. ~1hr?
     W.remove = which(card(W.nb) == 0)
     if ( length(W.remove) > 0 ) {
@@ -18,16 +37,5 @@ neighbourhood_structure = function( sppoly, areal_units_source="lattice" ) {
     }
     attr(sppoly, "nb") = W.nb
     return( sppoly )
-  }
-
-  # ------------------------------------------------
-
-  if (areal_units_source == "stratanal_polygons") {
-    # predefined polygons with customized list of neighbours
-    W.nb = maritimes_groundfish_strata( returntype="neighbourhoods" )  # customized neighbourshood structure
-    attr(sppoly, "nb") = W.nb
-    return( sppoly )
-  }
-
-
+  
 }

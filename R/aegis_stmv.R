@@ -31,7 +31,6 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       p$varstomodel = c()
       p$taxa.of.interest = aegis.survey::groundfish_variablelist("catch.summary")
 
-      if (!exists("areal_units_timeperiod", p)) p$areal_units_timeperiod = "pre2014"   # "pre2014" for older
       if (!exists("aegis_proj4string_lonlat", p)) p$aegis_proj4string_lonlat = projection_proj4string("lonlat_wgs84")
       if (!exists("areal_units_proj4string_planar_km", p)) p$areal_units_proj4string_planar_km = projection_proj4string("omerc_nova_scotia")  # oblique mercator, centred on Scotian Shelf rotated by 325 degrees
       if (!exists("boundingbox", p)) p$boundingbox = list( xlim = c(-70.5, -56.5), ylim=c(39.5, 47.5)) # bounding box for plots using spplot
