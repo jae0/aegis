@@ -16,6 +16,9 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
   p$libs = unique( c( p$libs, project.library ( "aegis") ) )
 
 
+  p = parameters_add_without_overwriting( p,
+    aegis_internal_resolution_km = 1   # for internal discretization of input data 
+  )
 
   # ---------------------
   # lookup parameters
