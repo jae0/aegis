@@ -17,7 +17,8 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
 
 
   p = parameters_add_without_overwriting( p,
-    aegis_internal_resolution_km = 1   # for internal discretization of input data 
+    inputdata_spatial_discretization_planar_km = 1,
+    inputdata_temporal_discretization_yr = 1/12
   )
 
   # ---------------------
