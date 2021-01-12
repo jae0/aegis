@@ -71,7 +71,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
     # fine grid representation
     M = aegis_mesh( pts=pts,  resolution=resolution, output_type="grid.count" )
     M = M[ M$layer > 0, ]
-    xy = st_coordinates( M )
+    xy = st_coordinates( M ) 
 
     if ( is.null(boundary)) boundary="non_convex_hull"
     if ( is.character(boundary) ) {
