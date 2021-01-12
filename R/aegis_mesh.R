@@ -1,6 +1,7 @@
 
 
-aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=100, output_type="polygons", hull_multiplier=6, fraction_cv=1.0, fraction_good_bad=0.8, nAU_min=5, areal_units_constraint_nmin=1, tus=NULL ) {
+aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_type="polygons", 
+  hull_multiplier=6, fraction_cv=1.0, fraction_good_bad=0.8, nAU_min=5, areal_units_constraint_nmin=1, tus="none" ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
   #require(rgeos)
@@ -12,7 +13,7 @@ aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=1
     coordinates(meuse) = ~ x+y
     sp::proj4string(meuse) = CRS("+init=epsg:28992")
     pts = as(meuse, "sf")
-    boundary="non_convex_hull"
+    boundary=NULL
     spbuffer=NULL
     resolution=100
     output_type="polygons"
@@ -72,6 +73,7 @@ aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=1
     M = M[ M$layer > 0, ]
     xy = st_coordinates( M )
 
+    if ( is.null(boundary)) boundary="non_convex_hull"
     if ( is.character(boundary) ) {
 #      bnd = aegis_envelope( xy=xy, method=boundary, spbuffer=spbuffer, proj4string=pts_crs,  hull_multiplier=hull_multiplier )
       bnd = aegis_envelope( xy=xy, method=boundary, spbuffer=spbuffer,  hull_multiplier=hull_multiplier )
@@ -90,7 +92,7 @@ aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=1
     nAU =  length(good) + 100  # offsets to start
     ntr = length(good) + 100
 
-    if (!is.null(tus)) tuid = st_drop_geometry(pts) [, tus]
+    if (tus !="none") tuid = st_drop_geometry(pts) [, tus]
 
     message( "number of total areal units / number of candidate locations from which to drop " )
 
@@ -108,7 +110,7 @@ aegis_mesh = function( pts, boundary="non_convex_hull", spbuffer=0, resolution=1
       # vv = st_join( pts, AU, join=st_within )
       pts_auid = st_points_in_polygons( pts, AU, varname="auid" )
       AU$ww  = 0
-      if (is.null(tus)) {
+      if ( tus == "none" ) {
         # ww = tapply( rep(1, nrow(vv)), vv$auid, sum, na.rm=T )
         ww = tapply( rep(1, length(pts_auid)), pts$auid, sum, na.rm=T )
       } else {
