@@ -131,9 +131,13 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       ntr = length(toremove)
       ntr_delta = ntr_previous - ntr
       if (ntr > 1) {
-        omin = min( unique( AU$ww[toremove] ))
-        toremove_min = which( AU$ww == omin )
-        if (length(toremove_min) > 0)  good =  good[-toremove_min]   #remove up to x% at a time
+        oo = sort( unique( AU$ww[toremove] ))
+        if (length(oo) > 1) {
+          ntodrop = max(1, floor(length(oo)/3) )
+          omin = oo[1:ntodrop]
+          toremove_min = which( AU$ww %in% omin )
+          if (length(toremove_min) > 0)  good =  good[-toremove_min]   #remove up to x% at a time
+        }
       }
       # check for convergence
       nAU_previous = nAU
