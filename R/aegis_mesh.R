@@ -1,7 +1,7 @@
 
 
 aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_type="polygons", 
-  hull_multiplier=6, fraction_cv=1.0, fraction_good_bad=0.8, nAU_min=5, areal_units_constraint_nmin=1, tus="none" ) {
+  hull_multiplier=6, fraction_cv=1.0, fraction_good_bad=0.8, fraction_todrop=1/10, nAU_min=5, areal_units_constraint_nmin=1, tus="none" ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
   #require(rgeos)
@@ -133,7 +133,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       if (ntr > 1) {
         oo = sort( unique( AU$ww[toremove] ))
         if (length(oo) > 1) {
-          ntodrop = max(1, floor(length(oo)/5) )
+          ntodrop = max(1, floor(length(oo)*fraction_todrop ) )  # not number but count classes
           omin = oo[1:ntodrop]
           toremove_min = which( AU$ww %in% omin )
           if (length(toremove_min) > 0)  good =  good[-toremove_min]  
