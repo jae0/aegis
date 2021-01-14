@@ -12,7 +12,8 @@ parameters_reset = function( parameter_list,
       "areal_units_proj4string_planar_km",
       "areal_units_constraint",
       "areal_units_constraint_nmin",
-      "carstm_model_call",  # in case we need to run the modelling step on the fly
+      "carstm_model_formula",  # in case we need to run the modelling step on the fly
+      "carstm_model_family",  # in case we need to run the modelling step on the fly
       "carstm_model_label",  # to load data from carstm_summary
       "carstm_modelengine", 
       "inputdata_spatial_discretization_planar_km",
