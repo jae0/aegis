@@ -146,28 +146,28 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       ntsd = sd( AU$ww, na.rm=TRUE)
       if (  (  ntsd/ntmean ) < fraction_cv ) {
         if ( areal_units_constraint_nmin < ntmean  ) {
-          messge ("breaking on criterion: fraction_cv")
+          message ("breaking on criterion: fraction_cv")
           finished=TRUE   # when var is more constrained and mean is greater than target
         }
       }
       if ( (nAU-ntr) / nAU > fraction_good_bad ) {
-        messge ("breaking on criterion: fraction_good_bad")
+        message ("breaking on criterion: fraction_good_bad")
         finished=TRUE
       }
       if ( ntr <= 1 ) {
-        messge ("breaking on criterion: no more removal candidates")
+        message ("breaking on criterion: no more removal candidates")
         finished=TRUE
       }
       if ( ntr_delta <= 1  ) {
-        messge ("breaking on criterion: incremental change in au's stable")
+        message ("breaking on criterion: incremental change in au's stable")
         finished=TRUE
       }
       if ( nAU == nAU_previous ) {
-        messge ("breaking on criterion: incremental change in au's stable")
+        message ("breaking on criterion: incremental change in au's stable")
         finished=TRUE
       }
       if ( nAU <= nAU_min ) {
-        messge ("breaking on criterion: removal candidates exceeded")
+        message ("breaking on criterion: removal candidates exceeded")
         finished=TRUE
       }
       message( nAU, "/ ", ntr  )
