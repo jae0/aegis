@@ -94,7 +94,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 
     if (tus !="none") tuid = st_drop_geometry(pts) [, tus]
 
-    message( "number of total areal units / number of candidate locations from which to drop " )
+    message( "Current number of total areal units / number of candidate locations that were considered " )
 
     finished = FALSE
     while(!finished) {
