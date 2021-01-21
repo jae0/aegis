@@ -158,7 +158,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
         finished=TRUE   # when var is more constrained and mean is greater than target
       }
       if (  (  ntsd/ntmean ) < fraction_cv ) {
-        if ( ntmean > areal_units_constraint_nmin/2 ) {
+        if ( ntmean > areal_units_constraint_nmin*fraction_good_bad ) {
           if (verbose) message ("breaking on criterion: fraction_cv")
           finished=TRUE   # when var is more constrained and mean is greater than target
         }
