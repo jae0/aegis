@@ -1,7 +1,7 @@
 
 
 aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_type="polygons", 
-  hull_multiplier=6, fraction_cv=1.0, fraction_good_bad=0.8, fraction_todrop=1/10, nAU_min=5, areal_units_constraint_nmin=1, tus="none" ) {
+  hull_multiplier=6, fraction_cv=1.0, fraction_good_bad=0.8, fraction_todrop=1/10, nAU_min=5, areal_units_constraint_nmin=1, tus="none", verbose=FALSE ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
   #require(rgeos)
@@ -94,8 +94,6 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 
     if (tus !="none") tuid = st_drop_geometry(pts) [, tus]
 
-    message( "Current number of total areal units / number of candidate locations that were considered " )
-
     finished = FALSE
     while(!finished) {
       AU = tessellate( xy[good,], outformat="sf", crs=pts_crs) # centroids via voronoi
@@ -109,71 +107,86 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       AU$auid = 1:nrow(AU)
       # vv = st_join( pts, AU, join=st_within )
       pts_auid = st_points_in_polygons( pts, AU, varname="auid" )
-      AU$ww  = 0
+      AU$npts  = 0
       if ( tus == "none" ) {
-        # ww = tapply( rep(1, nrow(vv)), vv$auid, sum, na.rm=T )
-        ww = tapply( rep(1, length(pts_auid)), pts$auid, sum, na.rm=T )
+        # npts = tapply( rep(1, nrow(vv)), vv$auid, sum, na.rm=T )
+        npts = tapply( rep(1, length(pts_auid)), pts$auid, sum, na.rm=T )
       } else {
         if ( length(pts_auid) == length(tuid) ) {
           xx = xtabs(  ~  pts_auid + tuid, na.action=na.omit )
           xx[xx > 0] = 1
-          ww = rowSums(xx) # number of unique time units in each areal unit
+          npts = rowSums(xx) # number of unique time units in each areal unit
         } else {
           break()
         }
       }
-      AU$ww[ as.numeric(names(ww))] = ww
-      AU$ww[ which(!is.finite(AU$ww)) ] = 0
-      # AU$sa = st_area(AU) # [ match( names(ww), as.character(AU$auid) )]
-      # AU$nden = AU$ww / AU$sa
-      toremove = which( AU$ww < areal_units_constraint_nmin )
+      AU$npts[ as.numeric(names(npts))] = npts
+      AU$npts[ which(!is.finite(AU$npts)) ] = 0
+ #     AU$sa = st_area(AU) # [ match( names(npts), as.character(AU$auid) )]
+ #     AU$density = AU$npts / AU$sa
+      
+      removal_candidates = which( AU$npts < areal_units_constraint_nmin )
+      
       ntr_previous = ntr
-      ntr = length(toremove)
+      ntr = length(removal_candidates)
       ntr_delta = ntr_previous - ntr
+      
       if (ntr > 1) {
-        oo = sort( unique( AU$ww[toremove] ))
+        # removal criterion: smallest counts 
+        oo = sort( unique( AU$npts[removal_candidates] ))
         if (length(oo) > 1) {
-          ntodrop = max(1, floor(length(oo)*fraction_todrop ) )  # not number but count classes
-          omin = oo[1:ntodrop]
-          toremove_min = which( AU$ww %in% omin )
-          if (length(toremove_min) > 0)  good =  good[-toremove_min]  
+  #          dd = stats::quantile( AU$density[removal_candidates] , probs=fraction_todrop, na.rm=TRUE )
+            ntodrop = max(1, floor(length(oo)*fraction_todrop ) )  # not number but count classes
+            omin = oo[1:ntodrop]
+            toremove_min = NULL
+   #         toremove_min = which( (AU$npts %in% omin ) & ( AU$density < dd )  )
+            toremove_min = which( (AU$npts %in% omin )   )
+            good = good[-toremove_min] 
         }
       }
+      
       # check for convergence
       nAU_previous = nAU
       nAU = length(good)
-      ntmean = mean( AU$ww, na.rm=TRUE)
-      ntsd = sd( AU$ww, na.rm=TRUE)
+      ntmean = mean( AU$npts, na.rm=TRUE )
+      ntsd = sd( AU$npts, na.rm=TRUE )
+
+      if (verbose) message( "nAU: ", nAU, "  mean no pts: ", round(ntmean,2), " sd no pts: ", round(ntsd,2), " sd/mean no pts: ", round(ntsd/ntmean, 2), "  fraction_good_bad: ", round((nAU-ntr) / nAU, 2) )
+      
+      if ( ntmean > areal_units_constraint_nmin   ) {
+        if (verbose) message ("breaking on criterion: areal_units_constraint_nmin")
+        finished=TRUE   # when var is more constrained and mean is greater than target
+      }
       if (  (  ntsd/ntmean ) < fraction_cv ) {
-        if ( areal_units_constraint_nmin < ntmean  ) {
-          message ("breaking on criterion: fraction_cv")
+        if ( ntmean > areal_units_constraint_nmin/2 ) {
+          if (verbose) message ("breaking on criterion: fraction_cv")
           finished=TRUE   # when var is more constrained and mean is greater than target
         }
       }
       if ( (nAU-ntr) / nAU > fraction_good_bad ) {
-        message ("breaking on criterion: fraction_good_bad")
+        if (verbose) message ("breaking on criterion: fraction_good_bad")
         finished=TRUE
       }
       if ( ntr <= 1 ) {
-        message ("breaking on criterion: no more removal candidates")
+        if (verbose) message ("breaking on criterion: no more removal candidates")
         finished=TRUE
       }
       if ( ntr_delta <= 1  ) {
-        message ("breaking on criterion: incremental change in au's stable")
+        if (verbose) message ("breaking on criterion: incremental change in au's stable")
         finished=TRUE
       }
       if ( nAU == nAU_previous ) {
-        message ("breaking on criterion: incremental change in au's stable")
+        if (verbose) message ("breaking on criterion: incremental change in au's stable")
         finished=TRUE
       }
       if ( nAU <= nAU_min ) {
-        message ("breaking on criterion: removal candidates exceeded")
+        if (verbose) message ("breaking on criterion: removal candidates exceeded")
         finished=TRUE
       }
-      message( nAU, "/ ", ntr  )
-      # plot(AU[,"ww"])
+#      if (verbose) message( "Current number of total areal units: ", nAU )
+      # plot(AU[,"npts"])
       # (finished)
-      # print (AU$ww[toremove] )
+      # print (AU$npts[removal_candidates] )
       # print( good)
     }
 
