@@ -151,7 +151,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       ntmean = mean( AU$npts, na.rm=TRUE )
       ntsd = sd( AU$npts, na.rm=TRUE )
 
-      if (verbose) message( "nAU: ", nAU, "  mean no pts: ", round(ntmean,2), " sd no pts: ", round(ntsd,2), " sd/mean no pts: ", round(ntsd/ntmean, 2), "  fraction_good_bad: ", round((nAU-ntr) / nAU, 2) )
+      if (verbose) message( "nAU: ", nAU, "  mean no pts: ", round(ntmean,2), " sd no pts: ", round(ntsd,2), " sd/mean no pts: ", round(ntsd/ntmean, 2) )
       
       if ( ntmean > areal_units_constraint_nmin   ) {
         if (verbose) message ("breaking on criterion: areal_units_constraint_nmin")
@@ -163,11 +163,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
           finished=TRUE   # when var is more constrained and mean is greater than target
         }
       }
-      if ( (nAU-ntr) / nAU > fraction_good_bad ) {
-        if (verbose) message ("breaking on criterion: fraction_good_bad")
-        finished=TRUE
-      }
-      if ( ntr <= 1 ) {
+       if ( ntr <= 1 ) {
         if (verbose) message ("breaking on criterion: no more removal candidates")
         finished=TRUE
       }
