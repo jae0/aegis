@@ -5,7 +5,7 @@ temporal_parameters = function( p=list(), ... ) {
 
   # ----------------------------------
   # determine problem's temporal dimensionality
-
+  
   if ( p$aegis_dimensionality == "space" ) {
 
     #nothing else to do
