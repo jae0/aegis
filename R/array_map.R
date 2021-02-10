@@ -35,6 +35,14 @@
     }
 
 
+    if (method=="ts->year_index") {
+      # time, season index, same as xy->1, except order
+      ij = 1L + aegis_floor(  (coords-origin)/res ) # year index
+      return( ij ) 
+    }
+
+
+
     if (method=="xy->2") {
       return( aegis_floor( cbind( (coords[,1]-origin[1])/res[1] , (coords[,2]-origin[2])/res[2]) ) +1L  ) # do NOT use aegis_floor FP issues cause error
     }
