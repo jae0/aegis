@@ -188,7 +188,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 
     AU = tessellate(xy[good,], outformat="sf", crs=pts_crs) # centroids via voronoi
     AU = st_sf( st_intersection( AU, bnd ) ) # crop
-    message( "After tessilation, there are:  ", nrow(AU), " areal units." )
+    message( "After tesselation, there are:  ", nrow(AU), " areal units." )
     # plot(AU)
     return(AU)
   }

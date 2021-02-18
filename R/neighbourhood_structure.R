@@ -19,7 +19,7 @@ neighbourhood_structure = function( sppoly, areal_units_type="lattice" ) {
   }
 
   # ------------------------------------------------
-  # otherwise, generic lattice, "tessilation", or "inla_mesh" 
+  # otherwise, generic lattice, "tesselation", or "inla_mesh" 
   
     W.nb = poly2nb(sppoly, row.names=sppoly$AUID, queen=TRUE)  # slow .. ~1hr?
     W.remove = which(card(W.nb) == 0)
