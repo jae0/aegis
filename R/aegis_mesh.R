@@ -83,8 +83,8 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
     bnd = st_buffer( bnd, spbuffer )
 
     if (0) {
-      plot(bnd)
-      plot(M, add=T)
+      plot(bnd, reset=FALSE)
+      plot(M, add=TRUE)
     }
 
     good = 1:nrow(M)
@@ -94,18 +94,19 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
     probs = c(fraction_todrop/2, 1-(fraction_todrop/2))
 
     if (tus !="none") tuid = st_drop_geometry(pts) [, tus]
+browser()
 
     finished = FALSE
     while(!finished) {
       AU = tessellate( xy[good,], outformat="sf", crs=pts_crs) # centroids via voronoi
+      AU$good = good  # keep a copy
       if(0) {
         x11();
-        plot(AU)
+        plot(bnd, reset=FALSE)
+        plot(AU, add=T)
         plot(M, add=T)
-        plot(bnd, add=T)
       }
       AU = st_sf( st_intersection( AU, bnd ) ) # crop
-      AU$good = good  # keep a copy
       AU$auid = 1:nrow(AU)
       pts_auid = st_points_in_polygons( pts, AU, varname="auid" )
       AU$npts  = 0
