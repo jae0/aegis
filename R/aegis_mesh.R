@@ -1,7 +1,7 @@
 
 
 aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_type="polygons", 
-  hull_multiplier=6, fraction_cv=1.0, fraction_good_bad=0.8, fraction_todrop=1/10, nAU_min=5, areal_units_constraint_nmin=1, tus="none", verbose=FALSE ) {
+  hull_alpha=15, fraction_cv=1.0, fraction_good_bad=0.8, fraction_todrop=1/10, nAU_min=5, areal_units_constraint_nmin=1, tus="none", verbose=FALSE ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
   #require(rgeos)
@@ -17,7 +17,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
     spbuffer=NULL
     resolution=100
     output_type="polygons"
-    hull_multiplier=6
+    hull_alpha=15
     fraction_reduceby=0.01  # fraction of candidates to drop
     areal_units_constraint_nmin=1
     nAU_min=30
@@ -75,13 +75,12 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 
     if ( is.null(boundary)) boundary="non_convex_hull"
     if ( is.character(boundary) ) {
-#      bnd = aegis_envelope( xy=xy, method=boundary, spbuffer=spbuffer, proj4string=pts_crs,  hull_multiplier=hull_multiplier )
-      bnd = aegis_envelope( xy=xy, method=boundary, spbuffer=spbuffer,  hull_multiplier=hull_multiplier )
+      bnd = aegis_envelope( xy=xy, method=boundary, spbuffer=spbuffer,  hull_alpha=hull_alpha )
+      st_crs(bnd) = pts_crs
     } else {
       bnd = st_transform(boundary, pts_crs)
     }
     bnd = st_buffer( bnd, spbuffer )
-    st_crs(bnd) = pts_crs
 
     if (0) {
       plot(bnd)
@@ -122,8 +121,8 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       }
       AU$npts[ as.numeric(names(npts))] = npts
       AU$npts[ which(!is.finite(AU$npts)) ] = 0
- #     AU$sa = st_area(AU) # [ match( names(npts), as.character(AU$auid) )]
- #     AU$density = AU$npts / AU$sa
+      AU$sa = st_area(AU) # [ match( names(npts), as.character(AU$auid) )]
+      AU$density = AU$npts / AU$sa
       
       removal_candidates = which( AU$npts < areal_units_constraint_nmin )
       
@@ -135,12 +134,12 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
         # removal criterion: smallest counts 
         oo = sort( unique( AU$npts[removal_candidates] ))
         if (length(oo) > 1) {
-  #          dd = stats::quantile( AU$density[removal_candidates] , probs=fraction_todrop, na.rm=TRUE )
+            dd = stats::quantile( AU$density[removal_candidates] , probs=fraction_todrop, na.rm=TRUE )
             ntodrop = max(1, floor(length(oo)*fraction_todrop ) )  # not number but count classes
             omin = oo[1:ntodrop]
             toremove_min = NULL
-   #         toremove_min = which( (AU$npts %in% omin ) & ( AU$density < dd )  )
-            toremove_min = which( (AU$npts %in% omin )   )
+            toremove_min = which( (AU$npts %in% omin ) & ( AU$density < dd )  )
+   #         toremove_min = which( (AU$npts %in% omin )   )
             good = good[-toremove_min] 
         }
       }
@@ -151,7 +150,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       ntmean = mean( AU$npts, na.rm=TRUE )
       ntsd = sd( AU$npts, na.rm=TRUE )
 
-      if (verbose) message( "nAU: ", nAU, "  mean no pts: ", round(ntmean,2), " sd no pts: ", round(ntsd,2), " sd/mean no pts: ", round(ntsd/ntmean, 2) )
+      if (verbose) message( "nAU: ", nAU, " ;   mean no pts: ", round(ntmean,2), " ;  sd no pts: ", round(ntsd,2), " ;  sd/mean no pts: ", round(ntsd/ntmean, 2) )
       
       if ( ntmean > areal_units_constraint_nmin   ) {
         if (verbose) message ("breaking on criterion: areal_units_constraint_nmin")
