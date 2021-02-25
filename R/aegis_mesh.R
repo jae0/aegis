@@ -91,6 +91,8 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
     nAU =  length(good) + 100  # offsets to start
     ntr = length(good) + 100
 
+    probs = c(fraction_todrop/2, 1-(fraction_todrop/2))
+
     if (tus !="none") tuid = st_drop_geometry(pts) [, tus]
 
     finished = FALSE
@@ -134,12 +136,15 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
         # removal criterion: smallest counts 
         oo = sort( unique( AU$npts[removal_candidates] ))
         if (length(oo) > 1) {
-            dd = stats::quantile( AU$density[removal_candidates] , probs=fraction_todrop, na.rm=TRUE )
+            dd = stats::quantile( AU$density, probs=probs, na.rm=TRUE )
+            ss = stats::quantile( AU$sa, probs=probs, na.rm=TRUE )
             ntodrop = max(1, floor(length(oo)*fraction_todrop ) )  # not number but count classes
             omin = oo[1:ntodrop]
             toremove_min = NULL
-            toremove_min = which( (AU$npts %in% omin ) & ( AU$density < dd )  )
-   #         toremove_min = which( (AU$npts %in% omin )   )
+            toremove_min = which( (AU$npts %in% omin ) & (
+               ( AU$density < dd[1] ) | ( AU$density > dd[2] ) | ( AU$sa < ss[1] ) | ( AU$sa > ss[2] ) 
+            ))  
+            #         toremove_min = which( (AU$npts %in% omin )   )
             good = good[-toremove_min] 
         }
       }
