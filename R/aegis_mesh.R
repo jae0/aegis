@@ -1,7 +1,7 @@
 
 
 aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_type="polygons",  
-  hull_alpha=15, fraction_cv=1.0, fraction_good_bad=0.8, fraction_todrop=1/10, nAU_min=5, areal_units_constraint_ntarget=1, tus="none", verbose=FALSE, using_density_based_removal=TRUE ) {
+  hull_alpha=15, fraction_cv=1.0, fraction_good_bad=0.8, fraction_todrop=1/10, nAU_min=5, areal_units_constraint_ntarget=1, tus="none", verbose=FALSE, using_density_based_removal=FALSE ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
   #require(rgeos)
