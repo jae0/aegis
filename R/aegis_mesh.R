@@ -121,7 +121,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
           break()
         }
       }
-      AU$npts[ as.numeric(names(npts))] = npts
+      AU$npts[ match( names(npts), as.character(AU$auid)) ] = npts
       AU$npts[ which(!is.finite(AU$npts)) ] = 0
       if (using_density_based_removal) {
         # testing density based removal
@@ -175,14 +175,14 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
         if (verbose) message ("breaking on criterion: no more removal candidates")
         finished=TRUE
       }
-      if ( ntr_delta <= 1  ) {
-        if (verbose) message ("breaking on criterion: incremental change in au's stable")
-        finished=TRUE
-      }
-      if ( nAU == nAU_previous ) {
-        if (verbose) message ("breaking on criterion: incremental change in au's stable")
-        finished=TRUE
-      }
+  #     if ( ntr_delta <= 1  ) {
+  #       if (verbose) message ("breaking on criterion: incremental change in au's stable")
+  #       finished=TRUE
+  #     }
+  # #    if ( nAU == nAU_previous ) {
+  #      if (verbose) message ("breaking on criterion: incremental change in au's stable")
+  #      finished=TRUE
+  #    }
       if ( nAU <= nAU_min ) {
         if (verbose) message ("breaking on criterion: removal candidates exceeded")
         finished=TRUE
