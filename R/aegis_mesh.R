@@ -147,7 +147,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
             ss = stats::quantile( AU$sa, probs=probs, na.rm=TRUE )
             toremove_min = AU$good[ which( (AU$npts %in% omin ) & (
                 ( AU$density < dd[1] )  | ( AU$sa < ss[1] )   ) 
-            )) ]  
+            ) ]  
           } else {
             toremove_min = AU$good[ which( (AU$npts %in% omin ) ) ]
           }
