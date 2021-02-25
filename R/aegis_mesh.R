@@ -1,7 +1,7 @@
 
 
 aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_type="polygons",  
-  hull_alpha=15, fraction_cv=1.0, fraction_good_bad=0.8, fraction_todrop=1/10, nAU_min=5, areal_units_constraint_nmin=1, tus="none", verbose=FALSE, using_density_based_removal=TRUE ) {
+  hull_alpha=15, fraction_cv=1.0, fraction_good_bad=0.8, fraction_todrop=1/10, nAU_min=5, areal_units_constraint_ntarget=1, tus="none", verbose=FALSE, using_density_based_removal=FALSE ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
   #require(rgeos)
@@ -19,7 +19,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
     output_type="polygons"
     hull_alpha=15
     fraction_reduceby=0.01  # fraction of candidates to drop
-    areal_units_constraint_nmin=1
+    areal_units_constraint_ntarget=1
     nAU_min=30
 
     res = aegis_mesh( pts=pts ) # 0 snap buffer
@@ -27,7 +27,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
     res = aegis_mesh( pts=pts, resolution=1, spbuffer=50, output_type="grid" )
     res = aegis_mesh( pts=pts, resolution=1, output_type="grid.count" )
     res = aegis_mesh( pts=pts, resolution=1, spbuffer=50 )
-    res = aegis_mesh( pts=pts, resolution=5, spbuffer=50, areal_units_constraint_nmin=1 )
+    res = aegis_mesh( pts=pts, resolution=5, spbuffer=50, areal_units_constraint_ntarget=1 )
 
     mypalette = colorRampPalette(c("darkblue","blue3", "green", "yellow", "orange","red3", "darkred"), space = "Lab")(100)
 
@@ -129,7 +129,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
         AU$density = AU$npts / AU$sa
       }
 
-      removal_candidates = which( AU$npts < areal_units_constraint_nmin )
+      removal_candidates = which( AU$npts < areal_units_constraint_ntarget )
       
       ntr_previous = ntr
       ntr = length(removal_candidates)
@@ -163,8 +163,8 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 
       if (verbose) message( "nAU: ", nAU, " ;   mean no pts: ", round(ntmean,2), " ;  sd no pts: ", round(ntsd,2), " ;  sd/mean no pts: ", round(ntsd/ntmean, 2) )
 
-      if ( ntmean > areal_units_constraint_nmin   ) {
-        if (verbose) message ("breaking on criterion: areal_units_constraint_nmin")
+      if ( ntmean > areal_units_constraint_ntarget   ) {
+        if (verbose) message ("breaking on criterion: areal_units_constraint_ntarget")
         finished=TRUE   # when var is more constrained and mean is greater than target
       }
       if (  (  ntsd/ntmean ) <= fraction_cv ) {
