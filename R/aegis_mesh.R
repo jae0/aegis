@@ -78,7 +78,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 #      bnd = aegis_envelope( xy=xy, method=boundary, spbuffer=spbuffer, proj4string=pts_crs,  hull_multiplier=hull_multiplier )
       bnd = aegis_envelope( xy=xy, method=boundary, spbuffer=spbuffer,  hull_multiplier=hull_multiplier )
     } else {
-      bnd = boundary
+      bnd = st_transform(boundary, pts_crs)
     }
     bnd = st_buffer( bnd, spbuffer )
     st_crs(bnd) = pts_crs
