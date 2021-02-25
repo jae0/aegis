@@ -1,7 +1,7 @@
 
 
 aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_type="polygons", ntarget=NA,
-  hull_alpha=15, fraction_cv=1.0, fraction_good_bad=0.8, fraction_todrop=1/10, nAU_min=5, areal_units_constraint_nmin=1, tus="none", verbose=FALSE, using_density_based_removal=FALSE ) {
+  hull_alpha=15, fraction_cv=1.0, fraction_good_bad=0.8, fraction_todrop=1/10, nAU_min=5, areal_units_constraint_nmin=1, tus="none", verbose=FALSE, using_density_based_removal=TRUE ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
   #require(rgeos)
@@ -145,7 +145,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
             dd = stats::quantile( AU$density, probs=probs, na.rm=TRUE )
             ss = stats::quantile( AU$sa, probs=probs, na.rm=TRUE )
             toremove_min = AU$good[ which( (AU$npts %in% omin ) & (
-                ( AU$density < dd[1] ) | ( AU$density > dd[2] ) | ( AU$sa < ss[1] ) | ( AU$sa > ss[2] ) 
+                ( AU$density < dd[1] )  | ( AU$sa < ss[1] ) | ( AU$sa > ss[2] ) 
             )) ]  
           } else {
             toremove_min = AU$good[ which( (AU$npts %in% omin ) ) ]
