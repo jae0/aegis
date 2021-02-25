@@ -94,12 +94,12 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
     probs = c(fraction_todrop/2, 1-(fraction_todrop/2))
 
     if (tus !="none") tuid = st_drop_geometry(pts) [, tus]
-browser()
 
     finished = FALSE
     while(!finished) {
       AU = tessellate( xy[good,], outformat="sf", crs=pts_crs) # centroids via voronoi
-      AU$good = good  # keep a copy
+      AU = st_as_sf(AU)
+      AU[,"good"] = good  # keep a copy
       if(0) {
         x11();
         plot(bnd, reset=FALSE)
