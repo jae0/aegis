@@ -105,6 +105,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
         plot(bnd, add=T)
       }
       AU = st_sf( st_intersection( AU, bnd ) ) # crop
+      AU$good = good  # keep a copy
       AU$auid = 1:nrow(AU)
       pts_auid = st_points_in_polygons( pts, AU, varname="auid" )
       AU$npts  = 0
@@ -135,7 +136,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       
       if (ntr > 1) {
         # removal criterion: smallest counts 
-        oo = sort( unique( AU$npts ))
+        oo = sort( unique( AU$npts[removal_candidates] ))
         if (length(oo) > 1) {
           ntodrop = max(1, floor(length(oo)*fraction_todrop ) )  # not number but count classes
           omin = oo[1:ntodrop]
@@ -143,13 +144,13 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
           if (using_density_based_removal) {
             dd = stats::quantile( AU$density, probs=probs, na.rm=TRUE )
             ss = stats::quantile( AU$sa, probs=probs, na.rm=TRUE )
-            toremove_min = which( (AU$npts %in% omin ) & (
+            toremove_min = AU$good[ which( (AU$npts %in% omin ) & (
                 ( AU$density < dd[1] ) | ( AU$density > dd[2] ) | ( AU$sa < ss[1] ) | ( AU$sa > ss[2] ) 
-            ))  
+            )) ]  
           } else {
-            toremove_min = which( (AU$npts %in% omin )   )
+            toremove_min = AU$good[ which( (AU$npts %in% omin ) ) ]
           }
-            good = good[-toremove_min] 
+          good = good[-toremove_min] 
         }
       }
       
