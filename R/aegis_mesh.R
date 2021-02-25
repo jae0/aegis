@@ -1,6 +1,6 @@
 
 
-aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_type="polygons", ntarget=NA,
+aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_type="polygons",  
   hull_alpha=15, fraction_cv=1.0, fraction_good_bad=0.8, fraction_todrop=1/10, nAU_min=5, areal_units_constraint_nmin=1, tus="none", verbose=FALSE, using_density_based_removal=TRUE ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
@@ -162,12 +162,6 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       ntsd = sd( AU$npts, na.rm=TRUE )
 
       if (verbose) message( "nAU: ", nAU, " ;   mean no pts: ", round(ntmean,2), " ;  sd no pts: ", round(ntsd,2), " ;  sd/mean no pts: ", round(ntsd/ntmean, 2) )
-      if (!is.na(ntarget)) {
-        if ( nAU >= ntarget   ) {
-          if (verbose) message ("breaking on criterion: areal_units_ntarget")
-          finished=TRUE   # when var is more constrained and mean is greater than target
-        }
-      } 
 
       if ( ntmean > areal_units_constraint_nmin   ) {
         if (verbose) message ("breaking on criterion: areal_units_constraint_nmin")
