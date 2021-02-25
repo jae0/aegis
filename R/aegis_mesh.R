@@ -151,7 +151,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
           } else {
             toremove_min = AU$good[ which( (AU$npts %in% omin ) ) ]
           }
-          good = good[-toremove_min] 
+          good = AU$good[-toremove_min]  # update good list 
         }
       }
       
