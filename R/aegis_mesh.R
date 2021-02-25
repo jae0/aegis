@@ -162,7 +162,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 
       if (verbose) message( "nAU: ", nAU, " ;   mean no pts: ", round(ntmean,2), " ;  sd no pts: ", round(ntsd,2), " ;  sd/mean no pts: ", round(ntsd/ntmean, 2) )
       if (!is.na(ntarget)) {
-        if ( nAU > = ntarget   ) {
+        if ( nAU >= ntarget   ) {
           if (verbose) message ("breaking on criterion: areal_units_ntarget")
           finished=TRUE   # when var is more constrained and mean is greater than target
         }
