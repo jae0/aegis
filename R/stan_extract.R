@@ -8,6 +8,7 @@ stan_extract = function( x, vns=NULL ) {
   out = list()
   
   names_x = setdiff(  names(x) , c(".chain", ".iteration", ".draw", "lp__") )
+  x = x[ , names_x]
   niter = dim(x)[1]
 
   if (is.null(vns)) vns = term::pars( term::term( names_x ) )

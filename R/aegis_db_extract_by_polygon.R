@@ -66,7 +66,7 @@ aegis_db_extract_by_polygon = function( sppoly, spatial_domain="SSE", covfields=
     for ( vn in cvn ) {
       if (is.vector(covfields[[vn]])) {
          datatype[[vn]] = "vector"
-         res  = aggregate( rowindex ~ AUID, slot(pts, "data"), fnsummary, na.action=na.omit, drop=FALSE )
+         res  = aggregate( rowindex ~ AUID,  pts, fnsummary, na.action=na.omit, drop=FALSE )
          mc = matrix(NA, nrow=length(auid), ncol=1, dimnames=list(auid, vn ) )
          mc[ match(res$AUID, auid), ] = res$rowindex[,1][]
          means[[vn]] = mc[]
@@ -79,7 +79,7 @@ aegis_db_extract_by_polygon = function( sppoly, spatial_domain="SSE", covfields=
 
       if (is.matrix(covfields[[vn]])) {
         datatype[[vn]] = "matrix"
-        m = aggregate( rowindex ~ AUID, slot(pts, "data"), fnsummary_mean, na.action=na.omit, drop=FALSE )
+        m = aggregate( rowindex ~ AUID, pts, fnsummary_mean, na.action=na.omit, drop=FALSE )
         if (is.matrix(m$rowindex)) {
           mc = matrix( NA, nrow=length(auid), ncol=ncol(m$rowindex), dimnames=list( auid, dimnames(covfields[[vn]])[[2]] ) )
           mc[ match(m$AUID, auid), ] = m$rowindex[]
@@ -91,7 +91,7 @@ aegis_db_extract_by_polygon = function( sppoly, spatial_domain="SSE", covfields=
           means[[vn]] = mc[]
         }
 
-        s = aggregate( rowindex ~ AUID, slot(pts, "data"), fnsummary_sd, na.action=na.omit, drop=FALSE )
+        s = aggregate( rowindex ~ AUID, pts, fnsummary_sd, na.action=na.omit, drop=FALSE )
         if (is.matrix(s$rowindex)) {
           sc = matrix( NA, nrow=length(auid), ncol=ncol(s$rowindex), dimnames=list( auid, dimnames(covfields[[vn]])[[2]] ) )
           sc[ match(s$AUID, auid), ] = s$rowindex[]
