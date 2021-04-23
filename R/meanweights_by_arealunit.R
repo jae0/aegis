@@ -6,6 +6,7 @@ meanweights_by_arealunit = function( set, AUID, yrs, fillall=FALSE, annual_break
   out = list( AUID=AUID )
   out$meanweights = matrix(NA, ncol=length(yrs), nrow=length(AUID), dimnames=list( AUID, yrs) )
   out$meanweights_overall = rep(NA, length=length(yrs))
+
   for (y in 1:length(yrs) ) {
     i = which( set$yr==yrs[y] )
     # aggregate the weight at each stratum and then average
@@ -47,3 +48,4 @@ meanweights_by_arealunit = function( set, AUID, yrs, fillall=FALSE, annual_break
 
   return(out)
 }
+
