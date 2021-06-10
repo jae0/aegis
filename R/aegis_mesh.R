@@ -93,7 +93,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 
     probs = c(fraction_todrop/2, 1-(fraction_todrop/2))
 
-    if (tus !="none") tuid = st_drop_geometry(pts) [, tus]
+    if (tus !="none") time_id = st_drop_geometry(pts) [, tus]
 
     finished = FALSE
     while(!finished) {
@@ -107,25 +107,25 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
         plot(M, add=T)
       }
       AU = st_sf( st_intersection( AU, bnd ) ) # crop
-      AU$auid = 1:nrow(AU)
-      pts_auid = st_points_in_polygons( pts, AU, varname="auid" )
+      AU$internal_uid = 1:nrow(AU)
+      pts_internal_uid = st_points_in_polygons( pts, AU, varname="internal_uid" )
       AU$npts  = 0
       if ( tus == "none" ) {
-        npts = tapply( rep(1, length(pts_auid)), pts$auid, sum, na.rm=T )
+        npts = tapply( rep(1, length(pts_internal_uid)), pts$internal_uid, sum, na.rm=T )
       } else {
-        if ( length(pts_auid) == length(tuid) ) {
-          xx = xtabs(  ~  pts_auid + tuid, na.action=na.omit )
+        if ( length(pts_internal_uid) == length(time_id) ) {
+          xx = xtabs(  ~  pts_internal_uid + time_id, na.action=na.omit )
           xx[xx > 0] = 1
           npts = rowSums(xx) # number of unique time units in each areal unit
         } else {
           break()
         }
       }
-      AU$npts[ match( names(npts), as.character(AU$auid)) ] = npts
+      AU$npts[ match( names(npts), as.character(AU$internal_uid)) ] = npts
       AU$npts[ which(!is.finite(AU$npts)) ] = 0
       if (using_density_based_removal) {
         # testing density based removal
-        AU$sa = st_area(AU) # [ match( names(npts), as.character(AU$auid) )]
+        AU$sa = st_area(AU) # [ match( names(npts), as.character(AU$internal_uid) )]
         AU$density = AU$npts / AU$sa
       }
 
