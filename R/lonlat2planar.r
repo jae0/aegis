@@ -1,9 +1,12 @@
 
-  lonlat2planar = function ( x, proj.type, input_names=c("lon", "lat"), newnames = c("plon", "plat") ) {
+  lonlat2planar = function ( x, proj.type, input_names=c("lon", "lat"), newnames = c("plon", "plat") , returntype="DF" ) {
     #\\ convert lon/lat to a projected surface using proj
     #\\ proj.type can be an internal code such as "utm20" or a proj4 argument
     #\\ output scale is defined in the +units=km (default for bio) or +units=m (default for proj)
     # first try an internal conversion /lookup for CRS
+    require(data.table)
+    setDT(x)
+
     pjj = NULL
     pjj = projection_proj4string(proj.type)
     if (!is.null(pjj)) {
@@ -27,11 +30,13 @@
     }
 
     # y = rgdal::project( as.matrix(x[,input_names]), proj=crsX , inv=F )
-    y = sf::sf_project( from=sf::st_crs("EPSG:4326"), to=proj4.params, pts=as.matrix(x[,input_names]))
+    y = sf::sf_project( from=sf::st_crs("EPSG:4326"), to=proj4.params, pts=as.matrix(x[,..input_names]))
+
     colnames(y) = newnames
     for (i in 1:length( newnames)) {
       if ( newnames[i] %in% colnames(x) ) x[, newnames[i]] = NULL
     }
-    x = as.data.frame(cbind(x,y))
+    x = cbind(x,y)
+    if (returntype=="DF") setDF(x)
     return (x)
   }

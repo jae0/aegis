@@ -14,6 +14,24 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
     c( ps$corners$lon[1], ps$corners$lat[2] )
   )
 
+
+  if ( spatial_domain %in% c( "canada.east.superhighres", "canada.east.highres", "canada.east" ) ) {
+    z_range = c( 0, 5000 )
+  }
+
+  if ( spatial_domain == "SSE.mpa" ) {
+    z_range = c( 0, 2000 )
+  }
+
+  if ( spatial_domain =="SSE" ) {
+    z_range = c( 0, 800 )
+  }
+
+  if ( spatial_domain == "snowcrab" ) {
+    z_range = c( 10, 350 )
+  }
+
+
   if (method=="sf") {
 
     bnd = (
@@ -34,27 +52,96 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
       }
     }
 
-    if ( spatial_domain %in% c( "canada.east.superhighres", "canada.east.highres", "canada.east" ) ) {
-      inside = which( st_points_in_polygons( Z, st_transform(bnd, crs=st_crs(Z) ) ) & Z$z < 5000 & Z$z > 0 )
-    }
+    bnd = st_transform(bnd, crs=st_crs(Z) ) 
+    inside = which( st_points_in_polygons( Z, bnd) & Z$z < z_range[2] & Z$z > z_range[1] )
 
     if ( spatial_domain == "SSE.mpa" ) {
-      inside = which( st_points_in_polygons( Z, st_transform(bnd, crs=st_crs(Z) )  ) & Z$z < 2000 & Z$z > 0 )
-    }
-
-    if ( spatial_domain =="SSE" ) {
-      inside = which( st_points_in_polygons( Z, st_transform(bnd, crs=st_crs(Z) )  ) & Z$z <  800 & Z$z > 0 )
+      bnd = polygon_db( polyid="scotia.fundy.with.buffer" )
+      bnd = st_transform(bnd, crs=st_crs(Z) ) 
+      jj = which( st_points_in_polygons( Z[inside,], bnd)  )
+      if (length( jj) > 0) inside = inside[ jj]
     }
 
     if ( spatial_domain == "snowcrab" ) {
-      #\\ NOTE::: snowcrab baseline == SSE baseline, except it is a subset with the following modifications:
-      inside = which( st_points_in_polygons( Z, st_transform(bnd, crs=st_crs(Z) )  ) & Z$z < 350 & Z$z > 10 )
-    }
-    return(inside)
-}
+      #\\ NOTE::: snowcrab baseline == SSE baseline, except it is a subset
+      Zco = st_coordinates( st_transform(Z[inside,], st_crs(ps$aegis_proj4string_planar_km )) )
+      tokeep = polygon_inside( Zco[,c(1:2)], region="cfaall", planar=T, proj.type=ps$aegis_proj4string_planar_km )
 
-  if (method=="fast") {
- 
+      # filter out area 4X
+      corners = as.data.frame( cbind(
+        lon = c(-63, -65.5, -56.8, -66.3 , -63),
+        lat = c( 44.75, 43.8, 47.5, 42.8, 44.75 )
+      ) )
+
+      dd1 = which( Zco[,1] < corners$lon[1] & Zco[,2] > corners$lat[1]  )
+      dd2 = which( Zco[,1] < corners$lon[2] & Zco[,2] > corners$lat[2]  )      
+      dd3 = which( Zco[,1] > corners$lon[3] ) # east lim
+      dd4 = which( Zco[,1] < corners$lon[4] )  #west lim
+      dd5 = which( Zco[,2] > corners$lat[3]  ) # north lim
+      dd6 = which( Zco[,2] < corners$lat[4]  )  #south lim
+      
+      todrop = unique( c(dd1, dd2, dd2, dd4, dd5, dd6) ) 
+
+      if (length( tokeep) > 0 & length(todrop) > 0)  tokeep = setdiff( tokeep, todrop )
+
+      if (length( tokeep) > 0)  inside = inside[ tokeep ]
+    }
+
+    return(inside)
+  }
+
+
+  if (method=="sp") {
+    # faster ..
+      if (!exists("plon", Z)) Z = lonlat2planar( Z, proj.type=ps$aegis_proj4string_planar_km ) # convert to internal projection
+  
+      inside = which(
+        Z$plon >= ps$corners$plon[1] & Z$plon <= ps$corners$plon[2] &
+        Z$plat >= ps$corners$plat[1] & Z$plat <= ps$corners$plat[2]  
+      )
+
+      i = Z$z[inside] < z_range[2] & Z$z[inside] > z_range[1] 
+
+      if (length(i) > 0) inside = inside[i]
+
+      if ( spatial_domain == "SSE.mpa" ) {
+        bnd = polygon_db( polyid="scotia.fundy.with.buffer" )
+        bnd = lonlat2planar( bnd, proj.type=ps$aegis_proj4string_planar_km ) # convert to internal projection
+        jj = which( sp::point.in.polygon( Z$plon[inside], Z$plat[inside], bnd$plon, bnd$plat) != 0 )
+        if (length( jj) > 0) inside = inside[ jj ]
+      }
+
+      if ( spatial_domain == "snowcrab" ) {
+        #\\ NOTE::: snowcrab baseline == SSE baseline, except it is a subset
+        jj = polygon_inside( Z[ inside,c(1:2) ], region="cfaall", planar=TRUE, proj.type=ps$aegis_proj4string_planar_km )
+        if (length( jj) > 0) inside = inside[ jj ]
+
+        # filter out area 4X
+        corners = data.frame( cbind(
+          lon = c(-63, -65.5, -56.8, -66.3 ),
+          lat = c( 44.75, 43.8, 47.5, 42.8 )
+        ) )
+        corners = lonlat2planar( corners, proj.type=ps$aegis_proj4string_planar_km )
+        
+        dd1 = which( Z$plon[inside] < corners$plon[1] & Z$plat[inside] > corners$plat[1]  )
+        if (length( dd1) > 0) inside = inside[- dd1 ]
+
+        dd2 = which( Z$plon[inside] < corners$plon[2] & Z$plat[inside] > corners$plat[2]  )
+        if (length( dd2) > 0) inside = inside[- dd2 ]
+        
+        dd3 = which( Z$plon[inside] > corners$plon[3] ) # east lim
+        if (length( dd3) > 0) inside = inside[- dd3 ]
+        
+        dd4 = which( Z$plon[inside] < corners$plon[4] )  #west lim
+        if (length( dd4) > 0) inside = inside[- dd4 ]
+        
+        dd5 = which( Z$plat[inside] > corners$plat[3]  ) # north lim
+        if (length( dd5) > 0) inside = inside[- dd5 ]
+        
+        dd6 = which( Z$plat[inside] < corners$plat[4]  )  #south lim
+        if (length( dd6) > 0) inside = inside[- dd6 ]
+
+      }
      return(inside)
  
   }
