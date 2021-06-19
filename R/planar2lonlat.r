@@ -35,7 +35,7 @@
       }
 
       # y = rgdal::project( as.matrix(x[,c("plon", "plat")]), crsX, inv=TRUE )
-      y = sf::sf_project( from=proj4.params, to=sf::st_crs("EPSG:4326"), pts=as.matrix(x[, ..input_names ]) )
+      y = sf::sf_project( from=proj4.params, to=sf::st_crs("EPSG:4326"), pts=as.matrix(x[, input_names, with=FALSE ]) )
 
       colnames(y) = newnames
       for (i in 1:length( newnames)) {
