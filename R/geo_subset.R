@@ -31,7 +31,7 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
     z_range = c( 10, 350 )
   }
 
-
+ 
   if (method=="sf") {
 
     bnd = (
@@ -53,7 +53,12 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
     }
 
     bnd = st_transform(bnd, crs=st_crs(Z) ) 
-    inside = which( st_points_in_polygons( Z, bnd) & Z$z < z_range[2] & Z$z > z_range[1] )
+ 
+    if (exists("z", Z, )) {
+      inside = which( st_points_in_polygons( Z, bnd) & Z$z < z_range[2] & Z$z > z_range[1] )
+    } else {
+      inside = which( st_points_in_polygons( Z, bnd)  )
+    }
 
     if ( spatial_domain == "SSE.mpa" ) {
       bnd = polygon_db( polyid="scotia.fundy.with.buffer" )
@@ -100,10 +105,11 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
         Z$plat >= ps$corners$plat[1] & Z$plat <= ps$corners$plat[2]  
       )
 
-      i = Z$z[inside] < z_range[2] & Z$z[inside] > z_range[1] 
-
-      if (length(i) > 0) inside = inside[i]
-
+      if (exists("z", Z, )) {
+        i = Z$z[inside] < z_range[2] & Z$z[inside] > z_range[1] 
+        if (length(i) > 0) inside = inside[i]
+      }
+      
       if ( spatial_domain == "SSE.mpa" ) {
         bnd = polygon_db( polyid="scotia.fundy.with.buffer" )
         bnd = lonlat2planar( bnd, proj.type=ps$aegis_proj4string_planar_km ) # convert to internal projection
