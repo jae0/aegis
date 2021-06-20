@@ -3,6 +3,8 @@
       #// inverse projection: planar to lon/lat using proj
       #// convert planar coord systems (length scale defined in the CRS as +units=km or m)  to lon-lat
       require(data.table)
+      setDT(x)
+
       ## use of this is deprecated
       if ( !is.null( planar.coord.scale)) {
         # planar.coord.scale is the multiplier applied upon the planar coords

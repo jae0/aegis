@@ -4,6 +4,8 @@ lookup_point_data = function( p, M, tolookup="bathymetry" ){
 
   # --------------------------
 
+  setDF(M)
+  
   if ("bathymetry" %in% tolookup) {
     require(aegis.bathymetry)
 
