@@ -1,7 +1,10 @@
 
-    planar2lonlat = function (x, proj.type, planar.coord.scale=NULL, input_names=c("plon", "plat"), newnames = c("lon", "lat"), returntype="DF"  ) {
+    planar2lonlat = function (x, proj.type, planar.coord.scale=NULL, input_names=c("plon", "plat"), newnames = c("lon", "lat") ) {
       #// inverse projection: planar to lon/lat using proj
       #// convert planar coord systems (length scale defined in the CRS as +units=km or m)  to lon-lat
+
+      datatype = ifelse("data.table" %in% class(x), "data.table", "data.frame")
+
       require(data.table)
       setDT(x)
 
@@ -41,10 +44,10 @@
 
       colnames(y) = newnames
       for (i in 1:length( newnames)) {
-        if ( newnames[i] %in% colnames(x) ) x[, newnames[i]] = NULL
+        if ( newnames[i] %in% colnames(x) ) x[[newnames[i]]] = NULL
       }
       x =  cbind(x,y) 
-      if (returntype=="DF") setDF(x)
+      if (datatype != "data.table") setDF(x)
       return (x)
     }
 

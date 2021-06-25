@@ -1,6 +1,6 @@
 aegis_db_lookup = function( X, lookupvars, xy_vars=c("lon", "lat"), time_var="timestamp", spatial_domain="SSE", yrs = c(1950:lubridate::year(lubridate::now() ) ) ) {
 
-  # wrapper around aegis_lookup to make in-situ lookup from stmv simpler
+  # wrapper around aegis_lookup_stmv to make in-situ lookup from stmv simpler
   # spatial_domain = "SSE" is the default and really the only supported projection ..
   # others are possible but 10.surveys and associated depndencies need to be created as well
 
@@ -26,7 +26,7 @@ aegis_db_lookup = function( X, lookupvars, xy_vars=c("lon", "lat"), time_var="ti
 
   X = lonlat2planar( X, proj.type=p$aegis_proj4string_planar_km )  # SSE crs is "+proj=utm +ellps=WGS84 +zone=20 +units=km"
 
-  X_new = aegis_lookup( DS="all", p=p, locs=X[,c("plon", "plat")], timestamp=X[,time_var], varnames=lookupvars )
+  X_new = aegis_lookup_stmv( DS="all", p=p, locs=X[,c("plon", "plat")], timestamp=X[,time_var], varnames=lookupvars )
   newvars = setdiff( lookupvars, names(X) )
   for ( vn in setdiff( lookupvars, newvars ) ) {
     i = which( !is.finite(X[,vn]) )

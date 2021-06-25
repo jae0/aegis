@@ -129,7 +129,7 @@
       # sp_vars = intersect( c("dZ", "ddZ", "substrate.grainsize", "tmean.climatology", "tsd.climatology", "b.sd", "b.range", "s.sd", "s.range", "t.range" ), p$stmv_variables$COV )
       newvars = setdiff(p$stmv_variables$COV, names(INP) )
       if (length(newvars) > 0) {
-        sn = aegis_lookup( p=p, DS="spatial", locsmap=locsmap, varnames=newvars )
+        sn = aegis_lookup_stmv( p=p, DS="spatial", locsmap=locsmap, varnames=newvars )
         if (!is.null(sn)) {
           if (ncol(sn) > 0)  INP = cbind( INP,  sn )
         }
@@ -138,7 +138,7 @@
       # st_vars = intersect( c( "tmean", "tsd", "tamplitude" ), p$stmv_variables$COV )
       newvars = setdiff(p$stmv_variables$COV, names(INP) )
       if (length(newvars) > 0) {
-        sn = aegis_lookup( p=p, DS="spatial.annual", locsmap=locsmap, timestamp=INP[,"timestamp"], varnames=newvars )
+        sn = aegis_lookup_stmv( p=p, DS="spatial.annual", locsmap=locsmap, timestamp=INP[,"timestamp"], varnames=newvars )
         if (!is.null(sn)) {
         # colnames( sn  ) = st_vars
           if (ncol(sn) >0) INP = cbind( INP,  sn )
