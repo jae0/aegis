@@ -33,13 +33,18 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
  
   if (method=="sf") {
 
-    bnd = (
-      st_multipoint( corners )
-      %>% st_sfc( crs=st_crs(projection_proj4string("lonlat_wgs84")) )
-      %>% st_cast("POLYGON" )
-      %>% st_make_valid()
-    )
+    pts2poly = function(x) {
+      require(sf)
+      out = (
+        st_multipoint( as.matrix(x) )
+        %>% st_sfc( crs=st_crs(projection_proj4string("lonlat_wgs84")) )
+        %>% st_cast("POLYGON" )
+        %>% st_make_valid()
+      )
+      return(out)
+    }
 
+    bnd = pts2poly(corners)
 
     if (!inherits(Z, "sf")) {
       if (exists("lon", Z)) {
@@ -70,22 +75,23 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
       #\\ NOTE::: snowcrab baseline == SSE baseline, except it is a subset
 
       region = aegis.polygons::polygon_internal_code( "cfaall" )
-      poly = list()
-      for (i in 1:length(region) ) {
-        y = read.table( aegis.polygons::polygon_file(region[i]), header=FALSE)
+      if (length(region) > 0) {
+        y = read.table( aegis.polygons::polygon_file(region[1]), header=FALSE)
         names(y) =c("lon", "lat")
-        poly[i] = (
-          st_multipoint( as.matrix(y) )
-          %>% st_sfc( crs=st_crs(projection_proj4string("lonlat_wgs84")) )
-          %>% st_cast("POLYGON" )
-          %>% st_make_valid()
-        )
+        pbnd = pts2poly(y)
       }
-      pbnd = poly[[1]]
-      if (length(poly) > 1 ) {
-        for (i in 2:length(poly) ) pbnd = st_union( st_buffer(pbnd, 0.001), st_buffer(poly[[i]], 0.001) )
+      if (length(region) > 1) {
+        for (i in 2:length(region) ) {
+          y = read.table( aegis.polygons::polygon_file(region[i]), header=FALSE)
+          names(y) =c("lon", "lat")
+          pbnd = st_union( st_buffer(pbnd, 0.0001), st_buffer( pts2poly(y), 0.0001) )
+        
+        }
       }
-      pbnd =  st_make_valid( st_simplify(pbnd) )
+
+      pbnd = st_make_valid(  pbnd  )
+      pbnd = st_transform(pbnd, crs=st_crs(Z) ) 
+
       tokeep = st_points_in_polygons( Z, pbnd) 
       
       # filter out area 4X
