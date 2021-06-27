@@ -14,7 +14,6 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
     c( ps$corners$lon[1], ps$corners$lat[2] )
   )
 
-
   if ( spatial_domain %in% c( "canada.east.superhighres", "canada.east.highres", "canada.east" ) ) {
     z_range = c( 0, 5000 )
   }
@@ -70,7 +69,8 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
     if ( spatial_domain == "snowcrab" ) {
       #\\ NOTE::: snowcrab baseline == SSE baseline, except it is a subset
       Zco = st_coordinates( st_transform(Z[inside,], st_crs(ps$aegis_proj4string_planar_km )) )
-      tokeep = polygon_inside( Zco[,c(1:2)], region="cfaall", planar=T, proj.type=ps$aegis_proj4string_planar_km )
+      names(Zco ) =c("plon", "plat")
+      tokeep = polygon_inside( Zco[,c(1:2)], region="cfaall", planar=TRUE, proj.type=ps$aegis_proj4string_planar_km )
 
       # filter out area 4X
       corners = as.data.frame( cbind(
