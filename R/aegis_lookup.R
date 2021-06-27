@@ -207,13 +207,13 @@ aegis_lookup = function(
 
         LU_map = paste( 
           array_map( "xy->1", LU[,c("plon","plat")], gridparams=p$gridparams ), 
-          array_map( "ts->1", LU[,c("yr")], dims=c(p$ny), res=c( 1  ), origin=c( min(p$yrs) ) ), 
+          array_map( "ts->year_index", LU[,c("yr")], dims=c(p$ny), res=c( 1  ), origin=c( min(p$yrs) ) ), 
           sep="_" 
         )
 
         LOCS_map = paste(
           array_map( "xy->1", LOCS[, c("plon","plat")], gridparams=p$gridparams ), 
-          array_map( "ts->1", LOCS[, c("yr" )], dims=c(p$ny ), res=c( 1  ), origin=c( min(p$yrs) ) ), 
+          array_map( "ts->year_index", LOCS[, c("yr" )], dims=c(p$ny ), res=c( 1  ), origin=c( min(p$yrs) ) ), 
           sep="_"
         )
 
@@ -239,7 +239,7 @@ aegis_lookup = function(
         LU = sf::st_transform( LU, crs=st_crs(AU) )
         LU_map = paste( 
           st_points_in_polygons( pts=LU, polys=AU[, "AUID"], varname= "AUID" ), 
-          array_map( "ts->1", st_drop_geometry( LU) [,c("yr" )], dims=c(p$ny ), res=c( 1  ), origin=c( min(p$yrs) ) ), 
+          array_map( "ts->year_index", st_drop_geometry( LU) [,c("yr" )], dims=c(p$ny ), res=c( 1  ), origin=c( min(p$yrs) ) ), 
           sep="_"
         )
 
@@ -250,7 +250,7 @@ aegis_lookup = function(
         LOCS = sf::st_transform( LOCS, crs=st_crs(AU) )
         LOCS_map =  paste( 
           st_points_in_polygons( pts=LOCS, polys = AU[, "AUID"], varname= "AUID" ),  
-          array_map( "ts->1", st_drop_geometry(LOCS)[ , c("yr") ], dims=c(p$ny), res=c( 1 ), origin=c( min(p$yrs) ) ), 
+          array_map( "ts->year_index", st_drop_geometry(LOCS)[ , c("yr") ], dims=c(p$ny), res=c( 1 ), origin=c( min(p$yrs) ) ), 
           sep="_"
         )
 
@@ -313,13 +313,13 @@ aegis_lookup = function(
         
       #   LOCS_map =  paste( 
       #     as.character( LOCS_AUID ),  
-      #     array_map( "ts->1", LOCS[ , c("yr", "dyear") ], dims=c(p$ny, p$nw), res=c( 1, 1/p$nw ), origin=c( min(p$yrs), 0) ), 
+      #     array_map( "ts->year_index", LOCS[ , c("yr", "dyear") ], dims=c(p$ny, p$nw), res=c( 1, 1/p$nw ), origin=c( min(p$yrs), 0) ), 
       #     sep="_"
       #   )
 
         LU_map = paste( 
           st_points_in_polygons( pts=LU, polys=AU_target[, "AUID"], varname= "AUID" ),
-          array_map( "ts->1", LU[,c("yr", "dyear")], dims=c(p$ny ), res=c( 1  ), origin=c( min(p$yrs) ) ), 
+          array_map( "ts->year_index", LU[,c("yr", "dyear")], dims=c(p$ny ), res=c( 1  ), origin=c( min(p$yrs) ) ), 
           sep="_"
         )
         
