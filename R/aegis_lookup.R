@@ -34,9 +34,10 @@ aegis_lookup = function(
       p = bathymetry_parameters(  project_class=lookup_from, year.assessment=year.assessment )
       if ( lookup_from %in% c("core" ) )  {
         LU = bathymetry_db ( p=p, DS=lookup_from_class )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
-        vn = "z"
-        vn2 = paste( vn, "mean", sep="." )
-        names(LU)[ which(names(LU) == vn2 ) ] =  vn
+        if (   lookup_from_class=="aggregated_data" ) {
+          vn2 = paste( p$variabletomodel, "mean", sep="." )
+          names(LU)[ which(names(LU) == vn2 ) ] =  p$variabletomodel
+        }
       }
       if ( lookup_from %in% c("stmv", "hybrid") ) {
         LU = bathymetry_db ( p=p, DS="complete" )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
@@ -48,9 +49,10 @@ aegis_lookup = function(
       p = substrate_parameters(  project_class=lookup_from, year.assessment=year.assessment )
       if ( lookup_from %in% c("core" ) )  {
         LU = substrate_db ( p=p, DS=lookup_from_class )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
-        vn = "substrate.grainsize"
-        vn2 = paste( vn, "mean", sep="." )
-        names(LU)[ which(names(LU) == vn2 ) ] =  vn
+        if (   lookup_from_class=="aggregated_data" ) {
+          vn2 = paste( p$variabletomodel, "mean", sep="." )
+          names(LU)[ which(names(LU) == vn2 ) ] =  p$variabletomodel
+        }
       }
       if ( lookup_from %in% c("stmv", "hybrid") ) {
         LU = substrate_db ( p=p, DS="complete" )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
@@ -64,7 +66,13 @@ aegis_lookup = function(
     if ( "temperature" %in% dc ) {
       if (is.null(year.assessment)) year.assessment = max( lubridate::year(LOCS$timestamp) )
       p = temperature_parameters(  project_class=lookup_from, year.assessment=year.assessment )
-      if ( lookup_from %in% c("core" ) )  LU = temperature_db ( p=p, DS=lookup_from_class )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
+      if ( lookup_from %in% c("core" ) ) {
+        LU = temperature_db ( p=p, DS=lookup_from_class )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
+        if (   lookup_from_class=="aggregated_data" ) {
+          vn2 = paste( p$variabletomodel, "mean", sep="." )
+          names(LU)[ which(names(LU) == vn2 ) ] =  p$variabletomodel
+        }
+      }
       if ( lookup_from %in% c("stmv", "hybrid") )  LU = temperature_db ( p=p, DS="complete" )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
       if ( lookup_from %in% c("carstm" )) LU = carstm_model( p=p, DS="carstm_modelled_summary" ) 
     }
@@ -74,24 +82,28 @@ aegis_lookup = function(
       p = speciescomposition_parameters(  project_class=lookup_from, variabletomodel=vnames, year.assessment=year.assessment  )
       if ( lookup_from %in% c("core" ) )  {
         LU = speciescomposition_db ( p=p, DS="speciescomposition" )   # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
-        names(LU)[ which(names(LU) == vnames_from ) ] =  vnames
+        if (   lookup_from_class=="aggregated_data" ) {
+          vn2 = paste( p$variabletomodel, "mean", sep="." )
+          names(LU)[ which(names(LU) == vn2 ) ] =  p$variabletomodel
+        }
       }
       if ( lookup_from %in% c( "stmv", "hybrid") )  LU = aegis_db( p=p, DS="complete" )   
       if ( lookup_from %in% c("carstm" )) LU = carstm_model( p=p, DS="carstm_modelled_summary" ) 
     }
 
-
-
     if (is.null(LU)) stop( "lookup data not found")
 
+ 
+    # ------------------
 
     if (p$aegis_dimensionality =="space" ) {
 
       if ( lookup_from %in% c("core") & lookup_to == "points" )  {
         # matching to point (LU) to point (LOCS)
         # if any still missing then use stmv depths
-        LU = lonlat2planar( LU, proj.type=p$aegis_proj4string_planar_km)
-        LOCS = lonlat2planar(LOCS, proj.type=p$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
+        if (!exists("plon", LU)) LU = lonlat2planar(LU, proj.type=p$aegis_proj4string_planar_km)
+        if (!exists("plon", LOCS)) LOCS = lonlat2planar(LOCS, proj.type=p$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
+
         LOCS[[vn]] = LU[ match(
             array_map( "xy->1", LOCS[, c("plon","plat")], gridparams=p$gridparams ),
             array_map( "xy->1", LU[,c("plon","plat")], gridparams=p$gridparams )
@@ -101,7 +113,7 @@ aegis_lookup = function(
 
       if ( lookup_from %in% c("core") & lookup_to == "areal_units" )  {
         # point (LU) -> areal unit (LOCS)
-        LU = planar2lonlat(LU, p$aegis_proj4string_planar_km)
+        if (!exists("lon", LU)) LU = planar2lonlat(LU, p$aegis_proj4string_planar_km)
         LU = sf::st_as_sf( LU, coords=c("lon", "lat") )
         st_crs(LU) = st_crs( projection_proj4string("lonlat_wgs84") )
         LU = sf::st_transform( LU, crs=st_crs(LOCS) )
@@ -112,8 +124,8 @@ aegis_lookup = function(
 
       if ( lookup_from %in% c("stmv", "hybrid") & lookup_to == "points" )  {
         # matching to point (LU) to point (LOCS)
-        LU = lonlat2planar(LU, proj.type=p$aegis_proj4string_planar_km)
-        LOCS = lonlat2planar(LOCS, proj.type=p$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
+        if (!exists("plon", LU)) LU = lonlat2planar(LU, proj.type=p$aegis_proj4string_planar_km)
+        if (!exists("plon", LOCS)) LOCS = lonlat2planar(LOCS, proj.type=p$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
         LOCS[,vnames] = LU[ match(
             array_map( "xy->1", LOCS[, c("plon","plat")], gridparams=p$gridparams ),
             array_map( "xy->1", LU[,c("plon","plat")], gridparams=p$gridparams )
@@ -123,7 +135,8 @@ aegis_lookup = function(
 
       if ( lookup_from %in% c("stmv", "hybrid") & lookup_to == "areal_units" )  {
         # point (LU) -> areal unit (LOCS)
-        LU = planar2lonlat(LU, proj.type=p$aegis_proj4string_planar_km)
+        if (!exists("lon", LU)) LU = planar2lonlat(LU, p$aegis_proj4string_planar_km)
+
         LU = sf::st_as_sf( LU, coords=c("lon", "lat") )
         st_crs(LU) = st_crs( projection_proj4string("lonlat_wgs84") )
         LU = sf::st_transform( LU, crs=st_crs(LOCS) )
@@ -135,13 +148,14 @@ aegis_lookup = function(
 
 
       if ( lookup_from %in% c("carstm" ) & lookup_to == "points" )  {
-        # areal unit (LU) to point (LOCS)
+        # areal unit (LU) to point (LOCS) --- expects 
         AU = areal_units( p=p )  #  poly associated with AU
         AU = sf::st_transform( AU, crs=st_crs(p$aegis_proj4string_planar_km) )
         bm = match( AU$AUID, LU$space )
-        AU[[vnames]] = LU[,vnames][ bm ]
+        AU[[vnames]] = LU[["predictions"]][ bm, "mean" ]
         LU = AU
 
+        if (!exists("lon", LOCS)) LOCS = planar2lonlat(LOCS, p$aegis_proj4string_planar_km)
         LOCS = sf::st_as_sf( LOCS, coords=c("lon", "lat") )
         st_crs(LOCS) = st_crs( projection_proj4string("lonlat_wgs84") )
         LOCS = sf::st_transform( LOCS, crs=st_crs(p$aegis_proj4string_planar_km) )
@@ -166,17 +180,13 @@ aegis_lookup = function(
         # areal unit (LU) to areal unit (LOCS)
         AU = areal_units( p=p )  #  poly associated with AU
         bm = match( AU$AUID, LU$space )
-        AU[[vnames]] = LU[,vnames][ bm ]
-        LU = AU
-
+        
         # now rasterize and re-estimate
         raster_template = raster( LOCS, res=min(p$gridparams$res), crs=st_crs( LOCS ) )
-        for (vn in vnames) {
-          LL = fasterize::fasterize( LU, raster_template, field=vn )
-          o = sf::st_as_sf( as.data.frame( raster::rasterToPoints(LL)), coords=c("x", "y") )
-          st_crs(o) = st_crs( LOCS )
-          LOCS[, vn] = sf:::aggregate.sf( o, LOCS, FUNC, na.rm=TRUE ) [["layer"]]
-        }
+        LL = fasterize::fasterize( LU$predictions[ bm, "mean"], raster_template, field=vn )
+        o = sf::st_as_sf( as.data.frame( raster::rasterToPoints(LL)), coords=c("x", "y") )
+        st_crs(o) = st_crs( LOCS )
+        LOCS[, vn] = sf:::aggregate.sf( o, LOCS, FUNC, na.rm=TRUE ) [["layer"]]
 
         return( st_drop_geometry(LOCS)[,vnames] )
       }
@@ -189,12 +199,11 @@ aegis_lookup = function(
 
       if ( lookup_from %in% c("core") & lookup_to == "points" )  {
         # matching to point (LU ) to point (LOCS)
-        LOCS = lonlat2planar(LOCS, proj.type=p$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
-        
+        if (!exists("plon", LOCS)) LOCS = lonlat2planar(LOCS, proj.type=p$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
+      
         if (! "POSIXct" %in% class(LOCS$timestamp)  ) LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
         LOCS$yr = lubridate::year( LOCS$timestamp ) 
 #        LOCS$dyear = lubridate::decimal_date( LOCS$timestamp ) - LOCS$yr
-
 
         LU_map = paste( 
           array_map( "xy->1", LU[,c("plon","plat")], gridparams=p$gridparams ), 
@@ -216,11 +225,6 @@ aegis_lookup = function(
 
       if ( lookup_from %in% c("core") & lookup_to == "areal_units" )  {
         # point (LU) -> areal unit (LOCS: AU/timestamp)
-        #   $ pcaX.predicted             : num [1:190, 1:20, 1:10] 2.37 2.01 5.27 1.98 1.56 ...
-        # ..- attr(*, "dimnames")=List of 3
-        # .. ..$ AUID : chr [1:190] "106" "107" "108" "121" ...
-        # .. ..$ year : chr [1:20] "1999" "2000" "2001" "2002" ...
-        # .. ..$ dyear: chr [1:10] "0.05" "0.15" "0.25" "0.35" ...
 
         if (!exists("AU")) AU = areal_units( p=p )
         if (!exists("AUID", AU)) AU$AUID = as.character(1:nrow(AU))
@@ -238,6 +242,8 @@ aegis_lookup = function(
           array_map( "ts->1", st_drop_geometry( LU) [,c("yr" )], dims=c(p$ny ), res=c( 1  ), origin=c( min(p$yrs) ) ), 
           sep="_"
         )
+
+        if (!exists("lon", LOCS)) LOCS = planar2lonlat(LOCS, proj.type=p$aegis_proj4string_planar_km)  
         
         LOCS = st_as_sf( LOCS, coords=c("lon","lat") )
         st_crs(LOCS) = st_crs( projection_proj4string("lonlat_wgs84") )
@@ -260,10 +266,10 @@ aegis_lookup = function(
         
 
         # matching to point (LU) to points (LOCS)
-        LU = planar2lonlat(LU, proj.type=p$aegis_proj4string_planar_km)
+        if (!exists("plon", LU))  LU = lonlat2planar(LU, proj.type=p$aegis_proj4string_planar_km)
         LU_map = array_map( "xy->1", LU[, c("plon","plat")], gridparams=p$gridparams )
         
-        LOCS = lonlat2planar(LOCS, proj.type=p$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
+        if (!exists("plon", LOCS))  LOCS = lonlat2planar(LOCS, proj.type=p$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
         LOCS_map = array_map( "xy->1", LOCS[, c("plon","plat")], gridparams=p$gridparams )
         LOCS_index = match( LOCS_map, LU_map )
 
@@ -281,7 +287,7 @@ aegis_lookup = function(
 
       if ( lookup_from %in% c("stmv", "hybrid") & lookup_to == "areal_units" )  {
         # points (LU) -> areal units (LOCS)
-        LU = planar2lonlat(LU, p$aegis_proj4string_planar_km)
+        if (!exists("lon", LU)) LU = planar2lonlat(LU, p$aegis_proj4string_planar_km)
         LU = sf::st_as_sf( LU, coords=c("lon", "lat") )
         st_crs(LU) = st_crs( projection_proj4string("lonlat_wgs84") )
         LU = sf::st_transform( LU, crs=st_crs(LOCS) )
@@ -332,8 +338,8 @@ aegis_lookup = function(
         # areal unit (LU) to points (LOCS)
 
     #    nw = length(LU$dyear)
-        ny = length(LU$year)
-        yr0 = min(as.numeric(LU$year))
+        ny = length(LU$time)
+        yr0 = min(as.numeric(LU$time))
 
         AU = sf::st_transform( LU$sppoly, crs=st_crs(p$aegis_proj4string_planar_km) )
         AU$au_index = 1:nrow(AU)
@@ -343,16 +349,16 @@ aegis_lookup = function(
         st_crs(LOCS) = st_crs( projection_proj4string("lonlat_wgs84") )
         LOCS = sf::st_transform( LOCS, crs=st_crs(p$aegis_proj4string_planar_km) )
         LOCS$AUID = st_points_in_polygons( pts=LOCS, polys = AU[, "AUID"], varname= "AUID" )   
-        LOCS$AU_index = match( LOCS$AUID, LU$AUID  )    
+        LOCS$AU_index = match( LOCS$AUID, LU$space  )    
         
         if (! "POSIXct" %in% class(LOCS$timestamp)  ) LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
         LOCS$yr = lubridate::year(LOCS$timestamp) 
         LOCS$dyear = lubridate::decimal_date( LOCS$timestamp ) - LOCS$yr
 
         # TIMESTAMP_index = array_map( "ts->2", LOCS [, c("yr", "dyear")], dims=c(ny, nw), res=c( 1, 1/nw ), origin=c( yr0, 0) )
-        TIMESTAMP_index = array_map( "ts->year_index", LOCS [, c("yr" )], dims=c(ny ), res=c( 1  ), origin=c( yr0 ) )
+        TIMESTAMP_index = array_map( "ts->year_index", LOCS[, c("yr" )], dims=c(ny ), res=c( 1  ), origin=c( yr0 ) )
       
-        LOCS[[vnames]] = LU[[vnames_from]][ cbind( LOCS$AU_index, TIMESTAMP_index )]
+        LOCS[[vnames]] = LU[["predictions"]][ cbind( LOCS$AU_index, TIMESTAMP_index, "mean" )]
 
         return( LOCS[[vnames]] )  
       
@@ -364,8 +370,8 @@ aegis_lookup = function(
 
         # from source data: LU = modelled predictions; AU are associated areal units linked by "AUID" 
     #    nw = length(LU$dyear)
-        ny = length(LU$year)
-        yr0 = min(as.numeric(LU$year))
+        ny = length(LU$time)
+        yr0 = min(as.numeric(LU$time))
 
         AU = sf::st_transform( LU$sppoly, crs=st_crs(p$aegis_proj4string_planar_km) )
         AU = st_cast(AU, "POLYGON")
@@ -376,7 +382,7 @@ aegis_lookup = function(
         AU_pts = sf::st_as_sf( as.data.frame( raster::rasterToPoints(AU_raster)), coords=c("x", "y") )
         st_crs(AU_pts) = st_crs( AU ) 
 
-        pts_AU = match(AU_pts$layer, AU$au_uid[match(LU$AUID, AU$AUID)] ) ## (layer==au_uid) -- to -- LU
+        pts_AU = match(AU_pts$layer, AU$au_uid[match(LU$space, AU$AUID)] ) ## (layer==au_uid) -- to -- LU
 
         # to target locations: AU_target 
         AU_target = sf::st_transform( AU_target, crs=st_crs(AU) )  # AU_target .... must be sent ... <---------
@@ -416,14 +422,11 @@ aegis_lookup = function(
 
       if ( lookup_from %in% c("core") & lookup_to == "points" )  {
         setDT(LOCS)
-        LOCS = lonlat2planar(LOCS, proj.type=p$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
+        if (!exists("plon", LOCS))  LOCS = lonlat2planar(LOCS, proj.type=p$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
         
         if (! "POSIXct" %in% class(LOCS$timestamp)  ) LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
         LOCS$yr = lubridate::year( LOCS$timestamp ) 
         LOCS$dyear = lubridate::decimal_date( LOCS$timestamp ) - LOCS$yr
-
-        LU = lonlat2planar(LU, proj.type=p$aegis_proj4string_planar_km)
-        names(LU)[ which(names(LU) == vnames_from ) ] =  vnames
 
         LU_map = paste( 
           array_map( "xy->1", LU[,c("plon","plat")], gridparams=p$gridparams ), 
@@ -454,8 +457,8 @@ aegis_lookup = function(
         LOCS$dyear = lubridate::decimal_date( LOCS$timestamp ) - LOCS$yr
 
 
-        LU = lonlat2planar(LU, proj.type=p$aegis_proj4string_planar_km)
-        names(LU)[ which(names(LU) ==vnames_from) ] =  vnames
+        if (!exists("plon", LU))  LU = lonlat2planar(LU, proj.type=p$aegis_proj4string_planar_km)
+
         LU = sf::st_as_sf( LU, coords=c("lon", "lat") )
         st_crs(LU) = st_crs( projection_proj4string("lonlat_wgs84") )
         LU = sf::st_transform( LU, crs=st_crs(AU) )
@@ -485,10 +488,11 @@ aegis_lookup = function(
       if ( lookup_from %in% c("stmv", "hybrid") & lookup_to == "points" )  {
 
         # matching to point (LU) to points (LOCS)
-        LU = planar2lonlat(LU, proj.type=p$aegis_proj4string_planar_km)
+        if (!exists("plon", LU))  LU = lonlat2planar(LU, proj.type=p$aegis_proj4string_planar_km)
+        if (!exists("plon", LOCS))  LOCS = lonlat2planar(LOCS, proj.type=p$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
+
         LU_map = array_map( "xy->1", LU[, c("plon","plat")], gridparams=p$gridparams )
         
-        LOCS = lonlat2planar(LOCS, proj.type=p$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
         LOCS_map = array_map( "xy->1", LOCS[, c("plon","plat")], gridparams=p$gridparams )
         LOCS_index = match( LOCS_map, LU_map )
 
@@ -504,7 +508,7 @@ aegis_lookup = function(
 
       if ( lookup_from %in% c("stmv", "hybrid") & lookup_to == "areal_units" )  {
         # points (LU) -> areal units (LOCS)
-        LU = planar2lonlat(LU, p$aegis_proj4string_planar_km)
+        if (!exists("lon", LU)) LU = planar2lonlat(LU, p$aegis_proj4string_planar_km)
         
         LU = sf::st_as_sf( LU, coords=c("lon", "lat") )
         st_crs(LU) = st_crs( projection_proj4string("lonlat_wgs84") )

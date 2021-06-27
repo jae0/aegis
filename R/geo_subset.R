@@ -68,28 +68,44 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
 
     if ( spatial_domain == "snowcrab" ) {
       #\\ NOTE::: snowcrab baseline == SSE baseline, except it is a subset
-      Zco = as.data.frame( st_coordinates( st_transform(Z[inside,], st_crs(ps$aegis_proj4string_planar_km )) ) )
-      colnames(Zco ) =c("plon", "plat")
-      tokeep = polygon_inside( Zco[,c(1:2)], region="cfaall", planar=TRUE, proj.type=ps$aegis_proj4string_planar_km )
 
+      region = aegis.polygons::polygon_internal_code( "cfaall" )
+      poly = list()
+      for (i in 1:length(region) ) {
+        y = read.table( aegis.polygons::polygon_file(region[i]), header=FALSE)
+        names(y) =c("lon", "lat")
+        poly[i] = (
+          st_multipoint( as.matrix(y) )
+          %>% st_sfc( crs=st_crs(projection_proj4string("lonlat_wgs84")) )
+          %>% st_cast("POLYGON" )
+          %>% st_make_valid()
+        )
+      }
+      pbnd = poly[[1]]
+      if (length(poly) > 1 ) {
+        for (i in 2:length(poly) ) pbnd = st_union( st_buffer(pbnd, 0.001), st_buffer(poly[[i]], 0.001) )
+      }
+      pbnd =  st_make_valid( st_simplify(pbnd) )
+      tokeep = st_points_in_polygons( Z, pbnd) 
+      
       # filter out area 4X
-      corners = as.data.frame( cbind(
+      cfa4x = as.data.frame( cbind(
         lon = c(-63, -65.5, -56.8, -66.3 , -63),
         lat = c( 44.75, 43.8, 47.5, 42.8, 44.75 )
       ) )
 
-      dd1 = which( Zco[,1] < corners$lon[1] & Zco[,2] > corners$lat[1]  )
-      dd2 = which( Zco[,1] < corners$lon[2] & Zco[,2] > corners$lat[2]  )      
-      dd3 = which( Zco[,1] > corners$lon[3] ) # east lim
-      dd4 = which( Zco[,1] < corners$lon[4] )  #west lim
-      dd5 = which( Zco[,2] > corners$lat[3]  ) # north lim
-      dd6 = which( Zco[,2] < corners$lat[4]  )  #south lim
+      Zco = st_coordinates( Z )  
+      dd1 = which( Zco[,1] < cfa4x$lon[1] & Zco[,2] > cfa4x$lat[1]  )
+      dd2 = which( Zco[,1] < cfa4x$lon[2] & Zco[,2] > cfa4x$lat[2]  )      
+      dd3 = which( Zco[,1] > cfa4x$lon[3] ) # east lim
+      dd4 = which( Zco[,1] < cfa4x$lon[4] )  #west lim
+      dd5 = which( Zco[,2] > cfa4x$lat[3]  ) # north lim
+      dd6 = which( Zco[,2] < cfa4x$lat[4]  )  #south lim
       
       todrop = unique( c(dd1, dd2, dd2, dd4, dd5, dd6) ) 
 
       if (length( tokeep) > 0 & length(todrop) > 0)  tokeep = setdiff( tokeep, todrop )
-
-      if (length( tokeep) > 0)  inside = inside[ tokeep ]
+      if (length( tokeep) > 0)  inside = intersect( inside, tokeep )
     }
 
     return(inside)
