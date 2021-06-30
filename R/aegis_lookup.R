@@ -1,23 +1,22 @@
 
 aegis_lookup = function( 
   data_class="bathymetry", 
+  variable_name=NULL,
   LOCS=NULL, 
   AU_target=NULL, 
   AU=NULL, 
   lookup_from="core", 
   lookup_to="points", 
-  FUNC=mean,  
-  vnames="t", 
-  vnames_from=paste(vnames, "mean", sep="."), 
   lookup_from_class="aggregated_data", 
   tz="America/Halifax", 
   year.assessment=NULL ,
+  FUNC=mean,  
   plu=NULL
 ) {
  
  if (0) {
   #  M = ...
-    z = aegis_lookup( data_class="temperature", LOCS=M[, c("lon", "lat")], spatial_domain=p$spatial_domain, lookup_from="core", lookup_to="points" , lookup_from_class="aggregated_data" ) # core=="rawdata"
+    z = aegis_lookup( data_class="temperature", LOCS=M[, c("lon", "lat")], spatial_domain=p$spatial_domain, lookup_from="core", lookup_to="points" , lookup_from_class="aggregated_data", variable_name="t.mean" ) # core=="rawdata"
  }
 
   require(data.table)  # enforce
@@ -32,28 +31,14 @@ aegis_lookup = function(
     if ( "bathymetry" %in% dc ) {
 
       p = bathymetry_parameters(  project_class=lookup_from, year.assessment=year.assessment )
-      if ( lookup_from %in% c("core" ) )  {
-        LU = bathymetry_db ( p=p, DS=lookup_from_class )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
-        if (   lookup_from_class=="aggregated_data" ) {
-          vn2 = paste( p$variabletomodel, "mean", sep="." )
-          names(LU)[ which(names(LU) == vn2 ) ] =  p$variabletomodel
-        }
-      }
-      if ( lookup_from %in% c("stmv", "hybrid") ) {
-        LU = bathymetry_db ( p=p, DS="complete" )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
-      }
+      if ( lookup_from %in% c("core" ) )  LU = bathymetry_db ( p=p, DS=lookup_from_class )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
+      if ( lookup_from %in% c("stmv", "hybrid") ) LU = bathymetry_db ( p=p, DS="complete" )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
       if ( lookup_from %in% c("carstm" )) LU = carstm_model( p=p, DS="carstm_modelled_summary" ) 
     }
 
     if ( "substrate" %in% dc ) {
       p = substrate_parameters(  project_class=lookup_from, year.assessment=year.assessment )
-      if ( lookup_from %in% c("core" ) )  {
-        LU = substrate_db ( p=p, DS=lookup_from_class )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
-        if (   lookup_from_class=="aggregated_data" ) {
-          vn2 = paste( p$variabletomodel, "mean", sep="." )
-          names(LU)[ which(names(LU) == vn2 ) ] =  p$variabletomodel
-        }
-      }
+      if ( lookup_from %in% c("core" ) )  LU = substrate_db ( p=p, DS=lookup_from_class )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
       if ( lookup_from %in% c("stmv", "hybrid") ) {
         LU = substrate_db ( p=p, DS="complete" )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
         pB = bathymetry_parameters( spatial_domain=p$spatial_domain, project_class=lookup_from  )
@@ -66,33 +51,22 @@ aegis_lookup = function(
     if ( "temperature" %in% dc ) {
       if (is.null(year.assessment)) year.assessment = max( lubridate::year(LOCS$timestamp) )
       p = temperature_parameters(  project_class=lookup_from, year.assessment=year.assessment )
-      if ( lookup_from %in% c("core" ) ) {
-        LU = temperature_db ( p=p, DS=lookup_from_class )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
-        if (   lookup_from_class=="aggregated_data" ) {
-          vn2 = paste( p$variabletomodel, "mean", sep="." )
-          names(LU)[ which(names(LU) == vn2 ) ] =  p$variabletomodel
-        }
-      }
+      if ( lookup_from %in% c("core" ) )  LU = temperature_db ( p=p, DS=lookup_from_class )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
       if ( lookup_from %in% c("stmv", "hybrid") )  LU = temperature_db ( p=p, DS="complete" )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
       if ( lookup_from %in% c("carstm" )) LU = carstm_model( p=p, DS="carstm_modelled_summary" ) 
     }
 
     if ("speciescomposition" %in% dc ){
       if (is.null(year.assessment)) year.assessment = max( lubridate::year(LOCS$timestamp) )
-      p = speciescomposition_parameters(  project_class=lookup_from, variabletomodel=vnames, year.assessment=year.assessment  )
-      if ( lookup_from %in% c("core" ) )  {
-        LU = speciescomposition_db ( p=p, DS="speciescomposition" )   # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
-        if (   lookup_from_class=="aggregated_data" ) {
-          vn2 = paste( p$variabletomodel, "mean", sep="." )
-          names(LU)[ which(names(LU) == vn2 ) ] =  p$variabletomodel
-        }
-      }
+      p = speciescomposition_parameters(  project_class=lookup_from, variabletomodel=variable_name, year.assessment=year.assessment  )
+      if ( lookup_from %in% c("core" ) ) LU = speciescomposition_db ( p=p, DS="speciescomposition" )   # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
       if ( lookup_from %in% c( "stmv", "hybrid") )  LU = aegis_db( p=p, DS="complete" )   
       if ( lookup_from %in% c("carstm" )) LU = carstm_model( p=p, DS="carstm_modelled_summary" ) 
     }
 
     if (is.null(LU)) stop( "lookup data not found")
 
+    if (is.null(variable_name)) variable_name = setdiff( names(LU), c("plon", "plat", "lon", "lat"))
  
     # ------------------
 
@@ -103,12 +77,13 @@ aegis_lookup = function(
         # if any still missing then use stmv depths
         if (!exists("plon", LU)) LU = lonlat2planar(LU, proj.type=p$aegis_proj4string_planar_km)
         if (!exists("plon", LOCS)) LOCS = lonlat2planar(LOCS, proj.type=p$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
-
-        LOCS[[vn]] = LU[ match(
-            array_map( "xy->1", LOCS[, c("plon","plat")], gridparams=p$gridparams ),
-            array_map( "xy->1", LU[,c("plon","plat")], gridparams=p$gridparams )
-        ), vn ]
-        return( LOCS[[vn]] )
+        for (vnm in variable_name) {
+          LOCS[[vnm]] = LU[ match(
+              array_map( "xy->1", LOCS[, c("plon","plat")], gridparams=p$gridparams ),
+              array_map( "xy->1", LU[,c("plon","plat")], gridparams=p$gridparams )
+          ), vnm ]
+        }
+        return( LOCS[[variable_name]] )
       }
 
       if ( lookup_from %in% c("core") & lookup_to == "areal_units" )  {
@@ -117,8 +92,10 @@ aegis_lookup = function(
         LU = sf::st_as_sf( LU, coords=c("lon", "lat") )
         st_crs(LU) = st_crs( projection_proj4string("lonlat_wgs84") )
         LU = sf::st_transform( LU, crs=st_crs(LOCS) )
-        LOCS[, vn] = aggregate( LU[, vn], LOCS, FUNC, na.rm=TRUE ) [[vn]]
-        return( st_drop_geometry(LOCS)[,vn] )
+        for (vnm in variable_name) {
+          LOCS[, vnm] = aggregate( LU[, vnm], LOCS, FUNC, na.rm=TRUE ) [[vnm]]
+        }
+        return( st_drop_geometry(LOCS)[,variable_name] )
       }
 
 
@@ -126,11 +103,13 @@ aegis_lookup = function(
         # matching to point (LU) to point (LOCS)
         if (!exists("plon", LU)) LU = lonlat2planar(LU, proj.type=p$aegis_proj4string_planar_km)
         if (!exists("plon", LOCS)) LOCS = lonlat2planar(LOCS, proj.type=p$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
-        LOCS[,vnames] = LU[ match(
+        for (vnm in variable_name) {
+          LOCS[,vnm ] = LU[ match(
             array_map( "xy->1", LOCS[, c("plon","plat")], gridparams=p$gridparams ),
             array_map( "xy->1", LU[,c("plon","plat")], gridparams=p$gridparams )
-        ), vnames ]
-        return( LOCS[,vnames] )
+          ), vnm ]
+        }
+        return( LOCS[,variable_name] )
       }
 
       if ( lookup_from %in% c("stmv", "hybrid") & lookup_to == "areal_units" )  {
@@ -140,10 +119,10 @@ aegis_lookup = function(
         LU = sf::st_as_sf( LU, coords=c("lon", "lat") )
         st_crs(LU) = st_crs( projection_proj4string("lonlat_wgs84") )
         LU = sf::st_transform( LU, crs=st_crs(LOCS) )
-        for (vn in vnames) {
-          LOCS[, vn] = aggregate( LU[, vn], LOCS, FUNC, na.rm=TRUE ) [[vn]]
+        for (vnm in variable_name) {
+          LOCS[, vnm] = aggregate( LU[, vnm], LOCS, FUNC, na.rm=TRUE ) [[vnm]]
         }
-        return( st_drop_geometry(LOCS)[,vnames] )
+        return( st_drop_geometry(LOCS)[,variable_name] )
       }
 
 
@@ -152,7 +131,7 @@ aegis_lookup = function(
         AU = areal_units( p=p )  #  poly associated with AU
         AU = sf::st_transform( AU, crs=st_crs(p$aegis_proj4string_planar_km) )
         bm = match( AU$AUID, LU$space )
-        AU[[vnames]] = LU[["predictions"]][ bm, "mean" ]
+        AU[[variable_name]] = LU[["predictions"]][ bm, "mean" ]
         LU = AU
 
         if (!exists("lon", LOCS)) LOCS = planar2lonlat(LOCS, p$aegis_proj4string_planar_km)
@@ -161,18 +140,17 @@ aegis_lookup = function(
         LOCS = sf::st_transform( LOCS, crs=st_crs(p$aegis_proj4string_planar_km) )
 
         raster_template = raster( LOCS, res=min(p$gridparams$res), crs=st_crs( LOCS ) )
-        for (vn in vnames) {
-          LL = fasterize::fasterize( LU, raster_template, field=vn )
+        for (vnm in variable_name) {
+          LL = fasterize::fasterize( LU, raster_template, field=vnm )
           o = sf::st_as_sf( as.data.frame( raster::rasterToPoints(LL)), coords=c("x", "y") )
           st_crs(o) = st_crs( LOCS )
-
-          LOCS[,vn] = st_drop_geometry(o)[ match(
+          LOCS[,vnm] = st_drop_geometry(o)[ match(
             array_map( "xy->1", st_coordinates(LOCS), gridparams=p$gridparams ),
             array_map( "xy->1", st_coordinates(o), gridparams=p$gridparams )
           ), "layer" ]
         }
 
-        return( st_drop_geometry(LOCS)[,vnames] )
+        return( st_drop_geometry(LOCS)[,variable_name] )
       }
 
 
@@ -183,12 +161,13 @@ aegis_lookup = function(
         
         # now rasterize and re-estimate
         raster_template = raster( LOCS, res=min(p$gridparams$res), crs=st_crs( LOCS ) )
-        LL = fasterize::fasterize( LU$predictions[ bm, "mean"], raster_template, field=vn )
-        o = sf::st_as_sf( as.data.frame( raster::rasterToPoints(LL)), coords=c("x", "y") )
-        st_crs(o) = st_crs( LOCS )
-        LOCS[, vn] = sf:::aggregate.sf( o, LOCS, FUNC, na.rm=TRUE ) [["layer"]]
-
-        return( st_drop_geometry(LOCS)[,vnames] )
+        for (vnm in variable_name) {
+          LL = fasterize::fasterize( LU[[vnm]][ bm, "mean"], raster_template, field=vnm )
+          o = sf::st_as_sf( as.data.frame( raster::rasterToPoints(LL)), coords=c("x", "y") )
+          st_crs(o) = st_crs( LOCS )
+          LOCS[, vnm] = sf:::aggregate.sf( o, LOCS, FUNC, na.rm=TRUE ) [["layer"]]
+        }
+        return( st_drop_geometry(LOCS)[,variable_name] )
       }
 
     }
@@ -217,9 +196,9 @@ aegis_lookup = function(
           sep="_"
         )
 
-        LOCS[[ vnames ]] = LU[ match( LOCS_map, LU_map ), vnames ]
+        LOCS[[ variable_name ]] = LU[ match( LOCS_map, LU_map ), variable_name ]
 
-        return( LOCS[[ vnames ]] )
+        return( LOCS[[ variable_name ]] )
       }
 
 
@@ -254,11 +233,11 @@ aegis_lookup = function(
           sep="_"
         )
 
-        LOCS_regridded = tapply( st_drop_geometry(LU)[, vnames], LU_map, FUN=FUNC, na.rm=TRUE )
+        LOCS_regridded = tapply( st_drop_geometry(LU)[, variable_name], LU_map, FUN=FUNC, na.rm=TRUE )
 
-        LOCS[[ vnames ]] = LOCS_regridded[ match( LOCS_map, as.character( names( LOCS_regridded )) ) ]
+        LOCS[[ variable_name ]] = LOCS_regridded[ match( LOCS_map, as.character( names( LOCS_regridded )) ) ]
 
-        return( LOCS[[ vnames ]] )
+        return( LOCS[[ variable_name ]] )
       }
 
 
@@ -324,11 +303,11 @@ aegis_lookup = function(
         )
         
 
-      #   for (vn in vnames) {
-      #     LOCS_regridded = tapply( LU[, vn], LU_uid, FUN=FUNC, na.rm=TRUE )
-      #     LOCS[ , vn ] = LOCS_regridded[ match( LOCS_map, as.character( names( LOCS_regridded )) ) ]
+      #   for (vnm in variable_name) {
+      #     LOCS_regridded = tapply( LU[, vnm], LU_uid, FUN=FUNC, na.rm=TRUE )
+      #     LOCS[ , vnm ] = LOCS_regridded[ match( LOCS_map, as.character( names( LOCS_regridded )) ) ]
       #   }
-      #   return( st_drop_geometry(LOCS)[,vnames] )
+      #   return( st_drop_geometry(LOCS)[,variable_name] )
         stop("incomplete")
       }
 
@@ -358,9 +337,9 @@ aegis_lookup = function(
         # TIMESTAMP_index = array_map( "ts->2", LOCS [, c("yr", "dyear")], dims=c(ny, nw), res=c( 1, 1/nw ), origin=c( yr0, 0) )
         TIMESTAMP_index = array_map( "ts->year_index", LOCS[, c("yr" )], dims=c(ny ), res=c( 1  ), origin=c( yr0 ) )
       
-        LOCS[[vnames]] = LU[["predictions"]][ cbind( LOCS$AU_index, TIMESTAMP_index, "mean" )]
+        LOCS[[variable_name]] = LU[["predictions"]][ cbind( LOCS$AU_index, TIMESTAMP_index, "mean" )]
 
-        return( LOCS[[vnames]] )  
+        return( LOCS[[variable_name]] )  
       
       }
 
@@ -406,9 +385,9 @@ aegis_lookup = function(
           }
         )
         space_index = match( LOCS$AUID, as.numeric(as.character(dimnames(LOCS_regridded )[[1]] ))  )   # AUID of AU_target (from pts_AUID)
-        LOCS[[vnames]] = LOCS_regridded[ cbind( space_index, TIMESTAMP_index ) ]
+        LOCS[[variable_name]] = LOCS_regridded[ cbind( space_index, TIMESTAMP_index ) ]
 
-        return( LOCS[[vnames]] )
+        return( LOCS[[variable_name]] )
     
       } 
 
@@ -440,9 +419,9 @@ aegis_lookup = function(
           sep="_"
         )
 
-        LOCS[[ vnames ]] = LU[ match( LOCS_map, LU_map ), vnames ]
+        LOCS[[ variable_name ]] = LU[ match( LOCS_map, LU_map ), variable_name ]
 
-        return( LOCS[[ vnames ]] )
+        return( LOCS[[ variable_name ]] )
       }
 
 
@@ -477,11 +456,11 @@ aegis_lookup = function(
           sep="_"
         )
 
-        LOCS_regridded = tapply( st_drop_geometry(LU)[, vnames], LU_map, FUN=FUNC, na.rm=TRUE )
+        LOCS_regridded = tapply( st_drop_geometry(LU)[, variable_name], LU_map, FUN=FUNC, na.rm=TRUE )
 
-        LOCS[[vnames ]] = LOCS_regridded[ match( LOCS_map, as.character( names( LOCS_regridded )) ) ]
+        LOCS[[variable_name ]] = LOCS_regridded[ match( LOCS_map, as.character( names( LOCS_regridded )) ) ]
 
-        return( LOCS[[ vnames ]] )
+        return( LOCS[[ variable_name ]] )
       }
 
 
@@ -559,9 +538,9 @@ aegis_lookup = function(
         LOCS$season = lubridate::decimal_date( LOCS$timestamp ) - LOCS$time
         TIMESTAMP_index = array_map( "ts->2", st_drop_geometry(LOCS) [, c("time", "season")], dims=c(ny, nw), res=c( 1, 1/nw ), origin=c( yr0, 0) )
       
-        LOCS[[vnames]] = LU[["predictions"]][ cbind( LOCS$AU_index, TIMESTAMP_index, "mean" )]
+        LOCS[[variable_name]] = LU[["predictions"]][ cbind( LOCS$AU_index, TIMESTAMP_index, "mean" )]
 
-        return( LOCS[[vnames]] )  
+        return( LOCS[[variable_name]] )  
       
       }
 
@@ -608,9 +587,9 @@ aegis_lookup = function(
         )
         space_index = match( LOCS$AUID, as.numeric(as.character(dimnames(LOCS_regridded )[[1]] ))  )   # AUID of AU_target (from ps_AUID)
 
-        LOCS[[vnames]] = LOCS_regridded[ cbind( space_index, time_index ) ]
+        LOCS[[variable_name]] = LOCS_regridded[ cbind( space_index, time_index ) ]
 
-        return( LOCS[[vnames]] )
+        return( LOCS[[variable_name]] )
     
       } 
 
