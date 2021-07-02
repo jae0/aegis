@@ -18,7 +18,7 @@ aegis_lookup = function(
     z = aegis_lookup( data_class="temperature", LOCS=M[, c("lon", "lat")], spatial_domain=p$spatial_domain, lookup_from="core", lookup_to="points" , lookup_from_class="aggregated_data", variable_name="t.mean" ) # core=="rawdata"
  }
 
- stop ("fix DT issues with varianle_name")
+ # stop ("fix DT issues with varianle_name")
 
   require(data.table)  # enforce
 
