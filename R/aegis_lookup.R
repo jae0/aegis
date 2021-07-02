@@ -10,14 +10,15 @@ aegis_lookup = function(
   lookup_from_class="aggregated_data", 
   tz="America/Halifax", 
   year.assessment=NULL ,
-  FUNC=mean,  
-  plu=NULL
+  FUNC=mean
 ) {
  
  if (0) {
   #  M = ...
     z = aegis_lookup( data_class="temperature", LOCS=M[, c("lon", "lat")], spatial_domain=p$spatial_domain, lookup_from="core", lookup_to="points" , lookup_from_class="aggregated_data", variable_name="t.mean" ) # core=="rawdata"
  }
+
+ stop ("fix DT issues with varianle_name")
 
   require(data.table)  # enforce
 
@@ -30,14 +31,14 @@ aegis_lookup = function(
 
     if ( "bathymetry" %in% dc ) {
 
-      p = bathymetry_parameters(  project_class=lookup_from, year.assessment=year.assessment )
+      p = bathymetry_parameters(  project_class=lookup_from  )
       if ( lookup_from %in% c("core" ) )  LU = bathymetry_db ( p=p, DS=lookup_from_class )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
       if ( lookup_from %in% c("stmv", "hybrid") ) LU = bathymetry_db ( p=p, DS="complete" )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
       if ( lookup_from %in% c("carstm" )) LU = carstm_model( p=p, DS="carstm_modelled_summary" ) 
     }
 
     if ( "substrate" %in% dc ) {
-      p = substrate_parameters(  project_class=lookup_from, year.assessment=year.assessment )
+      p = substrate_parameters(  project_class=lookup_from  )
       if ( lookup_from %in% c("core" ) )  LU = substrate_db ( p=p, DS=lookup_from_class )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
       if ( lookup_from %in% c("stmv", "hybrid") ) {
         LU = substrate_db ( p=p, DS="complete" )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
