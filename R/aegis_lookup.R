@@ -15,6 +15,7 @@ aegis_lookup = function(
   tz="America/Halifax", 
   year.assessment=NULL , 
   FUNC=mean, 
+  returntype = "sf",
   raster_resolution=1, ...
 ) {
  
@@ -59,7 +60,7 @@ aegis_lookup = function(
 
     M = snowcrab.db( p=p, DS="biological_data" )  
    
-    M = M[ which( M$yr %in% 2011:2020 ) ,]  # reduce data size
+    M = M[ which( M$yr %in% 2011:2015 ) ,]  # reduce data size
     dim(M)
 
     sppoly = areal_units( p=p )  # poly to estimate a surface 
@@ -72,74 +73,96 @@ aegis_lookup = function(
     
     # test raw data lookup
     # spatial
-    o = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  
+    o1 = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  
       project_class="core", output_format="points" , DS="aggregated_data", variable_name=c( "z.mean", "z.sd", "z.n") 
     ) 
 
-    o = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  
+    o2 = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  
       project_class="stmv", output_format="points" , DS="complete", variable_name=c( "z", "dZ", "ddZ") 
     ) 
  
+    # spatial averaging by areal unit
     # this one is slow .. could be sped up if used 
-    o = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly,
+    o3 = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly,
       project_class="stmv", output_format="areal_units" , DS="complete", variable_name=c( "z", "dZ", "ddZ") 
     ) 
 
-    o = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly,
+    # spatial averaging by areal unit
+    o4 = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly,
       project_class="core", output_format="areal_units" , DS="complete", variable_name=c( "z.mean", "z.sd", "z.n") 
     ) 
 
-    o = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  
+    # lookup from areal unit predictions
+    o5 = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  
       project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res)
     ) 
 
-    o = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly,
+    # slow 
+    o6 = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly,
       project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res) /2
     ) 
 
+    # consistency checks
+    plot(o1$z ~o2$z)
+    plot(o1$z ~o3$z)
+    plot(o1$z ~o4$z)
+    plot(o1$z ~o5$predictions_mean) 
+    plot(o1$z ~o6$predictions_mean) 
+
 
     # space-time
-    o = aegis_lookup(  data_class="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], variabletomodel="pca1",  
-      project_class="core", output_format="points" , DS="aggregated_data", variable_name=c( "pca1" ) 
+    o1 = aegis_lookup(  data_class="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], variabletomodel="pca1",  
+      project_class="core", output_format="points" , DS="speciescomposition", variable_name=c( "pca1" ) 
     ) 
 
-    o = aegis_lookup(  data_class="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], variabletomodel="pca1",  
+    o2 = aegis_lookup(  data_class="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], variabletomodel="pca1",  
       project_class="stmv", output_format="points" , DS="complete", variable_name=c( "pca1") 
     ) 
 
-    o = aegis_lookup(  data_class="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, variabletomodel="pca1",
+    o3 = aegis_lookup(  data_class="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, variabletomodel="pca1",
       project_class="core", output_format="areal_units" ,  variable_name=list( "pca1",  "pca2", "ca1", "ca2" )
     ) 
  
-    o = aegis_lookup(  data_class="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], variabletomodel="pca1",
+    o4 = aegis_lookup(  data_class="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], variabletomodel="pca1",
       project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd")
     ) 
   
-    o = aegis_lookup(  data_class="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, variabletomodel="pca1", 
+    o5 = aegis_lookup(  data_class="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, variabletomodel="pca1", 
       project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res)/2
     ) 
+
+
+    # consistency checks
+    plot(o1$pca1.mean ~o3$pca1.mean)
+    plot(o1$pca1.mean ~o4$predictions_mean) 
+    plot(o1$pca1.mean ~o5$predictions_mean) 
 
 
     # space-time-season
-    o = aegis_lookup(  data_class="temperature", LOCS=M[, c("lon", "lat", "timestamp")],   
+    o1 = aegis_lookup(  data_class="temperature", LOCS=M[, c("lon", "lat", "timestamp")],   
       project_class="core", output_format="points" , DS="aggregated_data", variable_name=c( "t.mean", "t.sd", "t.n")  
     ) 
 
-    o = aegis_lookup(  data_class="temperature", LOCS=M[, c("lon", "lat", "timestamp")],    
+    o2 = aegis_lookup(  data_class="temperature", LOCS=M[, c("lon", "lat", "timestamp")],    
       project_class="stmv", output_format="points" , DS="complete", variable_name=c( "t") 
     ) 
 
-    o = aegis_lookup(  data_class="temperature", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly,  
+    o3 = aegis_lookup(  data_class="temperature", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly,  
       project_class="core", output_format="areal_units" ,  variable_name=list( "t.mean",  "t.sd", "t.n"  )
     ) 
  
-    o = aegis_lookup(  data_class="temperature", LOCS=M[, c("lon", "lat", "timestamp")], 
+    o4 = aegis_lookup(  data_class="temperature", LOCS=M[, c("lon", "lat", "timestamp")], 
       project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd")
     ) 
   
-    o = aegis_lookup(  data_class="temperature", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, 
+    o5 = aegis_lookup(  data_class="temperature", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, 
       project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res)/2
     ) 
+
+    # consistency checks
+    plot(o1$t.mean ~o3$t.mean)
+    plot(o1$t.mean ~o4$predictions_mean) 
+    plot(o1$t.mean ~o5$predictions_mean) 
 
 
 
@@ -206,7 +229,7 @@ aegis_lookup = function(
       }
       p = speciescomposition_parameters(  project_class=project_class, variabletomodel=variabletomodel, year.assessment=year.assessment  )
       if (is.null(LUT)) {
-        if ( project_class %in% c("core" ) ) LUT = speciescomposition_db ( p=p, DS="speciescomposition" )   # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
+        if ( project_class %in% c("core" ) ) LUT = speciescomposition_db ( p=p, DS=DS )   # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
         if ( project_class %in% c( "stmv", "hybrid") )  LUT = aegis_db( p=p, DS="complete" )   
         if ( project_class %in% c("carstm" )) LUT = carstm_model( p=p, DS="carstm_modelled_summary" ) 
       }
@@ -235,6 +258,22 @@ aegis_lookup = function(
         for (vnm in variable_name) {
           if ( vnm %in% names(LUT ))  LOCS[[vnm]] = LUT[ ii, vnm ]
         } 
+
+        if (returntype =="sf" ) {
+
+         LOCS = st_as_sf( LOCS, coords=c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84")) )
+ 
+        }
+        if (returntype =="data.frame" ) {
+
+        }
+        if (returntype =="data.table" ) {
+
+        }
+        if (returntype =="vector" ) {
+
+        }
+
 
         return( LOCS )
       }
