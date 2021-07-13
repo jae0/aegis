@@ -73,16 +73,20 @@ aegis_lookup = function(
     # test raw data lookup
     # spatial
     o = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  
-      project_class="core", output_format="points" , DS="aggregated_data", variable_name=c( "z.mean", "z.sd") 
+      project_class="core", output_format="points" , DS="aggregated_data", variable_name=c( "z.mean", "z.sd", "z.n") 
     ) 
 
     o = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  
       project_class="stmv", output_format="points" , DS="complete", variable_name=c( "z", "dZ", "ddZ") 
     ) 
  
-
+    # this one is slow .. could be sped up if used 
     o = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly,
       project_class="stmv", output_format="areal_units" , DS="complete", variable_name=c( "z", "dZ", "ddZ") 
+    ) 
+
+    o = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly,
+      project_class="core", output_format="areal_units" , DS="complete", variable_name=c( "z.mean", "z.sd", "z.n") 
     ) 
 
     o = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  
