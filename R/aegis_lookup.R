@@ -151,19 +151,17 @@ aegis_lookup = function(
   }
 
 
-  setDT(LOCS)
+    setDT(LOCS)
 
-  require(data.table)  # enforce
-  require(raster) # TODO use sf /stars /fasterize instead ..
+    require(data.table)  # enforce
+    require(raster) # TODO use sf /stars /fasterize instead ..
 
-  crs_lonlat =  st_crs(projection_proj4string("lonlat_wgs84"))
-
-  for (dc in data_class) {
-
+    crs_lonlat =  st_crs(projection_proj4string("lonlat_wgs84"))
+  
     # determine LUT (lookup table)
     LUT = NULL
 
-    if ( "bathymetry" %in% dc ) {
+    if ( "bathymetry" %in% data_class ) {
 
       p = bathymetry_parameters(  project_class=project_class  )
       if (is.null(LUT)) {
@@ -173,7 +171,7 @@ aegis_lookup = function(
       }
     }
 
-    if ( "substrate" %in% dc ) {
+    if ( "substrate" %in% data_class ) {
       p = substrate_parameters(  project_class=project_class  )
       if (is.null(LUT)) {
         if ( project_class %in% c("core" ) )  LUT = substrate_db ( p=p, DS=DS )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
@@ -187,7 +185,7 @@ aegis_lookup = function(
       }
     }
 
-    if ( "temperature" %in% dc ) {
+    if ( "temperature" %in% data_class ) {
       if (is.null(year.assessment)) year.assessment = max( lubridate::year(LOCS$timestamp) )
       p = temperature_parameters(  project_class=project_class, year.assessment=year.assessment )
       if (is.null(LUT)) {
@@ -197,8 +195,15 @@ aegis_lookup = function(
       }
     }
 
-    if ("speciescomposition" %in% dc ){
+
+    if ( data_class %in% c("speciescomposition", "speciescomposition_pca1", "speciescomposition_pca2", "speciescomposition_ca1", "speciescomposition_ca2")  ){
       if (is.null(year.assessment)) year.assessment = max( lubridate::year(LOCS$timestamp) )
+      if (is.null(variabletomodel)) {
+        if (data_class == "speciescomposition_pca1") variabletomodel = "pca1" 
+        if (data_class == "speciescomposition_pac2") variabletomodel = "pca2" 
+        if (data_class == "speciescomposition_ca1") variabletomodel = "ca1" 
+        if (data_class == "speciescomposition_ca2") variabletomodel = "ca2" 
+      }
       p = speciescomposition_parameters(  project_class=project_class, variabletomodel=variabletomodel, year.assessment=year.assessment  )
       if (is.null(LUT)) {
         if ( project_class %in% c("core" ) ) LUT = speciescomposition_db ( p=p, DS="speciescomposition" )   # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
@@ -889,6 +894,5 @@ aegis_lookup = function(
       }
     } # end space-year-season
 
-  } # end for data_class
 
 }
