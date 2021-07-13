@@ -107,7 +107,7 @@ aegis_lookup = function(
     ) 
 
     # au to au match (LOCS=NULL)
-    o6 = aegis_lookup(  data_class="bathymetry",  LOCS_AU=sppoly,
+    o7 = aegis_lookup(  data_class="bathymetry",  LOCS_AU=sppoly,
       project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res) /2
     ) 
 
@@ -182,7 +182,7 @@ aegis_lookup = function(
  
   }
  
-    setDT(LOCS)
+    if (!is.null(LOCS)) setDT(LOCS)
  
     require(data.table)  # enforce
     require(raster) # TODO use sf /stars /fasterize instead ..
