@@ -15,7 +15,7 @@ aegis_lookup = function(
   tz="America/Halifax", 
   year.assessment=NULL , 
   FUNC=mean, 
-  returntype = "sf",
+  returntype = "vector",
   raster_resolution=1, ...
 ) {
  
@@ -65,8 +65,6 @@ aegis_lookup = function(
 
     sppoly = areal_units( p=p )  # poly to estimate a surface 
 
-    lookup = c("bathymetry", "substrate", "temperature", "speciescomposition")
-     
     loadfunctions("aegis")
     debug(aegis_lookup)
 
@@ -74,7 +72,13 @@ aegis_lookup = function(
     # test raw data lookup
     # spatial
     o1 = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  
-      project_class="core", output_format="points" , DS="aggregated_data", variable_name=c( "z.mean", "z.sd", "z.n") 
+      project_class="core", output_format="points" , DS="aggregated_data", variable_name=c( "z.mean", "z.sd", "z.n"),
+      returntype="sf" 
+    ) 
+
+    o1 = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  
+      project_class="core", output_format="points" , DS="aggregated_data", variable_name=c( "z.mean" ),
+      returntype="vector"
     ) 
 
     o2 = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  
@@ -99,6 +103,11 @@ aegis_lookup = function(
 
     # slow 
     o6 = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly,
+      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res) /2
+    ) 
+
+    # au to au match (LOCS=NULL)
+    o6 = aegis_lookup(  data_class="bathymetry",  LOCS_AU=sppoly,
       project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res) /2
     ) 
 
@@ -172,10 +181,9 @@ aegis_lookup = function(
     }
  
   }
-
-
+ 
     setDT(LOCS)
-
+ 
     require(data.table)  # enforce
     require(raster) # TODO use sf /stars /fasterize instead ..
 
@@ -259,23 +267,6 @@ aegis_lookup = function(
           if ( vnm %in% names(LUT ))  LOCS[[vnm]] = LUT[ ii, vnm ]
         } 
 
-        if (returntype =="sf" ) {
-
-         LOCS = st_as_sf( LOCS, coords=c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84")) )
- 
-        }
-        if (returntype =="data.frame" ) {
-
-        }
-        if (returntype =="data.table" ) {
-
-        }
-        if (returntype =="vector" ) {
-
-        }
-
-
-        return( LOCS )
       }
 
       if ( project_class %in% c("core", "stmv", "hybrid") & output_format == "areal_units" )  {
@@ -313,7 +304,6 @@ aegis_lookup = function(
           }   
         }
 
-        return( LOCS  )
       }
 
  
@@ -368,7 +358,6 @@ aegis_lookup = function(
           }
         } 
 
-        return( LOCS )
       }
 
 
@@ -380,10 +369,6 @@ aegis_lookup = function(
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
 
-        LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
-        LOCS = st_as_sf( LOCS, coords=c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84")) )
-        LOCS = sf::st_transform( LOCS, crs=st_crs(p$aegis_proj4string_planar_km) )
-
         if (!exists("AUID", LUT_AU)) LUT_AU$AUID = as.character(1:nrow(LUT_AU))
         bm = match( LUT_AU$AUID, LUT$space )  # should not be required but just in case things are subsetted
 
@@ -394,16 +379,29 @@ aegis_lookup = function(
         st_crs(LUT_AU_pts) = st_crs( LUT_AU ) 
 
         # format output polygon structure 
+        LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(LUT_AU) )  # LOCS_AU .... must be sent ... <---------
+        LOCS_AU = st_cast( LOCS_AU, "POLYGON")
         if (!exists("AUID", LOCS_AU))  {
           message ("AUID not found in the polygons, setting AUID as row number of polygons")
           LOCS_AU$AUID = as.character(1:nrow(LOCS_AU))
         }
- 
-        LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(LUT_AU) )  # LOCS_AU .... must be sent ... <---------
-        LOCS_AU = st_cast( LOCS_AU, "POLYGON")
 
+        if (is.null(LOCS)) {
+          # matching directly to LOCS_AU
+          LOCS = LOCS_AU
+          if (!exists("AUID", LOCS) ) stop( message("AUID must be found in LOCS or LOCS_AU"))
+
+        } else {
+          if (exists("lon", LOCS )) {
+            LOCS = st_as_sf( LOCS, coords=c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84")) )
+            LOCS = sf::st_transform( LOCS, crs=st_crs(p$aegis_proj4string_planar_km) )
+            LOCS[["AUID"]]  = st_points_in_polygons( pts=LOCS, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
+          }
+
+        }
+        
+        # covert LUT_AU to LOCS_AU
         # id membership of LOCS in LOCS_AU
-        LOCS[["AUID"]]  = st_points_in_polygons( pts=LOCS, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
 
         # id membership of LUT raster in LOCS_AU
         LUT_AU_pts_LOCS_AU_AUID = st_points_in_polygons( pts=LUT_AU_pts, polys=LOCS_AU[,"AUID"], varname="AUID" ) 
@@ -411,7 +409,7 @@ aegis_lookup = function(
         pts_AU = match(LUT_AU_pts$layer, LUT_AU$lut_uid[match(LUT$space, LUT_AU$AUID)] ) ## (layer==lut_uid) -- to -- LUT
 
         aggFUN = function( LUV ) tapply(X=LUV, INDEX=LUT_AU_pts_LOCS_AU_AUID, FUN=FUNC, na.rm=TRUE) 
- 
+
         for (g in 1:length(statvars)) {
           stat_var = statvars[g]
           for (h in 1:length(variable_name) ) {
@@ -429,7 +427,6 @@ aegis_lookup = function(
             }
           } 
         }
-        return( LOCS)  
       }
 
     }
@@ -465,7 +462,6 @@ aegis_lookup = function(
           if ( vnm %in% names(LUT ))  LOCS[[vnm]] = LUT[ ii, vnm ]
         }
 
-        return( LOCS )
       }
 
 
@@ -512,7 +508,6 @@ aegis_lookup = function(
           }
         }
 
-        return( LOCS  )
       }
 
  
@@ -574,9 +569,6 @@ aegis_lookup = function(
           } 
         }
 
-
-        return( LOCS )  
-      
       }
 
 
@@ -593,10 +585,6 @@ aegis_lookup = function(
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
         
-        LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
-        LOCS = st_as_sf( LOCS, coords=c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84")) )
-        LOCS = sf::st_transform( LOCS, crs=st_crs(p$aegis_proj4string_planar_km) )
-
         # dims
         ny = length(LUT$time)
         yr0 = min(as.numeric(LUT$time))
@@ -611,22 +599,30 @@ aegis_lookup = function(
         st_crs(LUT_AU_pts) = st_crs( LUT_AU ) 
 
         # format output polygon structure 
+        LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(LUT_AU) )  # LOCS_AU .... must be sent ... <---------
+        LOCS_AU = st_cast( LOCS_AU, "POLYGON")
         if (!exists("AUID", LOCS_AU))  {
           message ("AUID not found in the LOCS_AU polygons, setting AUID as row number of polygons")
           LOCS_AU$AUID = as.character(1:nrow(LOCS_AU))
         }
 
+        if (is.null(LOCS)) {
+          # matching directly to LOCS_AU
+          LOCS = LOCS_AU
+          if (!exists("AUID", LOCS) ) stop( message("AUID must be found in LOCS or LOCS_AU"))
+
+        } else {
+          if (exists("lon", LOCS )) {
+            LOCS = st_as_sf( LOCS, coords=c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84")) )
+            LOCS = sf::st_transform( LOCS, crs=st_crs(p$aegis_proj4string_planar_km) )
+            LOCS[["AUID"]]  = st_points_in_polygons( pts=LOCS, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
+          }
+        }
 
         if (! "POSIXct" %in% class(LOCS$timestamp)  ) LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
         if (! exists("yr", LOCS) ) LOCS$yr = lubridate::year(LOCS$timestamp) 
         
         TIMESTAMP_index1 = array_map( "ts->year_index", LOCS[["yr"]], dims=c(ny ), res=c( 1  ), origin=c( yr0 ) )
-
-        LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(LUT_AU) )  # LOCS_AU .... must be sent ... <---------
-        LOCS_AU = st_cast( LOCS_AU, "POLYGON")
-
-        # id membership of LOCS in LOCS_AU
-        LOCS[["AUID"]]  = st_points_in_polygons( pts=LOCS, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
 
         # id membership of LUT raster in LOCS_AU
         LUT_AU_pts_LOCS_AU_AUID = st_points_in_polygons( pts=LUT_AU_pts, polys=LOCS_AU[,"AUID"], varname="AUID" ) 
@@ -659,8 +655,6 @@ aegis_lookup = function(
             }
           } 
         }
-        return( LOCS  )
-      
       }
 
     }  # end dimension
@@ -705,9 +699,7 @@ aegis_lookup = function(
           if ( vnm %in% names(LUT ))  LOCS[[ vnm ]] = LUT[ ii, vnm ]
         }
 
-        return( LOCS  )
       }
-
 
  
       if ( project_class %in% c("core", "stmv", "hybrid") & output_format == "areal_units" )  {
@@ -769,7 +761,6 @@ aegis_lookup = function(
           }
         }
 
-        return( LOCS  )
       }
 
 
@@ -836,8 +827,6 @@ aegis_lookup = function(
             }
           } 
         }
-
-        return( LOCS  )  
       
       }
 
@@ -851,10 +840,6 @@ aegis_lookup = function(
         LUT_AU = st_cast(LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
-        
-        LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
-        LOCS = st_as_sf( LOCS, coords=c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84")) )
-        LOCS = sf::st_transform( LOCS, crs=st_crs(p$aegis_proj4string_planar_km) )
 
         nw = length(LUT$season)
         ny = length(LUT$time)
@@ -870,9 +855,25 @@ aegis_lookup = function(
         st_crs(LUT_AU_pts) = st_crs( LUT_AU ) 
 
         # format output polygon structure 
+        LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(LUT_AU) )  # LOCS_AU .... must be sent ... <---------
+        LOCS_AU = st_cast( LOCS_AU, "POLYGON")
         if (!exists("AUID", LOCS_AU))  {
           message ("AUID not found in the LOCS_AU polygons, setting AUID as row number of polygons")
           LOCS_AU$AUID = as.character(1:nrow(LOCS_AU))
+        }
+
+        if (is.null(LOCS)) {
+          # matching directly to LOCS_AU
+          LOCS = LOCS_AU
+          if (!exists("AUID", LOCS) ) stop( message("AUID must be found in LOCS or LOCS_AU"))
+
+        } else {
+          if (exists("lon", LOCS )) {
+            LOCS = st_as_sf( LOCS, coords=c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84")) )
+            LOCS = sf::st_transform( LOCS, crs=st_crs(p$aegis_proj4string_planar_km) )
+            LOCS[["AUID"]]  = st_points_in_polygons( pts=LOCS, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
+          }
+
         }
 
         if (! "POSIXct" %in% class(LOCS$timestamp)  ) LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
@@ -880,14 +881,7 @@ aegis_lookup = function(
         if (! exists("dyear", LOCS) ) LOCS$dyear = lubridate::decimal_date( LOCS$timestamp ) - LOCS$yr
     
         TIMESTAMP_index1 = array_map( "ts->year_index", LOCS[["yr"]], dims=c(ny ), res=c( 1  ), origin=c( yr0 ) )
-
         TIMESTAMP_index2 = array_map( "ts->2", st_drop_geometry(LOCS) [, c("yr", "dyear")], dims=c(ny, nw), res=c( 1, 1/nw ), origin=c( yr0, 0) )
-
-        LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(LUT_AU) )  # LOCS_AU .... must be sent ... <---------
-        LOCS_AU = st_cast( LOCS_AU, "POLYGON")
-
-        # id membership of LOCS in LOCS_AU
-        LOCS[["AUID"]]  = st_points_in_polygons( pts=LOCS, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
 
         # id membership of LUT raster in LOCS_AU
         LUT_AU_pts_LOCS_AU_AUID = st_points_in_polygons( pts=LUT_AU_pts, polys=LOCS_AU[,"AUID"], varname="AUID" ) 
@@ -927,11 +921,30 @@ aegis_lookup = function(
             }
           } 
         }
-      
-        return( LOCS  )
     
       }
     } # end space-year-season
 
+
+    if (returntype =="sf" ) {
+      if (! "sf" %in% class(LOCS) ) LOCS = st_as_sf( LOCS, coords=c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84")) )
+    }
+    if (returntype =="data.frame" ) {
+      if (! "data.frame" %in% class(LOCS) ) LOCS = as.data.frame(LOCS)
+    }
+
+    if (returntype =="data.table" ) {
+      if (! "data.table" %in% class(LOCS) ) setDT(LOCS)
+    }
+
+    if (returntype =="vector" ) {
+      setDT(LOCS)
+      if (length(variable_name) == 1) {
+        if (exists( variable_name, LOCS)) LOCS = LOCS[[variable_name]] 
+      } 
+      message("variable_name is not a single variable, all being returned")
+    }
+
+    return(LOCS)
 
 }
