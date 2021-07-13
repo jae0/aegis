@@ -140,6 +140,12 @@ aegis_lookup = function(
       project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res)/2
     ) 
 
+    mm = expand.grid(AUID=sppoly$AUID, timestamp=lubridate::date_decimal( p$yrs, tz="America/Halifax" ))
+
+    o6 = aegis_lookup(  data_class="speciescomposition", LOCS=mm, LOCS_AU=sppoly, variabletomodel="pca1", 
+      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res)/2
+    ) 
+
 
     # consistency checks
     plot(o1$pca1.mean ~o3$pca1.mean)
@@ -165,6 +171,11 @@ aegis_lookup = function(
     ) 
   
     o5 = aegis_lookup(  data_class="temperature", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, 
+      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res)/2
+    ) 
+
+    mm = expand.grid(AUID=sppoly$AUID, timestamp=lubridate::date_decimal( p$yrs, tz="America/Halifax" ))
+    o6 = aegis_lookup(  data_class="temperature", LOCS=mm, LOCS_AU=sppoly, 
       project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res)/2
     ) 
 
@@ -217,7 +228,7 @@ aegis_lookup = function(
     }
 
     if ( "temperature" %in% data_class ) {
-      if (is.null(year.assessment)) year.assessment = max( lubridate::year(LOCS$timestamp) )
+      if (is.null(year.assessment)) year.assessment = max( lubridate::year(lubridate::date_decimal( LOCS$timestamp, tz=tz )) )
       p = temperature_parameters(  project_class=project_class, year.assessment=year.assessment )
       if (is.null(LUT)) {
         if ( project_class %in% c("core" ) )  LUT = temperature_db ( p=p, DS=DS )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
@@ -228,7 +239,7 @@ aegis_lookup = function(
 
 
     if ( data_class %in% c("speciescomposition", "speciescomposition_pca1", "speciescomposition_pca2", "speciescomposition_ca1", "speciescomposition_ca2")  ){
-      if (is.null(year.assessment)) year.assessment = max( lubridate::year(LOCS$timestamp) )
+      if (is.null(year.assessment)) year.assessment = max( lubridate::year(lubridate::date_decimal( LOCS$timestamp, tz=tz )) )
       if (is.null(variabletomodel)) {
         if (data_class == "speciescomposition_pca1") variabletomodel = "pca1" 
         if (data_class == "speciescomposition_pac2") variabletomodel = "pca2" 
@@ -442,7 +453,7 @@ aegis_lookup = function(
         if (!exists("plon", LUT))  LUT = lonlat2planar(LUT, proj.type=p$aegis_proj4string_planar_km)
         if (!exists("plon", LOCS)) LOCS = lonlat2planar(LOCS, proj.type=p$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
       
-        if (! "POSIXct" %in% class(LOCS$timestamp)  ) LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
+        if (! inherits(LOCS$timestamp, "POSIXct") )  LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
         if (! exists("yr", LOCS) ) LOCS$yr = lubridate::year( LOCS$timestamp ) 
  
         ii = match( 
@@ -486,7 +497,7 @@ aegis_lookup = function(
 
         LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(LUT) )
 
-        if (! "POSIXct" %in% class(LOCS$timestamp)  ) LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
+        if (! inherits(LOCS$timestamp, "POSIXct") )  LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
         if (! exists("yr", LOCS) ) LOCS$yr = lubridate::year(LOCS$timestamp) 
 
         LU_map = paste( 
@@ -542,7 +553,7 @@ aegis_lookup = function(
 
         LOCS$AUID = st_points_in_polygons( pts=LOCS, polys = LUT_AU[, "AUID"], varname= "AUID" )   
        
-        if (! "POSIXct" %in% class(LOCS$timestamp)  ) LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
+        if (! inherits(LOCS$timestamp, "POSIXct") )  LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
         if (! exists("yr", LOCS) ) LOCS$yr = lubridate::year(LOCS$timestamp) 
       
       
@@ -619,7 +630,7 @@ aegis_lookup = function(
           }
         }
 
-        if (! "POSIXct" %in% class(LOCS$timestamp)  ) LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
+        if (! inherits(LOCS$timestamp, "POSIXct") )  LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
         if (! exists("yr", LOCS) ) LOCS$yr = lubridate::year(LOCS$timestamp) 
         
         TIMESTAMP_index1 = array_map( "ts->year_index", LOCS[["yr"]], dims=c(ny ), res=c( 1  ), origin=c( yr0 ) )
@@ -669,7 +680,7 @@ aegis_lookup = function(
         if (!exists("plon", LOCS))  LOCS = lonlat2planar(LOCS, proj.type=p$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
         if (!exists("plon", LUT))  LUT = lonlat2planar(LUT, proj.type=p$aegis_proj4string_planar_km)
         
-        if (! "POSIXct" %in% class(LOCS$timestamp)  ) LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
+        if (! inherits(LOCS$timestamp, "POSIXct") )  LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
         if (! exists("yr", LOCS) ) LOCS$yr = lubridate::year( LOCS$timestamp ) 
         if (! exists("dyear", LOCS) ) LOCS$dyear = lubridate::decimal_date( LOCS$timestamp ) - LOCS$yr
 
@@ -724,7 +735,7 @@ aegis_lookup = function(
 
         LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(LUT) )
 
-        if (! "POSIXct" %in% class(LOCS$timestamp)  ) LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
+        if (! inherits(LOCS$timestamp, "POSIXct") )  LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
         if (! exists("yr", LOCS) )LOCS$yr = lubridate::year(LOCS$timestamp) 
         if (! exists("dyear", LOCS) ) LOCS$dyear = lubridate::decimal_date( LOCS$timestamp ) - LOCS$yr
  
@@ -794,7 +805,7 @@ aegis_lookup = function(
 
         LOCS$AUID = st_points_in_polygons( pts=LOCS, polys = LUT_AU[, "AUID"], varname= "AUID" )   
 
-        if (! "POSIXct" %in% class(LOCS$timestamp)  ) LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
+        if (! inherits(LOCS$timestamp, "POSIXct") )  LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
         if (! exists("yr", LOCS) ) LOCS$yr = lubridate::year(LOCS$timestamp) 
         if (! exists("dyear", LOCS) ) LOCS$dyear = lubridate::decimal_date( LOCS$timestamp ) - LOCS$yr
       
@@ -808,10 +819,15 @@ aegis_lookup = function(
           array_map( "ts->year_index", LOCS[["yr"]], dims=c(ny ), res=c( 1  ), origin=c( yr0 ) ) 
         )
 
+  
+        LOCS_DF = LOCS
+        if (inherits(LOCS_DF, "sf")) LOCS_DF = st_drop_geometry(LOCS_DF)
+
         ll = cbind( 
           match( LOCS$AUID, LUT$space[bm] ), 
-          array_map( "ts->2", st_drop_geometry(LOCS) [, c("yr", "dyear")], dims=c(ny, nw), res=c( 1, 1/nw ), origin=c( yr0, 0) ) 
+          array_map( "ts->2", LOCS_DF[, c("yr", "dyear")], dims=c(ny, nw), res=c( 1, 1/nw ), origin=c( yr0, 0) ) 
         )
+        LOCS_DF = NULL
 
         for (g in 1:length(statvars)) {
           stat_var = statvars[g]
@@ -876,12 +892,17 @@ aegis_lookup = function(
 
         }
 
-        if (! "POSIXct" %in% class(LOCS$timestamp)  ) LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
+        if (! inherits(LOCS$timestamp, "POSIXct") )  LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
         if (! exists("yr", LOCS) ) LOCS$yr = lubridate::year(LOCS$timestamp) 
         if (! exists("dyear", LOCS) ) LOCS$dyear = lubridate::decimal_date( LOCS$timestamp ) - LOCS$yr
     
-        TIMESTAMP_index1 = array_map( "ts->year_index", LOCS[["yr"]], dims=c(ny ), res=c( 1  ), origin=c( yr0 ) )
-        TIMESTAMP_index2 = array_map( "ts->2", st_drop_geometry(LOCS) [, c("yr", "dyear")], dims=c(ny, nw), res=c( 1, 1/nw ), origin=c( yr0, 0) )
+        LOCS_DF = LOCS
+        if (inherits(LOCS_DF, "sf")) LOCS_DF = st_drop_geometry(LOCS_DF)
+
+        TIMESTAMP_index1 = array_map( "ts->year_index", LOCS_DF[, "yr"], dims=c(ny ), res=c( 1  ), origin=c( yr0 ) )
+        TIMESTAMP_index2 = array_map( "ts->2", LOCS_DF[, c("yr", "dyear")], dims=c(ny, nw), res=c( 1, 1/nw ), origin=c( yr0, 0) )
+        
+        LOCS_DF = NULL
 
         # id membership of LUT raster in LOCS_AU
         LUT_AU_pts_LOCS_AU_AUID = st_points_in_polygons( pts=LUT_AU_pts, polys=LOCS_AU[,"AUID"], varname="AUID" ) 
@@ -927,18 +948,17 @@ aegis_lookup = function(
 
 
     if (returntype =="sf" ) {
-      if (! "sf" %in% class(LOCS) ) LOCS = st_as_sf( LOCS, coords=c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84")) )
+      if (! inherits(LOCS, "sf"))   LOCS = st_as_sf( LOCS, coords=c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84")) )
     }
     if (returntype =="data.frame" ) {
-      if (! "data.frame" %in% class(LOCS) ) LOCS = as.data.frame(LOCS)
+      if  (! inherits(LOCS, "data.frame"))  LOCS = as.data.frame(LOCS)
     }
 
     if (returntype =="data.table" ) {
-      if (! "data.table" %in% class(LOCS) ) setDT(LOCS)
+      if (! inherits(LOCS, "data.table"))   setDT(LOCS)
     }
 
     if (returntype =="vector" ) {
-      setDT(LOCS)
       if (length(variable_name) == 1) {
         if (exists( variable_name, LOCS)) LOCS = LOCS[[variable_name]] 
       } 
