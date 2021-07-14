@@ -107,7 +107,17 @@ aegis_lookup = function(
     ) 
 
     # au to au match (LOCS=NULL)
-    o7 = aegis_lookup(  data_class="bathymetry", LOCS=as.data.frame(sppoly), LOCS_AU=sppoly,
+    o7 = aegis_lookup(  data_class="bathymetry", LOCS=list(AUID=sppoly$AUID), LOCS_AU=sppoly,
+      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res) /2
+    ) 
+
+    # au to au match (LOCS=NULL)
+    o7 = aegis_lookup(  data_class="bathymetry", LOCS=sppoly[,"AUID"], LOCS_AU=sppoly,
+      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res) /2
+    ) 
+
+    # au to au match (LOCS=NULL)
+    o7 = aegis_lookup(  data_class="bathymetry", LOCS=sppoly$AUID, LOCS_AU=sppoly,
       project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res) /2
     ) 
 
@@ -197,6 +207,7 @@ aegis_lookup = function(
  
   }
  
+    if (is.vector(LOCS)) LOCS = list(AUID=LOCS)
     if (!is.null(LOCS)) setDT(LOCS)
  
     require(data.table)  # enforce
