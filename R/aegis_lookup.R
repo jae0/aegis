@@ -968,8 +968,9 @@ aegis_lookup = function(
     if (returntype =="vector" ) {
       if (length(variable_name) == 1) {
         if (exists( variable_name, LOCS)) LOCS = LOCS[[variable_name]] 
-      } 
-      message("variable_name is not a single variable, all being returned")
+      }  else {
+        message("variable_name is not a single variable, all being returned")
+      }
     }
 
     return(LOCS)
