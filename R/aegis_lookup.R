@@ -967,10 +967,11 @@ aegis_lookup = function(
 
     if (returntype =="vector" ) {
       if (length(variable_name) == 1) {
+          if (project_class="carstm") {
+              variable_name = paste( paste0(variable_name[[1]],  collapse="_"),  statvars[1], sep="_" )
+          }          
         if (exists( variable_name, LOCS)) LOCS = LOCS[[variable_name]] 
-      }  else {
-        message("variable_name is not a single variable, all being returned")
-      }
+      }  
     }
 
     return(LOCS)
