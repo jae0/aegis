@@ -10,7 +10,6 @@ aegis_lookup = function(
   project_class="core",   # "project_class" to look up from
   DS="aggregated_data", # "DS=.. "
   output_format="points", 
-  vnm = "predictions",  # used for carstm lookups
   statvars = c("mean"),
   tz="America/Halifax", 
   year.assessment=NULL , 
@@ -19,11 +18,6 @@ aegis_lookup = function(
   raster_resolution=1, ...
 ) {
  
-
-# join = function(x, y) st_is_within_distance(x, y, dist = raster_resolution )
-# join = function(x, y) st_is_within_distance(x, y, dist = raster_resolution )
-# join = st_intersects
-
 
  if (0) {
    # testing usign snow data
@@ -39,14 +33,12 @@ aegis_lookup = function(
       project_class="core"   # "project_class" to look up from
       DS="aggregated_data" # "DS=.. "
       output_format="points" 
-      vnm = "predictions"  # used for carstm lookups
       statvars = c("mean")
       tz="America/Halifax" 
       year.assessment= lubridate::year(lubridate::now())   
       FUNC=mean 
-      join = st_intersects 
       raster_resolution=1
-  }
+    }
 
     year.assessment = 2020
 
@@ -65,9 +57,8 @@ aegis_lookup = function(
 
     sppoly = areal_units( p=p )  # poly to estimate a surface 
 
-    loadfunctions("aegis")
-    debug(aegis_lookup)
-
+    # loadfunctions("aegis")
+    # debug(aegis_lookup)
     
     # test raw data lookup
     # spatial
