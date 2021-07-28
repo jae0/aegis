@@ -111,7 +111,7 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
       dd6 = which( Zco[,2] < cfa4x$lat[4]  )  #south lim
       
       todrop = unique( c(dd1, dd2, dd2, dd4, dd5, dd6) ) 
-browser()
+
       if (length( tokeep) > 0 & length(todrop) > 0)  tokeep = setdiff( tokeep, todrop )
       if (length( tokeep) > 0)  inside = intersect( inside, which(tokeep) )
     }
