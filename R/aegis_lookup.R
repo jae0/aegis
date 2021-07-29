@@ -1,4 +1,6 @@
 
+# TODO:: tapply can be converted into data.table computations for speed
+
 aegis_lookup = function( 
   data_class="bathymetry", 
   variable_name=NULL,
@@ -279,7 +281,7 @@ aegis_lookup = function(
     if (p$aegis_dimensionality =="space" ) {
 
       if ( project_class %in% c("core", "stmv", "hybrid") & output_format == "points" )  {
-
+        
         if (!exists("plon", LUT))  LUT = lonlat2planar(LUT, proj.type=p$aegis_proj4string_planar_km)
         if (!exists("plon", LOCS)) LOCS = lonlat2planar(LOCS, proj.type=p$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
 
@@ -294,9 +296,38 @@ aegis_lookup = function(
           if ( vnm %in% names(LUT ))  LOCS[[vnm]] = LUT[ ii, vnm ]
         } 
 
+     
       }
 
       if ( project_class %in% c("core", "stmv", "hybrid") & output_format == "areal_units" )  {
+
+        LOCS0 = NULL
+        if (exists("AUID", LOCS)) {
+          # this is a special class of lookup taking LUT (usually empirical or aggregated data) and estimating from it for an areal unit (via rasterization)
+          LOCS0 = LOCS # store as modifications will be made to LOCS
+
+          # next, get a x-y coordinate for each LOC by rasterizing to LOCS_AU  
+          raster_template = raster::raster( LOCS_AU, res=raster_resolution, crs=st_crs( p$aegis_proj4string_planar_km ) )
+
+          # prep-pass with a au_index variable to get index
+         
+          LOCS_AU = st_cast(LOCS_AU, "POLYGON" )
+          LOCS_AU = st_make_valid(LOCS_AU)
+          LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
+
+          LOCS_AU$au_index = 1:nrow(LOCS_AU)
+          LOCS_AU_raster = fasterize::fasterize( LOCS_AU, raster::raster( LOCS_AU, res=raster_resolution, crs=st_crs( LOCS_AU ) ), field="au_index" )  
+
+          # overwrite LOCS with discretized points 
+          LOCS = sf::st_as_sf( as.data.frame( raster::rasterToPoints(LOCS_AU_raster)), coords=c("x", "y") )
+          LOCS$AUID = LOCS_AU$AUID[ match( LOCS[["layer"]], LOCS_AU$au_index )]
+          # ll = st_coordinates(LOCS)
+          # colnames(ll) = c("plon", "plat")
+          # LOCS = cbind( st_drop_geometry(LOCS), ll )
+          # ll = NULL
+          
+          # now match to empirical data using standard approach..
+        }
 
         if (exists("lon", LUT)) {
           LUT = sf::st_as_sf( LUT, coords=c("lon", "lat") )
@@ -313,7 +344,7 @@ aegis_lookup = function(
 
         LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(LUT) )
 
-        LOCS = st_as_sf( LOCS, coords=c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84")) )
+        if (!inherits(LOCS, "sf")) LOCS = st_as_sf( LOCS, coords=c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84")) )
  
         variable_name = intersect( names(LUT), variable_name )
         LUT = LUT[, variable_name]
@@ -322,7 +353,7 @@ aegis_lookup = function(
         #   LOCS[[vnm]] =  sf:::aggregate.sf( LUT[, vnm], LOCS, FUNC, na.rm=TRUE ) [[vnm]]
         # }
         LU_map =  st_points_in_polygons( pts=LUT, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
-        LOCS[["AUID"]]  = st_points_in_polygons( pts=LOCS, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
+        if (!exists("AUID", LOCS ))  LOCS[["AUID"]]  = st_points_in_polygons( pts=LOCS, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
 
         for (vnm in variable_name) {
           if ( vnm %in% names(LUT )) {  
@@ -330,6 +361,14 @@ aegis_lookup = function(
             LOCS[[ vnm ]] = LUT_regridded[ match( LOCS$AUID, as.character( names( LUT_regridded )) ) ]
           }   
         }
+
+        if (!is.null(LOCS0)) {
+          # summarize LOCS to to original AUID's
+          setDT(LOCS)
+          o = LOCS[,  lapply(.SD, mean, na.rm=TRUE), by=AUID, .SDcols=variable_name]   
+          LOCS = o[ match( LOCS0$AUID, o$AUID), .SD, .SDcols=variable_name  ]        
+        }
+
 
       }
 
