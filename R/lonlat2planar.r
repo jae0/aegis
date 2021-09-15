@@ -7,8 +7,10 @@
   
     datatype = ifelse("data.table" %in% class(x), "data.table", "data.frame")
 
+    
     require(data.table)
     setDT(x)
+    ii = which( is.finite( rowSums( x[,input_names, with=FALSE] ) ) )   
 
     pjj = NULL
     pjj = projection_proj4string(proj.type)
@@ -32,8 +34,10 @@
       stop( "The proj4 CRS requires an explicit +units=km ")
     }
 
-    # y = rgdal::project( as.matrix(x[,input_names]), proj=crsX , inv=F )
-    y = sf::sf_project( from=sf::st_crs("EPSG:4326"), to=proj4.params, pts=as.matrix(x[,input_names, with=FALSE]))
+    y = rgdal::project( as.matrix(x[,input_names, with=FALSE]), proj=crsX , inv=FALSE )
+    
+    # sf method is a bit too srtict with bounds TODO
+    # y = sf::sf_project( from=sf::st_crs("EPSG:4326"), to=proj4.params, pts=as.matrix(x[,input_names, with=FALSE]))
 
     colnames(y) = newnames
     for (i in 1:length( newnames)) {

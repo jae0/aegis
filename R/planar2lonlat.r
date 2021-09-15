@@ -39,8 +39,10 @@
         stop( "The proj4 CRS requires an explicit +units=km ")
       }
 
-      # y = rgdal::project( as.matrix(x[,c("plon", "plat")]), crsX, inv=TRUE )
-      y = sf::sf_project( from=proj4.params, to=sf::st_crs("EPSG:4326"), pts=as.matrix(x[, input_names, with=FALSE ]) )
+      y = rgdal::project( as.matrix(x[, input_names, with=FALSE ]), proj=crsX, inv=TRUE )
+      
+      # sf method is a bit too strict to use ..
+      # y = sf::sf_project( from=proj4.params, to=sf::st_crs("EPSG:4326"), pts=as.matrix(x[, input_names, with=FALSE ]) )
 
       colnames(y) = newnames
       for (i in 1:length( newnames)) {
