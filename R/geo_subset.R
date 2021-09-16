@@ -102,13 +102,16 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
         lat = c( 44.75, 43.8, 47.5, 42.8, 44.75 )
       ) )
 
+      cfa4x = lonlat2planar( cfa4x, proj.type=ps$aegis_proj4string_planar_km )
+
       Zco = st_coordinates( Z )  
-      dd1 = which( Zco[,1] < cfa4x$lon[1] & Zco[,2] > cfa4x$lat[1]  )
-      dd2 = which( Zco[,1] < cfa4x$lon[2] & Zco[,2] > cfa4x$lat[2]  )      
-      dd3 = which( Zco[,1] > cfa4x$lon[3] ) # east lim
-      dd4 = which( Zco[,1] < cfa4x$lon[4] )  #west lim
-      dd5 = which( Zco[,2] > cfa4x$lat[3]  ) # north lim
-      dd6 = which( Zco[,2] < cfa4x$lat[4]  )  #south lim
+
+      dd1 = which( Zco[,1] < cfa4x$plon[1] & Zco[,2] > cfa4x$plat[1]  )
+      dd2 = which( Zco[,1] < cfa4x$plon[2] & Zco[,2] > cfa4x$plat[2]  )      
+      dd3 = which( Zco[,1] > cfa4x$plon[3] ) # east lim
+      dd4 = which( Zco[,1] < cfa4x$plon[4] )  #west lim
+      dd5 = which( Zco[,2] > cfa4x$plat[3]  ) # north lim
+      dd6 = which( Zco[,2] < cfa4x$plat[4]  )  #south lim
       
       todrop = unique( c(dd1, dd2, dd2, dd4, dd5, dd6) ) 
 
