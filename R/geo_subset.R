@@ -8,6 +8,7 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
 
   # trim to extents
   ps = spatial_parameters( spatial_domain=spatial_domain ) # obtain internal projection params
+
   corners =  rbind(
     c( ps$corners$lon[1], ps$corners$lat[2] ),
     c( ps$corners$lon[2], ps$corners$lat[2] ),
@@ -98,8 +99,8 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
       
       # filter out area 4X
       cfa4x = as.data.frame( cbind(
-        lon = c(-63, -65.5, -56.8, -66.3 , -63),
-        lat = c( 44.75, 43.8, 47.5, 42.8, 44.75 )
+        lon = c(-63,   -65.5,  -56.8, -66.3 , -63    ),
+        lat = c( 44.75, 43.8,   47.5,  42.8,   44.75 )
       ) )
 
       cfa4x = lonlat2planar( cfa4x, proj.type=ps$aegis_proj4string_planar_km )
