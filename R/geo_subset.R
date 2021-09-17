@@ -76,7 +76,6 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
 
     if ( spatial_domain == "snowcrab" ) {
       #\\ NOTE::: snowcrab baseline == SSE baseline, except it is a subset
-
       region = aegis.polygons::polygon_internal_code( "cfaall" )
       if (length(region) > 0) {
         y = read.table( aegis.polygons::polygon_file(region[1]), header=FALSE)
@@ -95,7 +94,7 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
       pbnd = st_make_valid(  pbnd  )
       pbnd = st_transform(pbnd, crs=st_crs(Z) ) 
 
-      tokeep = st_points_in_polygons( Z, pbnd) 
+      tokeep = which( st_points_in_polygons( Z, pbnd) )
       
       # filter out area 4X
       cfa4x = as.data.frame( cbind(
@@ -120,7 +119,7 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
       todrop = unique( c(dd1, dd2, dd2, dd4, dd5, dd6) ) 
 
       if (length( tokeep) > 0 & length(todrop) > 0)  tokeep = setdiff( tokeep, todrop )
-      if (length( tokeep) > 0)  inside = intersect( inside, which(tokeep) )
+      if (length( tokeep) > 0)  inside = intersect( inside, tokeep )
     }
 
     return(inside)
