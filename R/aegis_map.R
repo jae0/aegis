@@ -90,6 +90,7 @@
           isobs = st_transform( isobs, crs=st_crs(projection_map_proj4string) )
           
 # browser()
+
           depths1 = as.character( c(100, 300, 500, 700 ) )
           depths2 = as.character( c(200, 400, 600 ) )
          
