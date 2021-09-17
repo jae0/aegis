@@ -103,16 +103,19 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
         lat = c( 44.75, 43.8,   47.5,  42.8,   44.75 )
       ) )
 
-      cfa4x = lonlat2planar( cfa4x, proj.type=ps$aegis_proj4string_planar_km )
+      cfa4x = st_multipoint( as.matrix(cfa4x) )
+      cfa4x = st_sfc( cfa4x, crs=st_crs(projection_proj4string("lonlat_wgs84")) )
+      cfa4x = st_transform( cfa4x, crs=st_crs(Z) )
+      cfa4x = st_coordinates(cfa4x)
 
       Zco = st_coordinates( Z )  
 
-      dd1 = which( Zco[,1] < cfa4x$plon[1] & Zco[,2] > cfa4x$plat[1]  )
-      dd2 = which( Zco[,1] < cfa4x$plon[2] & Zco[,2] > cfa4x$plat[2]  )      
-      dd3 = which( Zco[,1] > cfa4x$plon[3] ) # east lim
-      dd4 = which( Zco[,1] < cfa4x$plon[4] )  #west lim
-      dd5 = which( Zco[,2] > cfa4x$plat[3]  ) # north lim
-      dd6 = which( Zco[,2] < cfa4x$plat[4]  )  #south lim
+      dd1 = which( Zco[,1] < cfa4x[1,1] & Zco[,2] > cfa4x[1,2]  )
+      dd2 = which( Zco[,1] < cfa4x[2,1] & Zco[,2] > cfa4x[2,2]  )      
+      dd3 = which( Zco[,1] > cfa4x[3,1] ) # east lim
+      dd4 = which( Zco[,1] < cfa4x[4,1] )  #west lim
+      dd5 = which( Zco[,2] > cfa4x[3,2]  ) # north lim
+      dd6 = which( Zco[,2] < cfa4x[4,2]  )  #south lim
       
       todrop = unique( c(dd1, dd2, dd2, dd4, dd5, dd6) ) 
 
