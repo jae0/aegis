@@ -12,6 +12,8 @@
     # map using levelplot ... no GMT dependency
 
 		require( lattice )
+    require( sf )
+    
 
     pp = spatial_parameters( spatial_domain=spatial_domain )
 
@@ -85,7 +87,7 @@
         }
         if (depthcontours) {
           isobs = aegis.bathymetry::isobath_db( depths=c( 100, 200, 300, 400, 500, 600, 700 ) )
-          isobs = st_tranform( isobs, crs=st_crs(projection_map_proj4string) )
+          isobs = st_transform( isobs, crs=st_crs(projection_map_proj4string) )
           
 # browser()
           depths1 = as.character( c(100, 300, 500, 700 ) )
