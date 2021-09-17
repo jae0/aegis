@@ -35,14 +35,14 @@
 
       out$sab.polygons = bind( aoi, z1, z2, z3, z4, keepnames=TRUE )
 
-      mc = as( isobath_db( p=p, DS="isobath", depths=p$map.depthcontours, project_to=project_to  ), "Spatial" )
+      mc = as( isobath_db(  DS="isobath", depths=p$map.depthcontours, project_to=project_to  ), "Spatial" )
       mcnames = names( mc)
       # must crop each one separately
       mcout = raster::crop( mc[1], bbox )
       for (i in 2:length(mc) ) {
         mcout = bind( mcout, raster::crop( mc[i], bbox ), keepnames=FALSE )
       }
-      out$map.contours = as( isobath_db( p=p, DS="isobath", depths=p$map.depthcontours, project_to=project_to  ), "Spatial" )
+      out$map.contours = as( isobath_db(  DS="isobath", depths=p$map.depthcontours, project_to=project_to  ), "Spatial" )
 
       # add a small buffer around data and clip to make smaller
       out$map.coastline = as( aegis.coastline::coastline_db( DS=" gshhg coastline highres redo ",
