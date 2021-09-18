@@ -96,7 +96,6 @@
           depths1 = intersect( as.character( c(100, 300, 500, 700 ) ), nn )  
           depths2 = intersect( as.character( c(200, 400, 600 ) ), nn)
 
-browser()
           if (length(depths1) > 0 ) {
             for ( i in depths1 ) {
               spl = as( as( isobs[i,], "Spatial"), "SpatialLines") 
