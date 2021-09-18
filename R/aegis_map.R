@@ -86,22 +86,22 @@
           }
         }
         if (depthcontours) {
- 
-          isobs = aegis.bathymetry::isobath_db( depths=c( 100, 200, 300, 400, 500, 600, 700 ) )
+ browser()
+          isobs = aegis.bathymetry::isobath_db( p=p, depths=c( 100, 200, 300, 400, 500, 600, 700 ) )
+
           isobs = st_transform( isobs, crs=st_crs(projection_map_proj4string) )
           isobs = as( as( isobs, "Spatial"), "SpatialLines")
           
           depths1 = as.character( c(100, 300, 500, 700 ) )  
           depths2 = as.character( c(200, 400, 600 ) )
 
-#          sp.lines( isobs  )
-
-#          for ( i in depths1 ) {
+          for ( i in depths1 ) {
+            browser()
             sp.lines( isobs[depths1,], col = rgb(0.2,0.2,0.2,0.5), cex=0.6 )
- #         }
-#          for ( i in depths2 ) {
+          }
+          for ( i in depths2 ) {
             sp.lines( isobs[depths2,], col = rgb(0.3,0.3,0.3,0.5), cex=0.6 )
- #         }
+          }
         }
 
         if ( !is.null(plotlines) ) {
