@@ -90,17 +90,25 @@
           isobs = aegis.bathymetry::isobath_db( p=p, depths=c( 100, 200, 300, 400, 500, 600, 700 ) )
 
           isobs = st_transform( isobs, crs=st_crs(projection_map_proj4string) )
-          isobs = as( as( isobs, "Spatial"), "SpatialLines")
           
-          depths1 = as.character( c(100, 300, 500, 700 ) )  
-          depths2 = as.character( c(200, 400, 600 ) )
+          nn = row.names(isobs)
 
-          for ( i in depths1 ) {
-            browser()
-            sp.lines( isobs[depths1,], col = rgb(0.2,0.2,0.2,0.5), cex=0.6 )
+          depths1 = intersect( as.character( c(100, 300, 500, 700 ) ), nn )  
+          depths2 = intersect( as.character( c(200, 400, 600 ) ), nn)
+
+browser()
+          if (length(depths1) > 0 ) {
+            for ( i in depths1 ) {
+              spl = as( as( isobs[i,], "Spatial"), "SpatialLines") 
+              sp.lines( spl, col = rgb(0.2,0.2,0.2,0.5), cex=0.6 )
+            }
           }
-          for ( i in depths2 ) {
-            sp.lines( isobs[depths2,], col = rgb(0.3,0.3,0.3,0.5), cex=0.6 )
+
+          if (length(depths2) > 0 ) {
+            for ( i in depths2 ) {
+              spl = as( as( isobs[i,], "Spatial"), "SpatialLines") 
+              sp.lines( spl, col = rgb(0.3,0.3,0.3,0.5), cex=0.6 )
+            }
           }
         }
 
