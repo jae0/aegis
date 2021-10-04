@@ -198,7 +198,10 @@ aegis_lookup = function(
       LUT = bathymetry_db ( p=p, DS="complete" )   
     }
  
-  }
+  }  ## END consistency checks
+
+  # -----------
+
  
     if (is.vector(LOCS)) LOCS = list(AUID=LOCS)
     if (!is.null(LOCS)) setDT(LOCS)
@@ -268,13 +271,22 @@ aegis_lookup = function(
       if (is.null(LUT)) {
         if ( project_class %in% c("core" ) ) LUT = speciescomposition_db ( p=p, DS=DS )   # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
         if ( project_class %in% c( "stmv", "hybrid") )  LUT = aegis_db( p=p, DS="complete" )   
-        if ( project_class %in% c("carstm" )) LUT = carstm_model( p=p, DS="carstm_modelled_summary" ) 
+        if ( project_class %in% c("carstm" )) {
+          LUT = carstm_model( p=p, DS="carstm_modelled_summary" ) 
+        
+        }
       }
     }
 
     if (is.null(LUT)) stop( "lookup data not found nor given")
 
-    if (is.null(variable_name)) variable_name = setdiff( names(LUT), c("plon", "plat", "lon", "lat", "timestamp", "year", "dyear", "yr" ))
+    if (is.null(variable_name)) {
+      if ( project_class %in% c("carstm" )) {
+        variable_name = LUT$formula_parsed$dependent_variable
+      } else {
+        variable_name = setdiff( names(LUT), c("plon", "plat", "lon", "lat", "timestamp", "year", "dyear", "yr" ))
+      }
+    } 
  
     # ------------------
 
@@ -678,6 +690,7 @@ aegis_lookup = function(
         if (! exists("yr", LOCS) ) LOCS$yr = lubridate::year(LOCS$timestamp) 
         
         TIMESTAMP_index1 = array_map( "ts->year_index", LOCS[["yr"]], dims=c(ny ), res=c( 1  ), origin=c( yr0 ) )
+        if (any( TIMESTAMP_index1 < 0)) stop ("time index is negative: lookup table does not contain data to lookup")
 
         # id membership of LUT raster in LOCS_AU
         LUT_AU_pts_LOCS_AU_AUID = st_points_in_polygons( pts=LUT_AU_pts, polys=LOCS_AU[,"AUID"], varname="AUID" ) 
@@ -823,7 +836,7 @@ aegis_lookup = function(
       if ( project_class %in% c("carstm" ) & output_format == "points" )  {
         # areal unit (LUT) to points (LOCS)
    
-        nw = length(LUT$season)
+        nw = length(LUT$cyclic)
         ny = length(LUT$time)
         yr0 = min(as.numeric(LUT$time))
 
@@ -901,9 +914,10 @@ aegis_lookup = function(
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
 
-        nw = length(LUT$season)
+        nw = length(LUT$cyclic)
         ny = length(LUT$time)
         yr0 = min(as.numeric(LUT$time))
+
 
         if (!exists("AUID", LUT_AU)) LUT_AU$AUID = as.character(1:nrow(LUT_AU))
         bm = match( LUT_AU$AUID, LUT$space )  # should not be required but just in case things are subsetted
@@ -940,6 +954,11 @@ aegis_lookup = function(
         TIMESTAMP_index1 = array_map( "ts->year_index", LOCS_DF[, "yr"], dims=c(ny ), res=c( 1  ), origin=c( yr0 ) )
         TIMESTAMP_index2 = array_map( "ts->2", LOCS_DF[, c("yr", "dyear")], dims=c(ny, nw), res=c( 1, 1/nw ), origin=c( yr0, 0) )
         
+        if (any( TIMESTAMP_index1 < 0)) stop ("time index is negative: lookup table does not contain data to lookup")
+        if (any( TIMESTAMP_index2 < 0)) stop ("time index is negative: lookup table does not contain data to lookup")
+
+## browser()
+
         LOCS_DF = NULL
 
         # id membership of LUT raster in LOCS_AU
