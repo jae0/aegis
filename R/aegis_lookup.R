@@ -690,7 +690,11 @@ aegis_lookup = function(
         if (! exists("yr", LOCS) ) LOCS$yr = lubridate::year(LOCS$timestamp) 
         
         TIMESTAMP_index1 = array_map( "ts->year_index", LOCS[["yr"]], dims=c(ny ), res=c( 1  ), origin=c( yr0 ) )
-        if (any( TIMESTAMP_index1 < 0)) stop ("time index is negative: lookup table does not contain data to lookup")
+        if (any( TIMESTAMP_index1 < 0)) {
+          warning ("time index is negative: lookup table does not contain data to lookup ... \n 
+            lookup data needs to be expanded or time periods reduced in model")
+          TIMESTAMP_index1[ which( TIMESTAMP_index1 <= 0 ) ] = NA
+        }
 
         # id membership of LUT raster in LOCS_AU
         LUT_AU_pts_LOCS_AU_AUID = st_points_in_polygons( pts=LUT_AU_pts, polys=LOCS_AU[,"AUID"], varname="AUID" ) 
@@ -954,10 +958,16 @@ aegis_lookup = function(
         TIMESTAMP_index1 = array_map( "ts->year_index", LOCS_DF[, "yr"], dims=c(ny ), res=c( 1  ), origin=c( yr0 ) )
         TIMESTAMP_index2 = array_map( "ts->2", LOCS_DF[, c("yr", "dyear")], dims=c(ny, nw), res=c( 1, 1/nw ), origin=c( yr0, 0) )
         
-        if (any( TIMESTAMP_index1 < 0)) stop ("time index is negative: lookup table does not contain data to lookup")
-        if (any( TIMESTAMP_index2 < 0)) stop ("time index is negative: lookup table does not contain data to lookup")
-
-## browser()
+        if (any( TIMESTAMP_index1 < 0)) {
+          warning ("time index is negative: lookup table does not contain data to lookup ... \n 
+            lookup data needs to be expanded or time periods reduced in model")
+          TIMESTAMP_index1[ which( TIMESTAMP_index1 <= 0 ) ] = NA
+        }
+        if (any( TIMESTAMP_index2 < 0)) {
+          warning ("cyclic time index is negative: lookup table does not contain data to lookup ... \n 
+            lookup data needs to be expanded or time periods reduced in model")
+          TIMESTAMP_index2[ which( TIMESTAMP_index2 <= 0 ) ] = NA
+        }
 
         LOCS_DF = NULL
 
