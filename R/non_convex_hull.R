@@ -6,6 +6,7 @@ non_convex_hull = function( xy, alpha, plot=FALSE ) {
   #\\ see stmv::ah2sp
   require(alphahull)
   require(igraph)
+  
   o = ashape( xy, alpha=alpha )
   ograph = graph.edgelist( cbind( as.character(o$edges[, "ind1"]), 
                                   as.character(o$edges[, "ind2"])), directed = FALSE)
