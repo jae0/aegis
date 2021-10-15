@@ -2,7 +2,7 @@
 # TODO:: tapply can be converted into data.table computations for speed
 
 aegis_lookup = function( 
-  data_class="bathymetry", 
+  parameters = NULL, 
   variable_name=NULL,
   variabletomodel=NULL,  # required only for projects with multiple variables to model such as speciescomposition 
   LUT = NULL,    # look up table from which to obtain results
@@ -19,13 +19,13 @@ aegis_lookup = function(
   returntype = "vector",
   raster_resolution=1, ...
 ) {
- 
+
 
  if (0) {
    # testing usign snow data
     if (0) {
       # generics
-      data_class="bathymetry" 
+      parameters="bathymetry" 
       variable_name=list( "predictions", c("random", "space", "combined") )
       variabletomodel="pca1"  # required only for projects with multiple variables to model such as speciescomposition 
       LUT = NULL    # look up table from which to obtain results
@@ -64,53 +64,53 @@ aegis_lookup = function(
     
     # test raw data lookup
     # spatial
-    o1 = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  
+    o1 = aegis_lookup(  parameters="bathymetry", LOCS=M[, c("lon", "lat")],  
       project_class="core", output_format="points" , DS="aggregated_data", variable_name=c( "z.mean", "z.sd", "z.n"),
       returntype="sf" 
     ) 
 
-    o1 = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  
+    o1 = aegis_lookup(  parameters="bathymetry", LOCS=M[, c("lon", "lat")],  
       project_class="core", output_format="points" , DS="aggregated_data", variable_name=c( "z.mean" ),
       returntype="vector"
     ) 
 
-    o2 = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  
+    o2 = aegis_lookup(  parameters="bathymetry", LOCS=M[, c("lon", "lat")],  
       project_class="stmv", output_format="points" , DS="complete", variable_name=c( "z", "dZ", "ddZ") 
     ) 
  
     # spatial averaging by areal unit
     # this one is slow .. could be sped up if used 
-    o3 = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly,
+    o3 = aegis_lookup(  parameters="bathymetry", LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly,
       project_class="stmv", output_format="areal_units" , DS="complete", variable_name=c( "z", "dZ", "ddZ") 
     ) 
 
     # spatial averaging by areal unit
-    o4 = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly,
+    o4 = aegis_lookup(  parameters="bathymetry", LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly,
       project_class="core", output_format="areal_units" , DS="complete", variable_name=c( "z.mean", "z.sd", "z.n") 
     ) 
 
     # lookup from areal unit predictions
-    o5 = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  
+    o5 = aegis_lookup(  parameters="bathymetry", LOCS=M[, c("lon", "lat")],  
       project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res)
     ) 
 
     # slow 
-    o6 = aegis_lookup(  data_class="bathymetry", LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly,
+    o6 = aegis_lookup(  parameters="bathymetry", LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly,
       project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res) /2
     ) 
 
     # au to au match (LOCS=NULL)
-    o7 = aegis_lookup(  data_class="bathymetry", LOCS=list(AUID=sppoly$AUID), LOCS_AU=sppoly,
+    o7 = aegis_lookup(  parameters="bathymetry", LOCS=list(AUID=sppoly$AUID), LOCS_AU=sppoly,
       project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res) /2
     ) 
 
     # au to au match (LOCS=NULL)
-    o7 = aegis_lookup(  data_class="bathymetry", LOCS=sppoly[,"AUID"], LOCS_AU=sppoly,
+    o7 = aegis_lookup(  parameters="bathymetry", LOCS=sppoly[,"AUID"], LOCS_AU=sppoly,
       project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res) /2
     ) 
 
     # au to au match (LOCS=NULL)
-    o7 = aegis_lookup(  data_class="bathymetry", LOCS=sppoly$AUID, LOCS_AU=sppoly,
+    o7 = aegis_lookup(  parameters="bathymetry", LOCS=sppoly$AUID, LOCS_AU=sppoly,
       project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res) /2
     ) 
 
@@ -123,30 +123,30 @@ aegis_lookup = function(
 
 
     # space-time
-    o1 = aegis_lookup(  data_class="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], variabletomodel="pca1",  
+    o1 = aegis_lookup(  parameters="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], variabletomodel="pca1",  
       project_class="core", output_format="points" , DS="speciescomposition", variable_name=c( "pca1" ) 
     ) 
 
-    o2 = aegis_lookup(  data_class="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], variabletomodel="pca1",  
+    o2 = aegis_lookup(  parameters="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], variabletomodel="pca1",  
       project_class="stmv", output_format="points" , DS="complete", variable_name=c( "pca1") 
     ) 
 
-    o3 = aegis_lookup(  data_class="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, variabletomodel="pca1",
+    o3 = aegis_lookup(  parameters="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, variabletomodel="pca1",
       project_class="core", output_format="areal_units" ,  variable_name=list( "pca1",  "pca2", "ca1", "ca2" )
     ) 
  
-    o4 = aegis_lookup(  data_class="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], variabletomodel="pca1",
+    o4 = aegis_lookup(  parameters="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], variabletomodel="pca1",
       project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd")
     ) 
   
-    o5 = aegis_lookup(  data_class="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, variabletomodel="pca1", 
+    o5 = aegis_lookup(  parameters="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, variabletomodel="pca1", 
       project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res)/2
     ) 
 
     mm = expand.grid(AUID=sppoly$AUID, timestamp=lubridate::date_decimal( p$yrs, tz="America/Halifax" ))
     mm = expand.grid(AUID=sppoly$AUID, timestamp= p$yrs )
 
-    o6 = aegis_lookup(  data_class="speciescomposition", LOCS=mm, LOCS_AU=sppoly, variabletomodel="pca1", 
+    o6 = aegis_lookup(  parameters="speciescomposition", LOCS=mm, LOCS_AU=sppoly, variabletomodel="pca1", 
       project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res)/2
     ) 
 
@@ -158,23 +158,23 @@ aegis_lookup = function(
 
 
     # space-time-season
-    o1 = aegis_lookup(  data_class="temperature", LOCS=M[, c("lon", "lat", "timestamp")],   
+    o1 = aegis_lookup(  parameters="temperature", LOCS=M[, c("lon", "lat", "timestamp")],   
       project_class="core", output_format="points" , DS="aggregated_data", variable_name=c( "t.mean", "t.sd", "t.n")  
     ) 
 
-    o2 = aegis_lookup(  data_class="temperature", LOCS=M[, c("lon", "lat", "timestamp")],    
+    o2 = aegis_lookup(  parameters="temperature", LOCS=M[, c("lon", "lat", "timestamp")],    
       project_class="stmv", output_format="points" , DS="complete", variable_name=c( "t") 
     ) 
 
-    o3 = aegis_lookup(  data_class="temperature", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly,  
+    o3 = aegis_lookup(  parameters="temperature", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly,  
       project_class="core", output_format="areal_units" ,  variable_name=list( "t.mean",  "t.sd", "t.n"  )
     ) 
  
-    o4 = aegis_lookup(  data_class="temperature", LOCS=M[, c("lon", "lat", "timestamp")], 
+    o4 = aegis_lookup(  parameters="temperature", LOCS=M[, c("lon", "lat", "timestamp")], 
       project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd")
     ) 
   
-    o5 = aegis_lookup(  data_class="temperature", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, 
+    o5 = aegis_lookup(  parameters="temperature", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, 
       project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res)/2
     ) 
 
@@ -182,7 +182,7 @@ aegis_lookup = function(
     mm = expand.grid(AUID=sppoly$AUID, timestamp=lubridate::date_decimal( p$yrs, tz="America/Halifax" ))
     mm = expand.grid(AUID=sppoly$AUID, timestamp= p$yrs )
 
-    o6 = aegis_lookup(  data_class="temperature", LOCS=mm, LOCS_AU=sppoly, 
+    o6 = aegis_lookup(  parameters="temperature", LOCS=mm, LOCS_AU=sppoly, 
       project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res)/2
     ) 
 
@@ -202,7 +202,21 @@ aegis_lookup = function(
 
   # -----------
 
- 
+    if ( is.null(parameters) ) stop( "parameters is required")
+
+    p = NULL
+    if ( class(parameters) == "character" ) {
+      # then use generic defaults
+      aegis_project = parameters
+    } else {
+      aegis_project = names(parameters)  
+      if (length(aegis_project) > 1) {
+        warning( "more than one parameter list sent, taking the first only")
+        aegis_project = aegis_project[1]
+        p = parameters[[aegis_project]]
+      }
+    }
+
     if (is.vector(LOCS)) LOCS = list(AUID=LOCS)
     if (!is.null(LOCS)) setDT(LOCS)
  
@@ -214,9 +228,10 @@ aegis_lookup = function(
     # determine LUT (lookup table)
     LUT = NULL
 
-    if ( "bathymetry" %in% data_class ) {
+    if ( "bathymetry" %in% aegis_project ) {
 
-      p = bathymetry_parameters(  project_class=project_class  )
+      if ( is.null(p) )  p = bathymetry_parameters(  project_class=project_class  )
+
       if (is.null(LUT)) {
         if ( project_class %in% c("core" ) )  LUT = bathymetry_db ( p=p, DS=DS )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
         if ( project_class %in% c("stmv", "hybrid") ) LUT = bathymetry_db ( p=p, DS="complete" )   
@@ -224,13 +239,17 @@ aegis_lookup = function(
       }
     }
 
-    if ( "substrate" %in% data_class ) {
-      p = substrate_parameters(  project_class=project_class  )
+    if ( "substrate" %in% aegis_project ) {
+
+      if ( is.null(p) )  p = substrate_parameters(  project_class=project_class  )
+
       if (is.null(LUT)) {
         if ( project_class %in% c("core" ) )  LUT = substrate_db ( p=p, DS=DS )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
         if ( project_class %in% c("stmv", "hybrid") ) {
           LUT = substrate_db ( p=p, DS="complete" )   
+
           pB = bathymetry_parameters( spatial_domain=p$spatial_domain, project_class=project_class  )
+          
           BA = bathymetry_db ( p=pB, DS="baseline", varnames=c("lon", "lat")  )
           LUT = cbind(LUT, BA )
         }
@@ -238,14 +257,16 @@ aegis_lookup = function(
       }
     }
 
-    if ( "temperature" %in% data_class ) {
+    if ( "temperature" %in% aegis_project ) {
       if (is.null(year.assessment)) {
         if (! inherits(LOCS$timestamp, "POSIXct") ) {
           LOCS$timestamp = lubridate::date_decimal( LOCS$timestamp, tz=tz )
         }
         year.assessment = max( lubridate::year( LOCS$timestamp ) )
       }
-      p = temperature_parameters(  project_class=project_class, year.assessment=year.assessment )
+
+      if ( is.null(p) )  p = temperature_parameters(  project_class=project_class, year.assessment=year.assessment )
+
       if (is.null(LUT)) {
         if ( project_class %in% c("core" ) )  LUT = temperature_db ( p=p, DS=DS )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
         if ( project_class %in% c("stmv", "hybrid") )  LUT = temperature_db ( p=p, DS="complete" ) 
@@ -254,7 +275,7 @@ aegis_lookup = function(
     }
 
 
-    if ( data_class %in% c("speciescomposition", "speciescomposition_pca1", "speciescomposition_pca2", "speciescomposition_ca1", "speciescomposition_ca2")  ){
+    if ( aegis_project %in% c("speciescomposition", "speciescomposition_pca1", "speciescomposition_pca2", "speciescomposition_ca1", "speciescomposition_ca2")  ){
        if (is.null(year.assessment)) {
         if (! inherits(LOCS$timestamp, "POSIXct") ) {
           LOCS$timestamp = lubridate::date_decimal( LOCS$timestamp, tz=tz )
@@ -262,12 +283,14 @@ aegis_lookup = function(
         year.assessment = max( lubridate::year( LOCS$timestamp ) )
       }
       if (is.null(variabletomodel)) {
-        if (data_class == "speciescomposition_pca1") variabletomodel = "pca1" 
-        if (data_class == "speciescomposition_pac2") variabletomodel = "pca2" 
-        if (data_class == "speciescomposition_ca1") variabletomodel = "ca1" 
-        if (data_class == "speciescomposition_ca2") variabletomodel = "ca2" 
+        if (aegis_project == "speciescomposition_pca1") variabletomodel = "pca1" 
+        if (aegis_project == "speciescomposition_pac2") variabletomodel = "pca2" 
+        if (aegis_project == "speciescomposition_ca1") variabletomodel = "ca1" 
+        if (aegis_project == "speciescomposition_ca2") variabletomodel = "ca2" 
       }
-      p = speciescomposition_parameters(  project_class=project_class, variabletomodel=variabletomodel, year.assessment=year.assessment  )
+
+      if ( is.null(p) )  p = speciescomposition_parameters(  project_class=project_class, variabletomodel=variabletomodel, year.assessment=year.assessment  )
+      
       if (is.null(LUT)) {
         if ( project_class %in% c("core" ) ) LUT = speciescomposition_db ( p=p, DS=DS )   # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
         if ( project_class %in% c( "stmv", "hybrid") )  LUT = aegis_db( p=p, DS="complete" )   
