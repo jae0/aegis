@@ -213,8 +213,8 @@ aegis_lookup = function(
       if (length(aegis_project) > 1) {
         warning( "more than one parameter list sent, taking the first only")
         aegis_project = aegis_project[1]
-        p = parameters[[aegis_project]]
       }
+      p = parameters[[aegis_project]]
     }
 
     if (is.vector(LOCS)) LOCS = list(AUID=LOCS)
