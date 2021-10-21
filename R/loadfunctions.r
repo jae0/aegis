@@ -16,7 +16,7 @@
     fs = .Platform$file.sep
     keydirectories = paste( "\\", fs, keydirectories, "\\", fs, sep="") # make sure only match directories and not file names
     filestosource = NULL
-
+ 
     for (pn in projectname ) {
 
       projectdirectory = project.codedirectory( directory, pn )
