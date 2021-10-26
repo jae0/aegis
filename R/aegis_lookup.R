@@ -46,7 +46,7 @@ aegis_lookup = function(
 
     p = bio.snowcrab::snowcrab_parameters(
       project_class="carstm",
-      assessment.years=2000:year.assessment,
+      yrs=2000:year.assessment,
       areal_units_type="tesselation",
       carstm_model_label = "tesselation",   # default is the name of areal_units_type
       selection = list(type = "number")
