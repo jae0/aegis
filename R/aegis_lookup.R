@@ -14,7 +14,7 @@ aegis_lookup = function(
   output_format="points", 
   statvars = c("mean"),
   tz="America/Halifax", 
-  year.assessment=NULL , 
+  yrs=NULL , 
   FUNC=mean, 
   returntype = "vector",
   raster_resolution=1, ...
@@ -37,16 +37,15 @@ aegis_lookup = function(
       output_format="points" 
       statvars = c("mean")
       tz="America/Halifax" 
-      year.assessment= lubridate::year(lubridate::now())   
+      yrs = 2000:lubridate::year(lubridate::now())   
       FUNC=mean 
       raster_resolution=1
     }
 
-    year.assessment = 2020
 
     p = bio.snowcrab::snowcrab_parameters(
       project_class="carstm",
-      yrs=2000:year.assessment,
+      yrs=2000:2018,
       areal_units_type="tesselation",
       carstm_model_label = "tesselation",   # default is the name of areal_units_type
       selection = list(type = "number")
@@ -179,7 +178,7 @@ aegis_lookup = function(
     ) 
 
 
-    mm = expand.grid(AUID=sppoly$AUID, timestamp=lubridate::date_decimal( p$yrs, tz="America/Halifax" ))
+   # mm = expand.grid(AUID=sppoly$AUID, timestamp=lubridate::date_decimal( p$yrs, tz="America/Halifax" ))
     mm = expand.grid(AUID=sppoly$AUID, timestamp= p$yrs )
 
     o6 = aegis_lookup(  parameters="temperature", LOCS=mm, LOCS_AU=sppoly, 
@@ -258,15 +257,9 @@ aegis_lookup = function(
     }
 
     if ( "temperature" %in% aegis_project ) {
-      if (is.null(year.assessment)) {
-        if (! inherits(LOCS$timestamp, "POSIXct") ) {
-          LOCS$timestamp = lubridate::date_decimal( LOCS$timestamp, tz=tz )
-        }
-        year.assessment = max( lubridate::year( LOCS$timestamp ) )
-      }
 
-      if ( is.null(p) )  p = temperature_parameters(  project_class=project_class, year.assessment=year.assessment )
-
+      if ( is.null(p) )  p = temperature_parameters(  project_class=project_class, yrs=yrs )
+    
       if (is.null(LUT)) {
         if ( project_class %in% c("core" ) )  LUT = temperature_db ( p=p, DS=DS )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
         if ( project_class %in% c("stmv", "hybrid") )  LUT = temperature_db ( p=p, DS="complete" ) 
@@ -276,12 +269,7 @@ aegis_lookup = function(
 
 
     if ( aegis_project %in% c("speciescomposition", "speciescomposition_pca1", "speciescomposition_pca2", "speciescomposition_ca1", "speciescomposition_ca2")  ){
-       if (is.null(year.assessment)) {
-        if (! inherits(LOCS$timestamp, "POSIXct") ) {
-          LOCS$timestamp = lubridate::date_decimal( LOCS$timestamp, tz=tz )
-        }
-        year.assessment = max( lubridate::year( LOCS$timestamp ) )
-      }
+
       if (is.null(variabletomodel)) {
         if (aegis_project == "speciescomposition_pca1") variabletomodel = "pca1" 
         if (aegis_project == "speciescomposition_pac2") variabletomodel = "pca2" 
@@ -289,7 +277,7 @@ aegis_lookup = function(
         if (aegis_project == "speciescomposition_ca2") variabletomodel = "ca2" 
       }
 
-      if ( is.null(p) )  p = speciescomposition_parameters(  project_class=project_class, variabletomodel=variabletomodel, year.assessment=year.assessment  )
+      if ( is.null(p) )  p = speciescomposition_parameters(  project_class=project_class, variabletomodel=variabletomodel, yrs=yrs  )
       
       if (is.null(LUT)) {
         if ( project_class %in% c("core" ) ) LUT = speciescomposition_db ( p=p, DS=DS )   # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
