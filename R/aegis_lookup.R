@@ -122,30 +122,30 @@ aegis_lookup = function(
 
 
     # space-time
-    o1 = aegis_lookup(  parameters="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], variabletomodel="pca1",  
+    o1 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=M[, c("lon", "lat", "timestamp")], variabletomodel="pca1",  
       project_class="core", output_format="points" , DS="speciescomposition", variable_name=c( "pca1" ) 
     ) 
 
-    o2 = aegis_lookup(  parameters="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], variabletomodel="pca1",  
+    o2 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=M[, c("lon", "lat", "timestamp")], variabletomodel="pca1",  
       project_class="stmv", output_format="points" , DS="complete", variable_name=c( "pca1") 
     ) 
 
-    o3 = aegis_lookup(  parameters="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, variabletomodel="pca1",
+    o3 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, variabletomodel="pca1",
       project_class="core", output_format="areal_units" ,  variable_name=list( "pca1",  "pca2", "ca1", "ca2" )
     ) 
  
-    o4 = aegis_lookup(  parameters="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], variabletomodel="pca1",
+    o4 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=M[, c("lon", "lat", "timestamp")], variabletomodel="pca1",
       project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd")
     ) 
   
-    o5 = aegis_lookup(  parameters="speciescomposition", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, variabletomodel="pca1", 
+    o5 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, variabletomodel="pca1", 
       project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res)/2
     ) 
 
     mm = expand.grid(AUID=sppoly$AUID, timestamp=lubridate::date_decimal( p$yrs, tz="America/Halifax" ))
     mm = expand.grid(AUID=sppoly$AUID, timestamp= p$yrs )
 
-    o6 = aegis_lookup(  parameters="speciescomposition", LOCS=mm, LOCS_AU=sppoly, variabletomodel="pca1", 
+    o6 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=mm, LOCS_AU=sppoly, variabletomodel="pca1", 
       project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), raster_resolution=min(p$gridparams$res)/2
     ) 
 
@@ -257,7 +257,6 @@ aegis_lookup = function(
     }
 
     if ( "temperature" %in% aegis_project ) {
-
       if ( is.null(p) )  p = temperature_parameters(  project_class=project_class, yrs=yrs )
     
       if (is.null(LUT)) {
@@ -268,13 +267,17 @@ aegis_lookup = function(
     }
 
 
-    if ( aegis_project %in% c("speciescomposition", "speciescomposition_pca1", "speciescomposition_pca2", "speciescomposition_ca1", "speciescomposition_ca2")  ){
+    if ( aegis_project %in% c(
+      "speciescomposition_pca1", "speciescomposition_pca2", "speciescomposition_pca3",
+      "speciescomposition_ca1", "speciescomposition_ca2", "speciescomposition_ca3")  ){
 
       if (is.null(variabletomodel)) {
         if (aegis_project == "speciescomposition_pca1") variabletomodel = "pca1" 
         if (aegis_project == "speciescomposition_pac2") variabletomodel = "pca2" 
+        if (aegis_project == "speciescomposition_pca3") variabletomodel = "pca3" 
         if (aegis_project == "speciescomposition_ca1") variabletomodel = "ca1" 
         if (aegis_project == "speciescomposition_ca2") variabletomodel = "ca2" 
+        if (aegis_project == "speciescomposition_ca3") variabletomodel = "ca3" 
       }
 
       if ( is.null(p) )  p = speciescomposition_parameters(  project_class=project_class, variabletomodel=variabletomodel, yrs=yrs  )
@@ -316,7 +319,10 @@ aegis_lookup = function(
               array_map( "xy->1", LUT[,  c("plon","plat")], gridparams=gridparams )
         )
         for (vnm in variable_name) {
-          if ( vnm %in% names(LUT ))  LOCS[[vnm]] = LUT[ ii, vnm ]
+          if ( vnm %in% names(LUT )) {
+            LOCS[[vnm]] = NA  
+            LOCS[[vnm]] = LUT[ ii, vnm ]
+          } 
         } 
 
      
@@ -540,11 +546,15 @@ aegis_lookup = function(
             sep="_" 
           ) 
         )
-        
-        for (vnm in variable_name) {
-          if ( vnm %in% names(LUT ))  LOCS[[vnm]] = LUT[ ii, vnm ]
-        }
 
+        for (vnm in variable_name) {
+          if ( vnm %in% names(LUT )) {
+            LOCS[[vnm]] = NA
+            LOCS[[vnm]] = LUT[ ii, vnm ]
+
+          } 
+        }
+    
       }
 
 
@@ -583,7 +593,7 @@ aegis_lookup = function(
           array_map( "ts->year_index", st_drop_geometry(LOCS)[ , c("yr") ], dims=c(p$ny), res=c( 1 ), origin=c( min(p$yrs) ) ), 
           sep="_"
         )
-
+        
         for (vnm in variable_name) {
           if ( vnm %in% names(LUT ))  {
             LUT_regridded = tapply( st_drop_geometry(LUT)[, vnm], LU_map, FUN=FUNC, na.rm=TRUE )
@@ -702,8 +712,6 @@ aegis_lookup = function(
         
         TIMESTAMP_index1 = array_map( "ts->year_index", LOCS[["yr"]], dims=c(ny ), res=c( 1  ), origin=c( yr0 ) )
         if (any( TIMESTAMP_index1 < 0)) {
-          warning ("time index is negative: lookup table does not contain data to lookup ... \n 
-            lookup data needs to be expanded or time periods reduced in model")
           TIMESTAMP_index1[ which( TIMESTAMP_index1 <= 0 ) ] = NA
         }
 
@@ -778,9 +786,14 @@ aegis_lookup = function(
           ) 
         )
 
-        for (vnm in variable_name) {
-          if ( vnm %in% names(LUT ))  LOCS[[ vnm ]] = LUT[ ii, vnm ]
-        }
+
+          for (vnm in variable_name) {
+            if ( vnm %in% names(LUT )) {
+              LOCS[[vnm]] = NA  
+              LOCS[[vnm]] = LUT[ ii, vnm ]
+            } 
+          }
+
 
       }
 
@@ -970,8 +983,6 @@ aegis_lookup = function(
         TIMESTAMP_index2 = array_map( "ts->2", LOCS_DF[, c("yr", "dyear")], dims=c(ny, nw), res=c( 1, 1/nw ), origin=c( yr0, 0) )
         
         if (any( TIMESTAMP_index1 < 0)) {
-          warning ("time index is negative: lookup table does not contain data to lookup ... \n 
-            lookup data needs to be expanded or time periods reduced in model")
           TIMESTAMP_index1[ which( TIMESTAMP_index1 <= 0 ) ] = NA
         }
         if (any( TIMESTAMP_index2 < 0)) {
@@ -1037,10 +1048,14 @@ aegis_lookup = function(
 
     if (returntype =="vector" ) {
       if (length(variable_name) == 1) {
-          if (project_class=="carstm") {
-              variable_name = paste( paste0(variable_name[[1]],  collapse="_"),  statvars[1], sep="_" )
-          }          
-        if (exists( variable_name, LOCS)) LOCS = LOCS[[variable_name]] 
+        if (project_class=="carstm") {
+          variable_name = paste( paste0(variable_name[[1]],  collapse="_"),  statvars[1], sep="_" )
+        }          
+        if (exists( variable_name, LOCS)) {
+          LOCS = LOCS[[variable_name]] 
+        } else {
+          LOCS = rep(NA, nrow(LOCS))
+        }
       }  
     }
 
