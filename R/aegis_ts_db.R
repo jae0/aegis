@@ -339,10 +339,8 @@
         return(Z)
       }
 
-      p = aegis.survey::groundfish_parameters()
-
       # data from groundfish data series
-      set = groundfish_survey_db( p=p, DS="set" )  ## TODO --- convert to aegis_db
+      set = groundfish_survey_db( DS="set" )  ## TODO --- convert to aegis_db
 
       variables = c( groundfish_variablelist("all"), "area")
       byyear = ts.getdata(set=set, fname="byear.4vw", from.file=F, variables=variables, plottimes="annual", regions="nafo.4vw", custom="normal")
