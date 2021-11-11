@@ -195,7 +195,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       pa = NULL
     }
     if ( p$selection$type=="direct")  {
-      # for z-scores: zn or zm
+
       ft2m = 0.3048
       m2km = 1/1000
       nmi2mi = 1.1507794
