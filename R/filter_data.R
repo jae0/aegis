@@ -14,6 +14,20 @@ filter_data = function( Y, selection ) {
           next()
         }
       }
+      if (exists( "less_than", selection)) {
+        if ( mm %in% selection$less_than ) { # ranged variables
+          dd =  selection[[mm]]
+          tokeep = intersect( tokeep, which( Y[,mm] < dd ) )
+          next()
+        }
+      }
+      if (exists( "greater_than", selection)) {
+        if ( mm %in% selection$greater_than ) { # ranged variables
+          dd =  selection[[mm]]
+          tokeep = intersect( tokeep, which( Y[,mm] > dd ) )
+          next()
+        }
+      }
       tokeep = intersect( tokeep, which( Y[,mm] %in% selection[[mm]] ) )  # exact matches otherwise as default
     }
   }
