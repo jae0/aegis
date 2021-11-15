@@ -279,7 +279,6 @@ aegis_lookup = function(
         if (aegis_project == "speciescomposition_ca2") variabletomodel = "ca2" 
         if (aegis_project == "speciescomposition_ca3") variabletomodel = "ca3" 
       }
-
       if ( is.null(p) )  p = speciescomposition_parameters(  project_class=project_class, variabletomodel=variabletomodel, yrs=yrs  )
       
       if (is.null(LUT)) {
