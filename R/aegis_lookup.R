@@ -339,6 +339,8 @@ aegis_lookup = function(
 
           # prep-pass with a au_index variable to get index
          
+          LOCS_AU = st_make_valid(LOCS_AU)
+          LOCS_AU = st_cast( LOCS_AU, "MULTIPOLYGON")
           LOCS_AU = st_cast(LOCS_AU, "POLYGON" )
           LOCS_AU = st_make_valid(LOCS_AU)
           LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
@@ -404,6 +406,8 @@ aegis_lookup = function(
       if ( project_class %in% c("carstm" ) & output_format == "points" )  {
 
         if (is.null(LUT_AU)) LUT_AU = LUT$sppoly
+        LUT_AU = st_make_valid(LUT_AU)
+        LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
         LUT_AU = st_cast(LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
@@ -459,6 +463,8 @@ aegis_lookup = function(
       if ( project_class %in% c("carstm") & output_format == "areal_units" )  {
        
         if (is.null(LUT_AU)) LUT_AU = LUT$sppoly
+        LUT_AU = st_make_valid(LUT_AU)
+        LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
         LUT_AU = st_cast(LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
@@ -474,6 +480,8 @@ aegis_lookup = function(
 
         # format output polygon structure 
         LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(LUT_AU) )  # LOCS_AU .... must be sent ... <---------
+        LOCS_AU = st_make_valid(LOCS_AU)
+        LOCS_AU = st_cast( LOCS_AU, "MULTIPOLYGON")
         LOCS_AU = st_cast( LOCS_AU, "POLYGON")
         if (!exists("AUID", LOCS_AU))  {
           message ("AUID not found in the polygons, setting AUID as row number of polygons")
@@ -613,6 +621,8 @@ aegis_lookup = function(
         yr0 = min(as.numeric(LUT$time))
 
         if (is.null(LUT_AU)) LUT_AU = LUT$sppoly
+        LUT_AU = st_make_valid(LUT_AU)
+        LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
         LUT_AU = st_cast(LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
@@ -673,6 +683,8 @@ aegis_lookup = function(
 
         # format coordinate systems   
         if (is.null(LUT_AU)) LUT_AU = LUT$sppoly
+        LUT_AU = st_make_valid(LUT_AU)
+        LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
         LUT_AU = st_cast(LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
@@ -692,6 +704,8 @@ aegis_lookup = function(
 
         # format output polygon structure 
         LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(LUT_AU) )  # LOCS_AU .... must be sent ... <---------
+        LOCS_AU = st_make_valid(LOCS_AU)
+        LOCS_AU = st_cast( LOCS_AU, "MULTIPOLYGON")
         LOCS_AU = st_cast( LOCS_AU, "POLYGON")
         if (!exists("AUID", LOCS_AU))  {
           message ("AUID not found in the LOCS_AU polygons, setting AUID as row number of polygons")
@@ -868,7 +882,9 @@ aegis_lookup = function(
         yr0 = min(as.numeric(LUT$time))
 
         if (is.null(LUT_AU)) LUT_AU = LUT$sppoly
-        LUT_AU = st_cast(LUT_AU, "POLYGON" )
+        LUT_AU = st_make_valid(LUT_AU)
+        LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
+        LUT_AU = st_cast( LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
         LUT_AU$au_index = 1:nrow(LUT_AU)
@@ -937,7 +953,9 @@ aegis_lookup = function(
      
         # format coordinate systems   
         if (is.null(LUT_AU)) LUT_AU = LUT$sppoly
-        LUT_AU = st_cast(LUT_AU, "POLYGON" )
+        LUT_AU = st_make_valid(LUT_AU)
+        LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
+        LUT_AU = st_cast (LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
 
@@ -957,6 +975,8 @@ aegis_lookup = function(
 
         # format output polygon structure 
         LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(LUT_AU) )  # LOCS_AU .... must be sent ... <---------
+        LOCS_AU = st_make_valid(LOCS_AU)
+        LOCS_AU = st_cast( LOCS_AU, "MULTIPOLYGON")
         LOCS_AU = st_cast( LOCS_AU, "POLYGON")
         if (!exists("AUID", LOCS_AU))  {
           message ("AUID not found in the LOCS_AU polygons, setting AUID as row number of polygons")
