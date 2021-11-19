@@ -1,5 +1,6 @@
 
 # TODO:: tapply can be converted into data.table computations for speed
+## WARNING:: if you polygons are misspecified, they can result in some au's being dropped .. check your polygons
 
 aegis_lookup = function( 
   parameters = NULL, 
