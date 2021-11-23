@@ -16,19 +16,22 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
     sp::proj4string(meuse) = CRS("+init=epsg:28992")
     pts = as(meuse, "sf")
     boundary=NULL
-    spbuffer=NULL
+    spbuffer=25
     resolution=100
     output_type="polygons"
-    hull_alpha=15
+    hull_alpha=50
     areal_units_constraint_ntarget=1
     nAU_min=30
+    fraction_todrop=1/10
+    fraction_cv=1.0
+    tus="none"
 
-    res = aegis_mesh( pts=pts ) # 0 snap buffer
-    res = aegis_mesh( pts=pts, spbuffer=50 ) # 50m snap buffer
-    res = aegis_mesh( pts=pts, resolution=1, spbuffer=50, output_type="grid" )
-    res = aegis_mesh( pts=pts, resolution=1, output_type="grid.count" )
-    res = aegis_mesh( pts=pts, resolution=1, spbuffer=50 )
-    res = aegis_mesh( pts=pts, resolution=5, spbuffer=50, areal_units_constraint_ntarget=1 )
+    res = aegis_mesh( pts=pts, hull_alpha=50 ) # 0 snap buffer
+    res = aegis_mesh( pts=pts, hull_alpha=50, spbuffer=25 ) # 50m snap buffer
+    res = aegis_mesh( pts=pts, hull_alpha=25, resolution=1, spbuffer=25, output_type="grid" )
+    res = aegis_mesh( pts=pts, hull_alpha=25, resolution=1, output_type="grid.count" )
+    res = aegis_mesh( pts=pts, hull_alpha=25, resolution=1, spbuffer=25 )
+    res = aegis_mesh( pts=pts, hull_alpha=25, resolution=5, spbuffer=25, areal_units_constraint_ntarget=1 )
 
     mypalette = colorRampPalette(c("darkblue","blue3", "green", "yellow", "orange","red3", "darkred"), space = "Lab")(100)
 
@@ -148,7 +151,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
         # removal criterion: smallest counts 
         # toremove = unique( c( toremove, which(AU$npts == min(unique(AU$npts))) ) )
         drop_threshold = quantile( AU$npts, probs=fraction_todrop, na.rm=TRUE )
-        toremove = unique( c( toremove, which( AU$npts < drop_threshold ) ) )
+        toremove = unique( c( toremove, which( AU$npts <= drop_threshold ) ) )
         if (length(toremove) > 1) {
           if (using_density_based_removal) {
             dd = stats::quantile( AU$density, probs=probs, na.rm=TRUE )
@@ -158,11 +161,14 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
               ( ( AU$density < dd[1] ) | ( AU$sa < ss[1] ) )
             ) )
           } 
-          if (!is.null(toremove)) {
-            if (length(toremove) > 0 )  {
-              print( length(tokeep ))
-              tokeep = tokeep[-na.omit(toremove)]  # update tokeep list 
+          if (length(toremove) > 0 )  {
+            print( length(tokeep ))
+            toremove = na.omit(toremove)
+            ntr = length(toremove)
+            if (ntr > 5){
+              toremove = toremove[ sample( ntr, max(1, floor(ntr*fraction_todrop) )) ]
             }
+            tokeep = tokeep[- toremove ]  # update tokeep list 
           }
         }
       }

@@ -8,8 +8,8 @@ non_convex_hull = function( xy, alpha, plot=FALSE ) {
   require(igraph)
   
   o = ashape( xy, alpha=alpha )
-  ograph = graph.edgelist( cbind( as.character(o$edges[, "ind1"]), 
-                                  as.character(o$edges[, "ind2"])), directed = FALSE)
+  u = cbind( as.character(o$edges[, "ind1"]),  as.character(o$edges[, "ind2"]))
+  ograph = graph.edgelist( u, directed = FALSE)
   cutg = ograph - E(ograph)[1]
   ends = names(which(degree(cutg) == 1))
   path = get.shortest.paths(cutg, ends[1], ends[2])[[1]]
