@@ -146,9 +146,9 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       
       if (ntr > 1) {
         # removal criterion: smallest counts 
-        toremove = unique( c( toremove, which(AU$npts == min(unique(AU$npts))) ) )
+        # toremove = unique( c( toremove, which(AU$npts == min(unique(AU$npts))) ) )
         drop_threshold = quantile( AU$npts, probs=fraction_todrop, na.rm=TRUE )
-        toremove = unique( c( toremove, which( AU$npts <= drop_threshold ) ) )
+        toremove = unique( c( toremove, which( AU$npts < drop_threshold ) ) )
         if (length(toremove) > 1) {
           if (using_density_based_removal) {
             dd = stats::quantile( AU$density, probs=probs, na.rm=TRUE )
@@ -158,7 +158,12 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
               ( ( AU$density < dd[1] ) | ( AU$sa < ss[1] ) )
             ) )
           } 
-          if (!is.null(toremove)) if (length(toremove) > 0 )  tokeep = tokeep[-na.omt(toremove)]  # update tokeep list 
+          if (!is.null(toremove)) {
+            if (length(toremove) > 0 )  {
+              print( length(tokeep ))
+              tokeep = tokeep[-na.omit(toremove)]  # update tokeep list 
+            }
+          }
         }
       }
       
