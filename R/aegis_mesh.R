@@ -87,7 +87,6 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       plot(bnd, reset=FALSE)
       plot(M, add=TRUE)
     }
-
     tokeep = 1:nrow(M)
     nAU =  length(tokeep) + 100  # offsets to start
     ntr = length(tokeep) + 100
@@ -100,9 +99,8 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
     while(!finished) {
 
       # st_voronoi inside of the tesselation handles duplicates poorly. catch them here and adjust
-      nxy = length(tokeep)
       oo = which(duplicated(xy[tokeep,]))
-      if (length(oo) > 0) tokeep = tokeep[-oo]
+      if (length(oo) > 0) stop("Duplicated positions created. This should not happen.")
 
       AU = tessellate( xy[tokeep,], outformat="sf", crs=pts_crs) # centroids via voronoi
       AU = st_as_sf(AU)
@@ -114,25 +112,26 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
         plot(M, add=T)
       }
       AU = st_sf( st_intersection( AU, bnd ) ) # crop
-      AU$internal_uid = 1:nrow(AU)
-      pts_internal_uid = st_points_in_polygons( pts, AU, varname="internal_uid" )
+      AU$auindex = 1:nrow(AU)
+      pts_auindex = st_points_in_polygons( pts, AU, varname="auindex" )
       AU$npts  = 0
+ #     browser()
       if ( tus == "none" ) {
-        npts = tapply( rep(1, length(pts_internal_uid)), pts$internal_uid, sum, na.rm=T )
+        npts = tapply( rep(1, length(pts_auindex)), pts$auindex, sum, na.rm=T )
       } else {
-        if ( length(pts_internal_uid) == length(time_id) ) {
-          xx = xtabs(  ~  pts_internal_uid + time_id, na.action=na.omit )
+        if ( length(pts_auindex) == length(time_id) ) {
+          xx = xtabs(  ~  pts_auindex + time_id, na.action=na.omit )
           xx[xx > 0] = 1
-          npts = rowSums(xx) # number of unique time units in each areal unit
+          npts = rowSums(xx, na.rm=FALSE) # number of unique time units in each areal unit
         } else {
           break()
         }
       }
-      AU$npts[ match( names(npts), as.character(AU$internal_uid)) ] = npts
+      AU$npts[ match( names(npts), as.character(AU$auindex)) ] = npts
       AU$npts[ which(!is.finite(AU$npts)) ] = 0
       if (using_density_based_removal) {
         # testing density based removal
-        AU$sa = st_area(AU) # [ match( names(npts), as.character(AU$internal_uid) )]
+        AU$sa = st_area(AU) # [ match( names(npts), as.character(AU$auindex) )]
         AU$density = AU$npts / AU$sa
       }
 
@@ -158,7 +157,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
               ( ( AU$density < dd[1] ) | ( AU$sa < ss[1] ) )
             ) )
           } 
-          if (!is.null(toremove)) if (length(toremove) > 0 )  tokeep = tokeep[-toremove_min]  # update tokeep list 
+          if (!is.null(toremove)) if (length(toremove) > 0 )  tokeep = tokeep[-toremove]  # update tokeep list 
         }
       }
       
