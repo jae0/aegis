@@ -1,7 +1,9 @@
 
 
 aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_type="polygons",  
-  hull_alpha=15, fraction_cv=1.0, fraction_good_bad=0.8, fraction_todrop=1/10, nAU_min=5, areal_units_constraint_ntarget=1, tus="none", verbose=FALSE, using_density_based_removal=FALSE ) {
+  hull_alpha=15, fraction_cv=1.0, fraction_todrop=1/10, nAU_min=5, 
+  areal_units_constraint_ntarget=1, tus="none", verbose=FALSE, using_density_based_removal=FALSE 
+) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
   #require(rgeos)
@@ -18,7 +20,6 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
     resolution=100
     output_type="polygons"
     hull_alpha=15
-    fraction_reduceby=0.01  # fraction of candidates to drop
     areal_units_constraint_ntarget=1
     nAU_min=30
 
@@ -87,9 +88,9 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       plot(M, add=TRUE)
     }
 
-    good = 1:nrow(M)
-    nAU =  length(good) + 100  # offsets to start
-    ntr = length(good) + 100
+    tokeep = 1:nrow(M)
+    nAU =  length(tokeep) + 100  # offsets to start
+    ntr = length(tokeep) + 100
 
     probs = c(fraction_todrop/2, 1-(fraction_todrop/2))
 
@@ -99,13 +100,13 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
     while(!finished) {
 
       # st_voronoi inside of the tesselation handles duplicates poorly. catch them here and adjust
-      nxy = length(good)
-      oo = which(duplicated(xy[good,]))
-      if (length(oo) > 0) good = good[-oo]
+      nxy = length(tokeep)
+      oo = which(duplicated(xy[tokeep,]))
+      if (length(oo) > 0) tokeep = tokeep[-oo]
 
-      AU = tessellate( xy[good,], outformat="sf", crs=pts_crs) # centroids via voronoi
+      AU = tessellate( xy[tokeep,], outformat="sf", crs=pts_crs) # centroids via voronoi
       AU = st_as_sf(AU)
-      AU[,"good"] = good  # keep a copy
+
       if(0) {
         x11();
         plot(bnd, reset=FALSE)
@@ -147,23 +148,23 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
         if (length(oo) > 1) {
           ntodrop = max(1, floor(length(oo)*fraction_todrop ) )  # not number but count classes
           omin = oo[1:ntodrop]
-          toremove_min = NULL
+          toremove = NULL
+          toremove = which( (AU$npts %in% omin ) ) 
           if (using_density_based_removal) {
             dd = stats::quantile( AU$density, probs=probs, na.rm=TRUE )
             ss = stats::quantile( AU$sa, probs=probs, na.rm=TRUE )
-            toremove_min = AU$good[ which( (AU$npts %in% omin ) & (
-                ( AU$density < dd[1] )  | ( AU$sa < ss[1] )   ) 
-            ) ]  
-          } else {
-            toremove_min = AU$good[ which( (AU$npts %in% omin ) ) ]
-          }
-          good = AU$good[-toremove_min]  # update good list 
+            toremove = intersect(toremove, which( 
+              ( AU$npts %in% omin ) & 
+              ( ( AU$density < dd[1] ) | ( AU$sa < ss[1] ) )
+            ) )
+          } 
+          if (!is.null(toremove)) if (length(toremove) > 0 )  tokeep = tokeep[-toremove_min]  # update tokeep list 
         }
       }
       
       # check for convergence
       nAU_previous = nAU
-      nAU = length(good)
+      nAU = length(tokeep)
       ntmean = mean( AU$npts, na.rm=TRUE )
       ntsd = sd( AU$npts, na.rm=TRUE )
 
@@ -197,10 +198,10 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       # plot(AU[,"npts"])
       # (finished)
       # print (AU$npts[removal_candidates] )
-      # print( good)
+      # print( tokeep)
     }
 
-    AU = tessellate(xy[good,], outformat="sf", crs=pts_crs) # centroids via voronoi
+    AU = tessellate(xy[tokeep,], outformat="sf", crs=pts_crs) # centroids via voronoi
     AU = st_sf( st_intersection( AU, bnd ) ) # crop
     message( "After tesselation, there are:  ", nrow(AU), " areal units." )
     # plot(AU)
