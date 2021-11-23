@@ -2,7 +2,7 @@
 
 aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_type="polygons",  
   hull_alpha=15, fraction_cv=1.0, fraction_todrop=1/10, nAU_min=5, 
-  areal_units_constraint_ntarget=1, tus="none", verbose=FALSE, using_density_based_removal=FALSE 
+  areal_units_constraint_ntarget=1, areal_units_constraint_nmin=1, tus="none", verbose=FALSE, using_density_based_removal=FALSE 
 ) {
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
@@ -100,7 +100,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 
     finished = FALSE
     while(!finished) {
-
+browser()
       # st_voronoi inside of the tesselation handles duplicates poorly. catch them here and adjust
       oo = which(duplicated(xy[tokeep,]))
       if (length(oo) > 0) stop("Duplicated positions created. This should not happen.")
@@ -140,37 +140,39 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
         AU$density = AU$npts / AU$sa
       }
 
-      toremove = NULL
-      toremove = which( AU$npts < areal_units_constraint_ntarget )
+      toremove = toremove_candidates = NULL
+      toremove_candidates = which( AU$npts < areal_units_constraint_ntarget )
       
       ntr_previous = ntr
-      ntr = length(toremove)
+      ntr = length(toremove_candidates)
       ntr_delta = ntr_previous - ntr
       
       if (ntr > 1) {
         # removal criterion: smallest counts 
         # toremove = unique( c( toremove, which(AU$npts == min(unique(AU$npts))) ) )
+        ucounts = sort( unique( AU$npts ) )
+        if (ucounts[1] == 0) toremove  = unique( c(toremove, which( AU$npts <= 0 )) )
+
         drop_threshold = quantile( AU$npts, probs=fraction_todrop, na.rm=TRUE )
-        toremove = unique( c( toremove, which( AU$npts <= drop_threshold ) ) )
-        if (length(toremove) > 1) {
-          if (using_density_based_removal) {
-            dd = stats::quantile( AU$density, probs=probs, na.rm=TRUE )
-            ss = stats::quantile( AU$sa, probs=probs, na.rm=TRUE )
-            toremove = intersect(toremove, which( 
-              ( AU$npts %in% omin ) & 
-              ( ( AU$density < dd[1] ) | ( AU$sa < ss[1] ) )
-            ) )
-          } 
-          if (length(toremove) > 0 )  {
-            print( length(tokeep ))
-            toremove = na.omit(toremove)
-            ntr = length(toremove)
-            if (ntr > 5){
-              toremove = toremove[ sample( ntr, max(1, floor(ntr*fraction_todrop) )) ]
-            }
-            tokeep = tokeep[- toremove ]  # update tokeep list 
-          }
+        toremove_candidates = unique(c( 
+          toremove_candidates,
+          which( AU$npts <= drop_threshold )
+        ))
+        if (using_density_based_removal) {
+          dd = stats::quantile( AU$density, probs=probs, na.rm=TRUE )
+          ss = stats::quantile( AU$sa, probs=probs, na.rm=TRUE )
+          toremove_candidates = intersect(
+            toremove_candidates, 
+            which( ( AU$density < dd[1] ) | ( AU$sa < ss[1] ) )
+          ) 
         }
+
+        rv = length(toremove_candidates)
+        if (rv > 5) {
+          toremove_candidates = toremove_candidates[ sample( rv, max(1, floor(rv*fraction_todrop) )) ]
+        }
+        toremove = na.omit( unique(c(toremove, toremove_candidates) ))
+        tokeep = tokeep[- toremove ]  # update tokeep list 
       }
       
       # check for convergence
