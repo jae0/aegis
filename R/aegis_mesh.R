@@ -117,12 +117,9 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       AU$npts  = 0
       np = length(pts_auindex)
       if ( tus == "none" ) {
-        # npts = tapply( rep(1, np), pts_auindex, sum, na.rm=T )
         npts = tapply( 1:np, pts_auindex, length, default = 0) # == table(fac)
- 
       } else {
         if ( np == length(time_id) ) {
-
           m = as.data.table(cbind(pts_auindex, time_id))
           m = na.omit(m)
           xx = xtabs(  ~  pts_auindex + time_id, m, na.action=na.omit )
@@ -148,9 +145,11 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       
       if (ntr > 1) {
         # removal criterion: smallest counts 
-        drop_threshold = quantile( AU$npts[removal_candidates], probs=fraction_todrop, na.rm=TRUE)
+        removal_candidates_cat = which(AU$npts == min(unique(AU$npts)))
+        drop_threshold = quantile( AU$npts, probs=fraction_todrop, na.rm=TRUE)
+        removal_candidates_frac = which( jitter(AU$npts) <= drop_threshold )
         toremove = NULL
-        toremove = intersect( removal_candidates, which( jitter(AU$npts) <= drop_threshold ) )
+        toremove = unique( union( removal_candidates, removal_candidates_frac, removal_candidates_cat ) )
         if (length(toremove) > 1) {
           if (using_density_based_removal) {
             dd = stats::quantile( AU$density, probs=probs, na.rm=TRUE )
