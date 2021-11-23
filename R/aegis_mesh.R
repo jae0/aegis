@@ -100,7 +100,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 
     finished = FALSE
     while(!finished) {
-browser()
+
       # st_voronoi inside of the tesselation handles duplicates poorly. catch them here and adjust
       oo = which(duplicated(xy[tokeep,]))
       if (length(oo) > 0) stop("Duplicated positions created. This should not happen.")
@@ -148,10 +148,9 @@ browser()
       ntr_delta = ntr_previous - ntr
       
       if (ntr > 1) {
-        # removal criterion: smallest counts 
-        # toremove = unique( c( toremove, which(AU$npts == min(unique(AU$npts))) ) )
+        # force removal criterion: smallest counts 
         ucounts = sort( unique( AU$npts ) )
-        if (ucounts[1] == 0) toremove  = unique( c(toremove, which( AU$npts <= 0 )) )
+        if (ucounts[1] == 0) toremove  = unique( c(toremove, which( AU$npts <= areal_units_constraint_nmin ),  which(AU$npts == min(ucounts) ) ) )
 
         drop_threshold = quantile( AU$npts, probs=fraction_todrop, na.rm=TRUE )
         toremove_candidates = unique(c( 
