@@ -115,12 +115,17 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       AU$auindex = 1:nrow(AU)
       pts_auindex = st_points_in_polygons( pts, AU, varname="auindex" )
       AU$npts  = 0
- #     browser()
+      np = length(pts_auindex)
       if ( tus == "none" ) {
-        npts = tapply( rep(1, length(pts_auindex)), pts$auindex, sum, na.rm=T )
+        # npts = tapply( rep(1, np), pts_auindex, sum, na.rm=T )
+        npts = tapply( 1:np, pts_auindex, length, default = 0) # == table(fac)
+ 
       } else {
-        if ( length(pts_auindex) == length(time_id) ) {
-          xx = xtabs(  ~  pts_auindex + time_id, na.action=na.omit )
+        if ( np == length(time_id) ) {
+
+          m = as.data.table(cbind(pts_auindex, time_id))
+          m = na.omit(m)
+          xx = xtabs(  ~  pts_auindex + time_id, m, na.action=na.omit )
           xx[xx > 0] = 1
           npts = rowSums(xx, na.rm=FALSE) # number of unique time units in each areal unit
         } else {
@@ -143,12 +148,10 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       
       if (ntr > 1) {
         # removal criterion: smallest counts 
-        oo = sort( unique( AU$npts[removal_candidates] ))
-        if (length(oo) > 1) {
-          ntodrop = max(1, floor(length(oo)*fraction_todrop ) )  # not number but count classes
-          omin = oo[1:ntodrop]
-          toremove = NULL
-          toremove = which( (AU$npts %in% omin ) ) 
+        drop_threshold = quantile( AU$npts[removal_candidates], probs=fraction_todrop, na.rm=TRUE)
+        toremove = NULL
+        toremove = intersect( removal_candidates, which( jitter(AU$npts) <= drop_threshold ) )
+        if (length(toremove) > 1) {
           if (using_density_based_removal) {
             dd = stats::quantile( AU$density, probs=probs, na.rm=TRUE )
             ss = stats::quantile( AU$sa, probs=probs, na.rm=TRUE )
