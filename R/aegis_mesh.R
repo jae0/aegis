@@ -137,19 +137,18 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
         AU$density = AU$npts / AU$sa
       }
 
-      removal_candidates = which( AU$npts < areal_units_constraint_ntarget )
+      toremove = NULL
+      toremove = which( AU$npts < areal_units_constraint_ntarget )
       
       ntr_previous = ntr
-      ntr = length(removal_candidates)
+      ntr = length(toremove)
       ntr_delta = ntr_previous - ntr
       
       if (ntr > 1) {
         # removal criterion: smallest counts 
-        removal_candidates_cat = which(AU$npts == min(unique(AU$npts)))
-        drop_threshold = quantile( AU$npts, probs=fraction_todrop, na.rm=TRUE)
-        removal_candidates_frac = which( jitter(AU$npts) <= drop_threshold )
-        toremove = NULL
-        toremove = unique( union( removal_candidates, removal_candidates_frac, removal_candidates_cat ) )
+        toremove = intersect( toremove, which(AU$npts == min(unique(AU$npts))) )
+        drop_threshold = quantile( AU$npts, probs=fraction_todrop, na.rm=TRUE )
+        toremove = unique( c( toremove, which( jitter(AU$npts) <= drop_threshold ) ) )
         if (length(toremove) > 1) {
           if (using_density_based_removal) {
             dd = stats::quantile( AU$density, probs=probs, na.rm=TRUE )
@@ -198,7 +197,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 #      if (verbose) message( "Current number of total areal units: ", nAU )
       # plot(AU[,"npts"])
       # (finished)
-      # print (AU$npts[removal_candidates] )
+      # print (AU$npts[toremove] )
       # print( tokeep)
     }
 
