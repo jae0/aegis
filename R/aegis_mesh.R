@@ -97,17 +97,14 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 
     finished = FALSE
     while(!finished) {
+
+      # st_voronoi inside of the tesselation handles duplicates poorly. catch them here and adjust
+      nxy = length(good)
+      oo = which(duplicated(xy[good,]))
+      if (length(oo) > 0) good = good[-oo]
+
       AU = tessellate( xy[good,], outformat="sf", crs=pts_crs) # centroids via voronoi
       AU = st_as_sf(AU)
-
-      nxy = length(good)
-      nAU = nrow(AU)
-      if ( nxy != nAU ) {
-        # st_voronoi inside of the tesselation handles duplicates poorly. catch them here and adjust
-        oo = which(duplicated(xy[good,]))
-        if (length(oo)>0) good = good[-oo]
-      }
-
       AU[,"good"] = good  # keep a copy
       if(0) {
         x11();

@@ -2,6 +2,8 @@
 tessellate = function(xy, outformat="sf", method="sf", crs=NULL ) {
   # create a tiled geometry
 
+  if (anyDuplicated(xy)) message("duplicates found, they should be dropped before being sent to tesselate")
+
   if (method=="deldir") {
     require(deldir)
     # triangulate and tessilate
@@ -24,9 +26,13 @@ tessellate = function(xy, outformat="sf", method="sf", crs=NULL ) {
     require(sf)
     mp = st_multipoint(xy)
     bbox =  st_as_sfc(st_bbox( mp ))
-    sfpoly = st_sfc(st_collection_extract( st_voronoi(mp, bbox)  ) ) #  plot(sfpoly, col=0)
+
+    # sfpoly = st_sfc(st_collection_extract( st_voronoi(mp, bbox)  ) ) #  plot(sfpoly, col=0)
+    sfpoly = st_sfc(st_collection_extract( st_voronoi(do.call(c, st_geometry(mp)), bbox)  ) )  
+    # st_voronoi does not keep order:   and drops duplicates well
+    o = unlist(st_intersects(mp, sfpoly)) # find the unique sort of polygons to points
+    sfpoly = st_make_valid(sfpoly[o])
     if (!is.null(crs)) st_crs(sfpoly) = crs
-    sfpoly = st_make_valid(sfpoly)
   }
 
   if (outformat=="sf") return( sfpoly )
@@ -45,6 +51,10 @@ tessellate = function(xy, outformat="sf", method="sf", crs=NULL ) {
         plot(pts["id"], pch = 16) # ID is color
         plot(st_set_geometry(pts, "pols")["id"], xlim = c(0,1), ylim = c(0,1), reset = FALSE)
         plot(st_geometry(pts), add = TRUE)
+
+        point <- st_sfc(lapply(replicate(100, runif(2), simplify=FALSE), st_point))
+        polygon <- st_intersection(st_collection_extract(st_voronoi(do.call(c, point))), border)
+        o <- unlist(st_intersects(point, polygon)) # find the unique sort of polygons to points
 
   }
 
