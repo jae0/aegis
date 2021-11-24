@@ -75,11 +75,11 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
     # fine grid representation
     M = aegis_mesh( pts=pts,  resolution=resolution, output_type="grid.count" )
     M = M[ M$layer > 0, ]
-    xy = st_coordinates( M ) 
+    M_xy = st_coordinates( M ) 
 
     if ( is.null(boundary)) boundary="non_convex_hull"
     if ( is.character(boundary) ) {
-      bnd = aegis_envelope( xy=xy, method=boundary, spbuffer=spbuffer,  hull_alpha=hull_alpha )
+      bnd = aegis_envelope( xy=M_xy, method=boundary, spbuffer=spbuffer,  hull_alpha=hull_alpha )
       st_crs(bnd) = pts_crs
     } else {
       bnd = st_transform(boundary, pts_crs)
@@ -90,9 +90,10 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       plot(bnd, reset=FALSE)
       plot(M, add=TRUE)
     }
-    tokeep = 1:nrow(M)
-    nAU =  length(tokeep) + 100  # offsets to start
-    ntr = length(tokeep) + 100
+
+    M_tokeep = 1:nrow(M)
+    nAU = length(M_tokeep) + 100  # offsets to start
+    ntr = length(M_tokeep) + 100
 
     probs = c(fraction_todrop/2, 1-(fraction_todrop/2))
 
@@ -100,13 +101,10 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 
     finished = FALSE
     while(!finished) {
-
-      # st_voronoi inside of the tesselation handles duplicates poorly. catch them here and adjust
-      oo = which(duplicated(xy[tokeep,]))
-      if (length(oo) > 0) stop("Duplicated positions created. This should not happen.")
-
-      AU = tessellate( xy[tokeep,], outformat="sf", crs=pts_crs) # centroids via voronoi
+ 
+      AU = tessellate( M_xy[M_tokeep,], outformat="sf", crs=pts_crs) # centroids via voronoi
       AU = st_as_sf(AU)
+      AU = st_sf( st_intersection( AU, bnd ) ) # crop
 
       if(0) {
         x11();
@@ -114,7 +112,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
         plot(AU, add=T)
         plot(M, add=T)
       }
-      AU = st_sf( st_intersection( AU, bnd ) ) # crop
+
       AU$auindex = 1:nrow(AU)
       pts_auindex = st_points_in_polygons( pts, AU, varname="auindex" )
       AU$npts  = 0
@@ -140,43 +138,43 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
         AU$density = AU$npts / AU$sa
       }
 
-      toremove = toremove_candidates = NULL
-      toremove_candidates = which( AU$npts < areal_units_constraint_ntarget )
+      au_toremove = au_toremove_candidates = NULL
+      au_toremove_candidates = which( AU$npts < areal_units_constraint_ntarget )
       
       ntr_previous = ntr
-      ntr = length(toremove_candidates)
+      ntr = length(au_toremove_candidates)
       ntr_delta = ntr_previous - ntr
       
       if (ntr > 1) {
         # force removal criterion: smallest counts 
         ucounts = sort( unique( AU$npts ) )
-        if (ucounts[1] == 0) toremove  = unique( c(toremove, which( AU$npts <= areal_units_constraint_nmin ),  which(AU$npts == min(ucounts) ) ) )
+        if (ucounts[1] == 0) au_toremove  = unique( c(au_toremove, which( AU$npts <= areal_units_constraint_nmin ),  which(AU$npts == min(ucounts) ) ) )
 
         drop_threshold = quantile( AU$npts, probs=fraction_todrop, na.rm=TRUE )
-        toremove_candidates = unique(c( 
-          toremove_candidates,
+        au_toremove_candidates = unique(c( 
+          au_toremove_candidates,
           which( AU$npts <= drop_threshold )
         ))
         if (using_density_based_removal) {
           dd = stats::quantile( AU$density, probs=probs, na.rm=TRUE )
           ss = stats::quantile( AU$sa, probs=probs, na.rm=TRUE )
-          toremove_candidates = intersect(
-            toremove_candidates, 
+          au_toremove_candidates = intersect(
+            au_toremove_candidates, 
             which( ( AU$density < dd[1] ) | ( AU$sa < ss[1] ) )
           ) 
         }
 
-        rv = length(toremove_candidates)
+        rv = length(au_toremove_candidates)
         if (rv > 5) {
-          toremove_candidates = toremove_candidates[ sample( rv, max(1, floor(rv*fraction_todrop) )) ]
+          au_toremove_candidates = au_toremove_candidates[ sample( rv, max(1, floor(rv*fraction_todrop) )) ]
         }
-        toremove = na.omit( unique(c(toremove, toremove_candidates) ))
-        tokeep = tokeep[- toremove ]  # update tokeep list 
+        au_toremove = na.omit( unique(c(au_toremove, au_toremove_candidates ] ) ))
+        M_tokeep = M_tokeep[- au_toremove ]  # update M_tokeep list 
       }
       
       # check for convergence
       nAU_previous = nAU
-      nAU = length(tokeep)
+      nAU = length(M_tokeep)
       ntmean = mean( AU$npts, na.rm=TRUE )
       ntsd = sd( AU$npts, na.rm=TRUE )
 
@@ -209,14 +207,14 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 #      if (verbose) message( "Current number of total areal units: ", nAU )
       # plot(AU[,"npts"])
       # (finished)
-      # print (AU$npts[toremove] )
-      # print( tokeep)
+      # print (AU$npts[au_toremove] )
+      # print( M_tokeep)
     }
 
-    AU = tessellate(xy[tokeep,], outformat="sf", crs=pts_crs) # centroids via voronoi
+    AU = tessellate(M_xy[M_tokeep,], outformat="sf", crs=pts_crs) # centroids via voronoi
     AU = st_sf( st_intersection( AU, bnd ) ) # crop
     message( "After tesselation, there are:  ", nrow(AU), " areal units." )
-    # plot(AU)
+    plot(AU)
     return(AU)
   }
 
