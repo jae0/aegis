@@ -168,7 +168,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
         if (rv > 5) {
           au_toremove_candidates = au_toremove_candidates[ sample( rv, max(1, floor(rv*fraction_todrop) )) ]
         }
-        au_toremove = na.omit( unique(c(au_toremove, au_toremove_candidates ] ) ))
+        au_toremove = na.omit( unique(c(au_toremove, au_toremove_candidates  ) ) )
         M_tokeep = M_tokeep[- au_toremove ]  # update M_tokeep list 
       }
       
