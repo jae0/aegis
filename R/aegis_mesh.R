@@ -101,10 +101,10 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 
     finished = FALSE
     while(!finished) {
- 
+
       AU = tessellate( M_xy[M_tokeep,], outformat="sf", crs=pts_crs) # centroids via voronoi
       AU = st_as_sf(AU)
-      AU = st_sf( st_intersection( AU, bnd ) ) # crop
+   #   AU = st_sf( st_intersection( AU, bnd ) ) # crop
 
       if(0) {
         x11();
@@ -124,7 +124,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
           m = as.data.table(cbind(pts_auindex, time_id))
           m = na.omit(m)
           xx = xtabs(  ~  pts_auindex + time_id, m, na.action=na.omit )
-          xx[xx > 0] = 1
+          # xx[xx > 0] = 1
           npts = rowSums(xx, na.rm=FALSE) # number of unique time units in each areal unit
         } else {
           break()
@@ -178,6 +178,10 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       ntmean = mean( AU$npts, na.rm=TRUE )
       ntsd = sd( AU$npts, na.rm=TRUE )
 
+      if (verbose) {
+        if (nAU < 2000) plot(AU["npts"])
+      }
+
       if (verbose) message( "nAU: ", nAU, " ;   mean no pts: ", round(ntmean,2), " ;  sd no pts: ", round(ntsd,2), " ;  sd/mean no pts: ", round(ntsd/ntmean, 2) )
 
       if ( ntmean > areal_units_constraint_ntarget   ) {
@@ -214,7 +218,6 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
     AU = tessellate(M_xy[M_tokeep,], outformat="sf", crs=pts_crs) # centroids via voronoi
     AU = st_sf( st_intersection( AU, bnd ) ) # crop
     message( "After tesselation, there are:  ", nrow(AU), " areal units." )
-    plot(AU)
     return(AU)
   }
 
