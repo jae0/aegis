@@ -9,7 +9,7 @@ vessel_findWayBack<-function(goalposind,fieldpointers, field){
     # convert linear index into [row column]
     
     py <- ((posind-1) %% n)+1
-    px <- aegis_floor((posind-1)/n) +1
+    px <- trunc((posind-1)/n) +1
 
         
     # store initial position

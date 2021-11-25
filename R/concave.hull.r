@@ -21,7 +21,7 @@
 
     p0i = which.min( convex.hull$bdry[[1]]$y )
     if (random.start) {
-      p0i = aegis_floor(runif(1) * length(convex.hull$bdry[[1]]$y) ) + 1
+      p0i = trunc(runif(1) * length(convex.hull$bdry[[1]]$y) ) + 1
     }
     pts.start = as.matrix( cbind( convex.hull$bdry[[1]]$x[ p0i ], convex.hull$bdry[[1]]$y[ p0i ] ) )
     hull = p0 = pts.start

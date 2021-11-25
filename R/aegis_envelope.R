@@ -2,7 +2,7 @@ aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returnty
 
   # obtain boundary of a bunch of points .. expect spatiial points
   drange = range( c( diff(range( xy[,1] )), diff(range(xy[,2] )) ) )
-  spbuffer_default =  aegis_floor( min(drange)/ 25 )
+  spbuffer_default =  trunc( min(drange)/ 25 )
 
   if (is.null(spbuffer)) {
     spbuffer = spbuffer_default
