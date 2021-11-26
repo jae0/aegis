@@ -1,7 +1,7 @@
 
 
 aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_type="polygons",  
-  hull_alpha=15, fraction_cv=1.0, fraction_todrop=1/10, nAU_min=5, 
+  hull_alpha=15, fraction_cv=1.0, fraction_todrop=1/10, nAU_min=5, count_time=FALSE,
   areal_units_constraint_ntarget=1, areal_units_constraint_nmin=1, tus="none", verbose=FALSE, using_density_based_removal=FALSE 
 ) {
 
@@ -124,7 +124,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
           m = as.data.table(cbind(pts_auindex, time_id))
           m = na.omit(m)
           xx = xtabs(  ~  pts_auindex + time_id, m, na.action=na.omit )
-          # xx[xx > 0] = 1
+          if (count_time)  xx[xx > 0] = 1
           npts = rowSums(xx, na.rm=FALSE) # number of unique time units in each areal unit
         } else {
           break()
