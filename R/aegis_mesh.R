@@ -100,9 +100,8 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
     if (tus !="none") time_id = st_drop_geometry(pts) [, tus]
 
     finished = FALSE
-    iter = 0
     while(!finished) {
-      iter = iter + 1
+
       AU = tessellate( M_xy[M_tokeep,], outformat="sf", crs=pts_crs) # centroids via voronoi
       AU = st_as_sf(AU)
    #   AU = st_sf( st_intersection( AU, bnd ) ) # crop
@@ -179,48 +178,36 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       ntmean = mean( AU$npts, na.rm=TRUE )
       ntsd = sd( AU$npts, na.rm=TRUE )
 
+      if (verbose) {
+        if (nAU < 2000) plot(AU["npts"])
+      }
 
       if (verbose) message( "nAU: ", nAU, " ;   mean no pts: ", round(ntmean,2), " ;  sd no pts: ", round(ntsd,2), " ;  sd/mean no pts: ", round(ntsd/ntmean, 2) )
-      
-      if (iter ==2) {
-        test_for_increase = ifelse( ntsd/ntmean  > fraction_cv, TRUE, FALSE )
+
+      if ( ntmean > areal_units_constraint_ntarget   ) {
+        if (verbose) message ("breaking on criterion: areal_units_constraint_ntarget")
+        finished=TRUE   # when var is more constrained and mean is greater than target
       }
-      
-      if (iter > 3) {
-        # start testing after things settle
-        if ( ntmean > areal_units_constraint_ntarget   ) {
-          if (verbose) message ("breaking on criterion: areal_units_constraint_ntarget")
-          finished=TRUE   # when var is more constrained and mean is greater than target
-        }
-        if (test_for_increase) {
-          if (  (  ntsd/ntmean ) <= fraction_cv ) {
-            if (verbose) message ("breaking on criterion: fraction_cv")
-            finished=TRUE   # when var is more constrained and mean is greater than target
-          }
-        } else {
-          if (  (  ntsd/ntmean ) >= fraction_cv ) {
-            if (verbose) message ("breaking on criterion: fraction_cv")
-            finished=TRUE   # when var is more constrained and mean is greater than target
-          }
-        }
-        if ( ntr <= 1 ) {
-          if (verbose) message ("breaking on criterion: no more removal candidates")
-          finished=TRUE
-        }
-        if ( ntr_delta <= 1  ) {
-          if (verbose) message ("breaking on criterion: incremental change in au's stable")
-          finished=TRUE
-        }
-        if ( nAU == nAU_previous ) {
-          if (verbose) message ("breaking on criterion: incremental change in au's stable")
-          finished=TRUE
-        }
-        if ( nAU <= nAU_min ) {
-          if (verbose) message ("breaking on criterion: removal candidates exceeded")
-          finished=TRUE
-        }
+      if (  (  ntsd/ntmean ) <= fraction_cv ) {
+        if (verbose) message ("breaking on criterion: fraction_cv")
+        finished=TRUE   # when var is more constrained and mean is greater than target
       }
-      
+       if ( ntr <= 1 ) {
+        if (verbose) message ("breaking on criterion: no more removal candidates")
+        finished=TRUE
+      }
+       if ( ntr_delta <= 1  ) {
+         if (verbose) message ("breaking on criterion: incremental change in au's stable")
+         finished=TRUE
+       }
+      if ( nAU == nAU_previous ) {
+        if (verbose) message ("breaking on criterion: incremental change in au's stable")
+        finished=TRUE
+      }
+      if ( nAU <= nAU_min ) {
+        if (verbose) message ("breaking on criterion: removal candidates exceeded")
+        finished=TRUE
+      }
 #      if (verbose) message( "Current number of total areal units: ", nAU )
       # plot(AU[,"npts"])
       # (finished)
@@ -231,10 +218,6 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
     AU = tessellate(M_xy[M_tokeep,], outformat="sf", crs=pts_crs) # centroids via voronoi
     AU = st_sf( st_intersection( AU, bnd ) ) # crop
     message( "After tesselation, there are:  ", nrow(AU), " areal units." )
-      if (verbose) {
-        if (nAU < 2000) plot(AU["npts"])
-      }
-
     return(AU)
   }
 
