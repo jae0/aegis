@@ -6,7 +6,7 @@ aegis_lookup = function(
   parameters = NULL, 
   variable_name=NULL,
   variabletomodel=NULL,  # required only for projects with multiple variables to model such as speciescomposition 
-  LUT = NULL,    # look up table from which to obtain results
+  LUTCF = NULL,    # look up table from which to obtain results
   LOCS = NULL,   # look up locations for which results are desired
   LUT_AU=NULL,   # areal units associated with LUT
   LOCS_AU=NULL, 
@@ -259,7 +259,7 @@ aegis_lookup = function(
 
     if ( "temperature" %in% aegis_project ) {
       if ( is.null(p) )  p = temperature_parameters(  project_class=project_class, yrs=yrs )
-    
+
       if (is.null(LUT)) {
         if ( project_class %in% c("core" ) )  LUT = temperature_db ( p=p, DS=DS )  # "aggregated_data", "bottom.all" , "spatial.annual.seasonal", "complete"
         if ( project_class %in% c("stmv", "hybrid") )  LUT = temperature_db ( p=p, DS="complete" ) 
@@ -341,7 +341,7 @@ aegis_lookup = function(
           # prep-pass with a au_index variable to get index
          
           LOCS_AU = st_make_valid(LOCS_AU)
-          LOCS_AU = st_cast( LOCS_AU, "MULTIPOLYGON")
+          # LOCS_AU = st_cast( LOCS_AU, "MULTIPOLYGON")
           LOCS_AU = st_cast(LOCS_AU, "POLYGON" )
           LOCS_AU = st_make_valid(LOCS_AU)
           LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
@@ -408,7 +408,7 @@ aegis_lookup = function(
 
         if (is.null(LUT_AU)) LUT_AU = LUT$sppoly
         LUT_AU = st_make_valid(LUT_AU)
-        LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
+        # LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
         LUT_AU = st_cast(LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
@@ -465,7 +465,7 @@ aegis_lookup = function(
        
         if (is.null(LUT_AU)) LUT_AU = LUT$sppoly
         LUT_AU = st_make_valid(LUT_AU)
-        LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
+        # LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
         LUT_AU = st_cast(LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
@@ -482,7 +482,7 @@ aegis_lookup = function(
         # format output polygon structure 
         LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(LUT_AU) )  # LOCS_AU .... must be sent ... <---------
         LOCS_AU = st_make_valid(LOCS_AU)
-        LOCS_AU = st_cast( LOCS_AU, "MULTIPOLYGON")
+        # LOCS_AU = st_cast( LOCS_AU, "MULTIPOLYGON")
         LOCS_AU = st_cast( LOCS_AU, "POLYGON")
         if (!exists("AUID", LOCS_AU))  {
           message ("AUID not found in the polygons, setting AUID as row number of polygons")
@@ -623,7 +623,7 @@ aegis_lookup = function(
 
         if (is.null(LUT_AU)) LUT_AU = LUT$sppoly
         LUT_AU = st_make_valid(LUT_AU)
-        LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
+        # LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
         LUT_AU = st_cast(LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
@@ -649,12 +649,10 @@ aegis_lookup = function(
         if (! exists("yr", LOCS) ) LOCS$yr = lubridate::year(LOCS$timestamp) 
       
       
-        ii = cbind( 
-          match( LOCS$AUID, LUT$space[bm] )
-        )
+        ii = cbind( match( LOCS$AUID, LUT$space[bm] ) )
 
         jj = cbind( 
-          match( LOCS$AUID, LUT$space[bm] ), 
+          ii, 
           array_map( "ts->year_index", LOCS[["yr"]], dims=c(ny ), res=c( 1  ), origin=c( yr0 ) ) 
         )
 
@@ -685,7 +683,7 @@ aegis_lookup = function(
         # format coordinate systems   
         if (is.null(LUT_AU)) LUT_AU = LUT$sppoly
         LUT_AU = st_make_valid(LUT_AU)
-        LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
+        # LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
         LUT_AU = st_cast(LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
@@ -706,7 +704,7 @@ aegis_lookup = function(
         # format output polygon structure 
         LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(LUT_AU) )  # LOCS_AU .... must be sent ... <---------
         LOCS_AU = st_make_valid(LOCS_AU)
-        LOCS_AU = st_cast( LOCS_AU, "MULTIPOLYGON")
+        # LOCS_AU = st_cast( LOCS_AU, "MULTIPOLYGON")
         LOCS_AU = st_cast( LOCS_AU, "POLYGON")
         if (!exists("AUID", LOCS_AU))  {
           message ("AUID not found in the LOCS_AU polygons, setting AUID as row number of polygons")
@@ -877,14 +875,14 @@ aegis_lookup = function(
 
       if ( project_class %in% c("carstm" ) & output_format == "points" )  {
         # areal unit (LUT) to points (LOCS)
-   
         nw = length(LUT$cyclic)
         ny = length(LUT$time)
         yr0 = min(as.numeric(LUT$time))
 
         if (is.null(LUT_AU)) LUT_AU = LUT$sppoly
         LUT_AU = st_make_valid(LUT_AU)
-        LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
+
+        # LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")  # causes additional polys ..
         LUT_AU = st_cast( LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
@@ -894,6 +892,7 @@ aegis_lookup = function(
           LUT_AU$AUID = as.character(LUT_AU$au_index)
         }
         bm = match( LUT_AU$AUID, LUT$space )  
+
 
         if (exists("lon", LOCS)) {
           LOCS = sf::st_as_sf( LOCS, coords=c("lon", "lat") )
@@ -910,13 +909,11 @@ aegis_lookup = function(
         if (! exists("yr", LOCS) ) LOCS$yr = lubridate::year(LOCS$timestamp) 
         if (! exists("dyear", LOCS) ) LOCS$dyear = lubridate::decimal_date( LOCS$timestamp ) - LOCS$yr
       
-     
-        ii = cbind( 
-          match( LOCS$AUID, LUT$space[bm] )
-        )
-
+  
+        ii = cbind( match( LOCS$AUID, LUT$space[bm] ) )
+   
         jj = cbind( 
-          match( LOCS$AUID, LUT$space[bm] ), 
+          ii, 
           array_map( "ts->year_index", LOCS[["yr"]], dims=c(ny ), res=c( 1  ), origin=c( yr0 ) ) 
         )
 
@@ -925,7 +922,7 @@ aegis_lookup = function(
         if (inherits(LOCS_DF, "sf")) LOCS_DF = st_drop_geometry(LOCS_DF)
 
         ll = cbind( 
-          match( LOCS$AUID, LUT$space[bm] ), 
+          ii, 
           array_map( "ts->2", LOCS_DF[, c("yr", "dyear")], dims=c(ny, nw), res=c( 1, 1/nw ), origin=c( yr0, 0) ) 
         )
         LOCS_DF = NULL
@@ -955,7 +952,7 @@ aegis_lookup = function(
         # format coordinate systems   
         if (is.null(LUT_AU)) LUT_AU = LUT$sppoly
         LUT_AU = st_make_valid(LUT_AU)
-        LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
+        # LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
         LUT_AU = st_cast (LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
@@ -977,7 +974,7 @@ aegis_lookup = function(
         # format output polygon structure 
         LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(LUT_AU) )  # LOCS_AU .... must be sent ... <---------
         LOCS_AU = st_make_valid(LOCS_AU)
-        LOCS_AU = st_cast( LOCS_AU, "MULTIPOLYGON")
+        # LOCS_AU = st_cast( LOCS_AU, "MULTIPOLYGON")
         LOCS_AU = st_cast( LOCS_AU, "POLYGON")
         if (!exists("AUID", LOCS_AU))  {
           message ("AUID not found in the LOCS_AU polygons, setting AUID as row number of polygons")
