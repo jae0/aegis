@@ -232,11 +232,6 @@ vars0 = ls()
 # ---- main init complete
 
 
-# comment this out if you do not want to load the environment  
-# -- this loads aegis, and any other libraries ..
-# -- separation helps prevent race conditions when installing libraries
-
-.bio  
 
 .First = function(){
   # make some functions operate without parentheses:
@@ -248,7 +243,7 @@ vars0 = ls()
   cat("\n  data_root = ", data_root )
   cat("\n")
   cat("\nShortcuts:\n")
-  cat("\n  To (re)load environment: .bio" )
+  cat("\n  To load environment: .bio" )
   cat("\n  To (re)initialize environment: .init" )
   cat("\n  To detach libraries: .gcl" )
   cat("\n  To clean memory: .gcm" )
@@ -259,6 +254,12 @@ vars0 = ls()
 .Last = function(){
   cat("\nSession ended at ", date(), "\n\n")
 }
+
+
+# uncomment this out if you want to load the environment automatically  
+# -- this loads aegis, and any other libraries ..
+# -- separation helps prevent race conditions when installing/updating libraries
+# .bio  
 
 
 if (0) {
@@ -307,4 +308,3 @@ if (0) {
 }
 
 ```
-
