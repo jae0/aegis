@@ -118,20 +118,31 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       AU$npts  = 0
       np = length(pts_auindex)
       if ( tus == "none" ) {
-        npts = tapply( 1:np, pts_auindex, length, default = 0) # == table(fac)
+          m = data.table(pts_auindex=pts_auindex)
+          m = na.omit(m)
+          m = m[,.(npts=.N), by=.(pts_auindex) ]  # number of unique time units in each areal unit
       } else {
         if ( np == length(time_id) ) {
           m = as.data.table(cbind(pts_auindex, time_id))
           m = na.omit(m)
-          xx = xtabs(  ~  pts_auindex + time_id, m, na.action=na.omit )
-          if (count_time)  xx[xx > 0] = 1
-          npts = rowSums(xx, na.rm=FALSE) # number of unique time units in each areal unit
+          m = m[, .(npts=.N), by=.(pts_auindex, time_id)]
+          if (count_time)  m$npts[ m$npts > 0] = 1
+          m = m[,.(npts=sum(npts)), by=.(pts_auindex) ]  # number of unique time units in each areal unit
         } else {
           break()
         }
       }
-      AU$npts[ match( names(npts), as.character(AU$auindex)) ] = npts
+      
+      kk = match( m$pts_auindex, as.character(AU$auindex))
+      kkx = (which(!is.finite(kk)))
+      if (length(kkx) > 0) {
+        m = m[-kkx, ]
+        kk = kk[-kkx]
+      }
+
+      AU$npts[ kk ] = m$npts
       AU$npts[ which(!is.finite(AU$npts)) ] = 0
+      
       if (using_density_based_removal) {
         # testing density based removal
         AU$sa = st_area(AU) # [ match( names(npts), as.character(AU$auindex) )]
