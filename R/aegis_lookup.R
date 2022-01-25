@@ -258,6 +258,9 @@ aegis_lookup = function(
     }
 
     if ( "temperature" %in% aegis_project ) {
+
+      browser()
+      
       if (is.null(yrs) ) yrs = year(range( LOCS$timestamp))
       if ( is.null(p) )  p = temperature_parameters(  project_class=project_class, yrs=yrs )
 
