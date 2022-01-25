@@ -227,7 +227,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
     AU = st_sf( st_intersection( AU, bnd ) ) # crop
     message( "After tesselation, there are:  ", nrow(AU), " areal units." )
 
-    if (verbose)  plot(AU["npts"])
+    if (verbose)  plot( AU )
 
     return(AU)
   }
