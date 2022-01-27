@@ -17,6 +17,7 @@ aegis_lookup = function(
   tz="America/Halifax", 
   yrs=NULL , 
   FUNC=mean, 
+  use_fasterize=FALSE,  # as of 27 Jan this seems to be broken (Error: package slot missing from signature for generic ‘raster’ and classes sf) 
   returntype = "vector",
   raster_resolution=1, ...
 ) {
@@ -220,8 +221,6 @@ aegis_lookup = function(
     if (is.vector(LOCS)) LOCS = list(AUID=LOCS)
     if (!is.null(LOCS)) setDT(LOCS)
  
-    require(data.table)  # enforce
-    require(raster) # TODO use sf /stars /fasterize instead ..
 
     crs_lonlat =  st_crs(projection_proj4string("lonlat_wgs84"))
   
@@ -952,7 +951,8 @@ aegis_lookup = function(
       if ( project_class %in% c("carstm") & output_format == "areal_units" )  {
         # areal unit (LUT) to areal units (LUT_AU/LOCS) 
         # from source data: LUT = modelled predictions; LUT_AU are associated areal units linked by "AUID" 
-     
+     browser()
+
         # format coordinate systems   
         if (is.null(LUT_AU)) LUT_AU = LUT$sppoly
         LUT_AU = st_make_valid(LUT_AU)
@@ -966,12 +966,17 @@ aegis_lookup = function(
         yr0 = min(as.numeric(LUT$time))
 
 
+        # aauu = st_sf( st_drop_geometry(LUT_AU)[, c("lut_uid", "AUID")], st_geometry(LUT_AU))
+
         if (!exists("AUID", LUT_AU)) LUT_AU$AUID = as.character(1:nrow(LUT_AU))
         bm = match( LUT_AU$AUID, LUT$space )  # should not be required but just in case things are subsetted
 
         # lut_uid is A LOCAL index of LUT_AU /LUT .. rasterize it
         LUT_AU$lut_uid = 1:nrow(LUT_AU)
-        LUT_AU_raster = fasterize::fasterize( LUT_AU, raster::raster( LUT_AU, res=raster_resolution, crs=st_crs( LUT_AU ) ), field="lut_uid" )  
+        raster_template = raster::raster( LUT_AU, res=raster_resolution, crs=st_crs( LUT_AU ) )
+        # LUT_AU_raster = fasterize::fasterize( aauu, raster_template, field="lut_uid" )  
+        
+        LUT_AU_raster = fasterize::fasterize( LUT_AU, raster_template, field="lut_uid" )  
         LUT_AU_pts = sf::st_as_sf( as.data.frame( raster::rasterToPoints(LUT_AU_raster)), coords=c("x", "y") )
         st_crs(LUT_AU_pts) = st_crs( LUT_AU ) 
 
