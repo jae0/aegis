@@ -376,8 +376,8 @@ aegis_lookup = function(
 
         for (vnm in variable_name) {
           if ( vnm %in% names(LUT )) {
-            LOCS[[vnm]] = NA  
-            LOCS[[vnm]] = LUT[ ii, vnm ]
+            LOCS[, vnm] = NA  
+            LOCS[, vnm] = LUT[ ii, vnm ]
           } 
         } 
 
@@ -435,9 +435,6 @@ aegis_lookup = function(
         variable_name = intersect( names(LUT), variable_name )
         LUT = LUT[, variable_name]
 
-        # for (vnm in variable_name) {
-        #   LOCS[[vnm]] =  sf:::aggregate.sf( LUT[, vnm], LOCS, FUNC, na.rm=TRUE ) [[vnm]]
-        # }
         LU_map =  st_points_in_polygons( pts=LUT, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
         if (!exists("AUID", LOCS ))  LOCS[["AUID"]]  = st_points_in_polygons( pts=LOCS, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
 
@@ -454,6 +451,7 @@ aegis_lookup = function(
           o = LOCS[,  lapply(.SD, mean, na.rm=TRUE), by=AUID, .SDcols=variable_name]   
           LOCS = o[ match( LOCS0$AUID, o$AUID), .SD, .SDcols=variable_name  ]        
         }
+        return(LOCS)
 
       }
 
@@ -495,7 +493,7 @@ aegis_lookup = function(
               LL = fasterize::fasterize( LUT_AU, raster_template, field=vnm )
               o = sf::st_as_sf( as.data.frame( raster::rasterToPoints(LL)), coords=c("x", "y") )
               st_crs(o) = st_crs( LUT_AU )
-              LOCS[[vnm]] = o[["layer"]][ ii ]
+              LOCS[, vnm] = o[["layer"]][ ii ]
             }
           }
         } 
@@ -561,11 +559,13 @@ aegis_lookup = function(
               if (kk == 2) {
                 ov = o[ pts_AU,  which(dimnames(o)$stat == stat_var)  ] 
                 LUT_as_LOCS_AU = aggFUN( ov)
-                LOCS[[vnm]] = LUT_as_LOCS_AU 
+                LOCS[, vnm] = LUT_as_LOCS_AU 
               }
             }
           } 
         }
+        return(LOCS)
+
       }
 
     }
@@ -622,8 +622,8 @@ aegis_lookup = function(
 
         for (vnm in variable_name) {
           if ( vnm %in% names(LUT )) {
-            LOCS[[vnm]] = NA
-            LOCS[[vnm]] = LUT[ ii, vnm ]
+            LOCS[, vnm] = NA
+            LOCS[, vnm] = LUT[ ii, vnm ]
 
           } 
 
@@ -738,11 +738,12 @@ aegis_lookup = function(
               vnm = paste( paste0(vnh,  collapse="_"),  stat_var, sep="_" )
               o = carstm_results_unpack( LUT, vnh ) 
               kk = length(dim(o))
-              if (kk == 2) LOCS[[vnm]] = o[ cbind(ii, which(dimnames(o)$stat == stat_var) )  ] 
-              if (kk == 3) LOCS[[vnm]] = o[ cbind(jj, which(dimnames(o)$stat == stat_var) )  ] 
+              if (kk == 2) LOCS[, vnm] = o[ cbind(ii, which(dimnames(o)$stat == stat_var) )  ] 
+              if (kk == 3) LOCS[, vnm] = o[ cbind(jj, which(dimnames(o)$stat == stat_var) )  ] 
             }
           } 
         }
+        return(LOCS)
 
       }
 
@@ -820,16 +821,18 @@ aegis_lookup = function(
               if (kk == 2) {
                 ov = o[ pts_AU,  which(dimnames(o)$stat == stat_var)  ] 
                 LUT_as_LOCS_AU = aggFUN( ov)
-                LOCS[[vnm]] = LUT_as_LOCS_AU 
+                LOCS[, vnm] = LUT_as_LOCS_AU 
               }
               if (kk == 3) {
                 ov = o[ pts_AU,, which(dimnames(o)$stat == stat_var)  ] 
                 LUT_as_LOCS_AU = apply( ov, MARGIN=c(2), FUN=aggFUN )
-                LOCS[[vnm]] = LUT_as_LOCS_AU[ TIMESTAMP_index1  ]
+                LOCS[, vnm] = LUT_as_LOCS_AU[ TIMESTAMP_index1  ]
               }
             }
           } 
         }
+        return(LOCS)
+      
       }
 
     }  # end dimension
@@ -889,8 +892,8 @@ aegis_lookup = function(
 
         for (vnm in variable_name) {
           if ( vnm %in% names(LUT )) {
-            LOCS[[vnm]] = NA  
-            LOCS[[vnm]] = LUT[ ii, vnm ]
+            LOCS[, vnm] = NA  
+            LOCS[, vnm] = LUT[ ii, vnm ]
           } 
         }
 
@@ -1018,13 +1021,14 @@ aegis_lookup = function(
               vnm = paste( paste0(vnh,  collapse="_"),  stat_var, sep="_" )
               o = carstm_results_unpack( LUT, vnh ) 
               kk = length(dim(o))
-              if (kk == 2) LOCS[[vnm]] = o[ cbind(ii, which(dimnames(o)$stat == stat_var) )  ] 
-              if (kk == 3) LOCS[[vnm]] = o[ cbind(jj, which(dimnames(o)$stat == stat_var) )  ] 
-              if (kk == 4) LOCS[[vnm]] = o[ cbind(ll, which(dimnames(o)$stat == stat_var) )  ] 
+              if (kk == 2) LOCS[, vnm] = o[ cbind(ii, which(dimnames(o)$stat == stat_var) )  ] 
+              if (kk == 3) LOCS[, vnm] = o[ cbind(jj, which(dimnames(o)$stat == stat_var) )  ] 
+              if (kk == 4) LOCS[, vnm] = o[ cbind(ll, which(dimnames(o)$stat == stat_var) )  ] 
             }
           } 
         }
-      
+        return(LOCS)
+
       }
 
 
@@ -1114,27 +1118,30 @@ aegis_lookup = function(
               if (kk == 2) {
                 ov = o[ pts_AU,  which(dimnames(o)$stat == stat_var)  ] 
                 LUT_as_LOCS_AU = aggFUN( ov)
-                LOCS[[vnm]] = LUT_as_LOCS_AU
+                LOCS[, vnm] = LUT_as_LOCS_AU
               }
               if (kk == 3) {
                 ov = o[ pts_AU,, which(dimnames(o)$stat == stat_var)  ] 
                 LUT_as_LOCS_AU = apply( ov, MARGIN=c(2), FUN=aggFUN )
-                LOCS[[vnm]] = LUT_as_LOCS_AU[ TIMESTAMP_index1 ]
+                LOCS[, vnm] = LUT_as_LOCS_AU[ TIMESTAMP_index1 ]
               }
               if (kk == 4) {
                 ov = o[ pts_AU,,, which(dimnames(o)$stat == stat_var)  ] 
                 LUT_as_LOCS_AU = apply( ov, MARGIN=c(2,3), FUN=aggFUN )
-                LOCS[[vnm]] = LUT_as_LOCS_AU[  TIMESTAMP_index2  ]
+                LOCS[, vnm] = LUT_as_LOCS_AU[  TIMESTAMP_index2  ]
               }
             }
           } 
         }
+        return(LOCS)
       }
+
+
     } # end space-year-season
 
 
     if (returntype =="sf" ) {
-      if (! inherits(LOCS, "sf"))   LOCS = st_as_sf( LOCS, coords=c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84")) )
+      if (! inherits(LOCS, "sf"))  LOCS = st_as_sf( LOCS, coords=c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84")) )
     }
     if (returntype =="data.frame" ) {
       if  (! inherits(LOCS, "data.frame"))  LOCS = as.data.frame(LOCS)
