@@ -561,8 +561,7 @@ aegis_lookup = function(
               if (kk == 2) {
                 ov = o[ pts_AU,  which(dimnames(o)$stat == stat_var)  ] 
                 LUT_as_LOCS_AU = aggFUN( ov)
-                space_index = match( as.character(LOCS$AUID), as.character(dimnames(LUT_as_LOCS_AU )[[1]] )  )   # AUID of LOCS_AU (from LUT_AU_pts_AUID)
-                LOCS[[vnm]] = LUT_as_LOCS_AU[ space_index  ]
+                LOCS[[vnm]] = LUT_as_LOCS_AU 
               }
             }
           } 
@@ -821,14 +820,12 @@ aegis_lookup = function(
               if (kk == 2) {
                 ov = o[ pts_AU,  which(dimnames(o)$stat == stat_var)  ] 
                 LUT_as_LOCS_AU = aggFUN( ov)
-                space_index = match( as.character(LOCS$AUID), as.character(dimnames(LUT_as_LOCS_AU )[[1]] )  )   # AUID of LOCS_AU (from LUT_AU_pts_AUID)
-                LOCS[[vnm]] = LUT_as_LOCS_AU[  space_index  ]
+                LOCS[[vnm]] = LUT_as_LOCS_AU 
               }
               if (kk == 3) {
                 ov = o[ pts_AU,, which(dimnames(o)$stat == stat_var)  ] 
                 LUT_as_LOCS_AU = apply( ov, MARGIN=c(2), FUN=aggFUN )
-                space_index = match( as.character(LOCS$AUID), as.character(dimnames(LUT_as_LOCS_AU )[[1]] )  )   # AUID of LOCS_AU (from LUT_AU_pts_AUID)
-                LOCS[[vnm]] = LUT_as_LOCS_AU[ cbind( space_index, TIMESTAMP_index1 ) ]
+                LOCS[[vnm]] = LUT_as_LOCS_AU[ TIMESTAMP_index1  ]
               }
             }
           } 
@@ -1117,20 +1114,17 @@ aegis_lookup = function(
               if (kk == 2) {
                 ov = o[ pts_AU,  which(dimnames(o)$stat == stat_var)  ] 
                 LUT_as_LOCS_AU = aggFUN( ov)
-                space_index = match( as.character(LOCS$AUID), as.character(dimnames(LUT_as_LOCS_AU )[[1]] )  )   # AUID of LOCS_AU (from LUT_AU_pts_AUID)
-                LOCS[[vnm]] = LUT_as_LOCS_AU[  space_index  ]
+                LOCS[[vnm]] = LUT_as_LOCS_AU
               }
               if (kk == 3) {
                 ov = o[ pts_AU,, which(dimnames(o)$stat == stat_var)  ] 
                 LUT_as_LOCS_AU = apply( ov, MARGIN=c(2), FUN=aggFUN )
-                space_index = match( as.character(LOCS$AUID), as.character(dimnames(LUT_as_LOCS_AU )[[1]] )  )   # AUID of LOCS_AU (from LUT_AU_pts_AUID)
-                LOCS[[vnm]] = LUT_as_LOCS_AU[ cbind( space_index, TIMESTAMP_index1 ) ]
+                LOCS[[vnm]] = LUT_as_LOCS_AU[ TIMESTAMP_index1 ]
               }
               if (kk == 4) {
                 ov = o[ pts_AU,,, which(dimnames(o)$stat == stat_var)  ] 
                 LUT_as_LOCS_AU = apply( ov, MARGIN=c(2,3), FUN=aggFUN )
-                space_index = match( as.character(LOCS$AUID), as.character(dimnames(LUT_as_LOCS_AU )[[1]] )  )   # AUID of LOCS_AU (from LUT_AU_pts_AUID)
-                LOCS[[vnm]] = LUT_as_LOCS_AU[ cbind( space_index, TIMESTAMP_index2 ) ]
+                LOCS[[vnm]] = LUT_as_LOCS_AU[  TIMESTAMP_index2  ]
               }
             }
           } 
