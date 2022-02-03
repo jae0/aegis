@@ -307,7 +307,7 @@ aegis_lookup = function(
 
       if ( grepl("speciescomposition", aegis_project) ) {
         if (aegis_project == "speciescomposition_pca1") sc_vn = "pca1" 
-        if (aegis_project == "speciescomposition_pac2") sc_vn = "pca2" 
+        if (aegis_project == "speciescomposition_pca2") sc_vn = "pca2" 
         if (aegis_project == "speciescomposition_pca3") sc_vn = "pca3" 
         if (aegis_project == "speciescomposition_ca1")  sc_vn = "ca1" 
         if (aegis_project == "speciescomposition_ca2")  sc_vn = "ca2" 
