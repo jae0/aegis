@@ -18,7 +18,7 @@ aegis_lookup = function(
   returntype = "vector",
   space_resolution=NULL,   # spatial planar discretization
   time_resolution=NULL,  # year, seasonal discretization
-  ...
+  year.assessment=NULL, ...
 ) {
 
 
@@ -276,7 +276,7 @@ aegis_lookup = function(
 
       if ( "temperature" %in% aegis_project ) {
 
-        if (is.null(pL) )  pL = temperature_parameters(  project_class=project_class )
+        if (is.null(pL) )  pL = temperature_parameters(  project_class=project_class, year.assessment=year.assessment )
         if (is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
         if (is.null(time_resolution))  if (exists( "tres", pL)) time_resolution =  pL$tres
         if ( project_class %in% c("core" ))  {
@@ -312,7 +312,7 @@ aegis_lookup = function(
         if (aegis_project == "speciescomposition_ca1")  sc_vn = "ca1" 
         if (aegis_project == "speciescomposition_ca2")  sc_vn = "ca2" 
         if (aegis_project == "speciescomposition_ca3")  sc_vn = "ca3" 
-        if (is.null(pL) )  pL = speciescomposition_parameters(  project_class=project_class, variabletomodel=sc_vn  )
+        if (is.null(pL) )  pL = speciescomposition_parameters(  project_class=project_class, variabletomodel=sc_vn, year.assessment=year.assessment   )
         if (is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
         if (is.null(time_resolution))  if (exists( "tres", pL)) time_resolution =  pL$tres
         if ( project_class %in% c("core" ) ) {
