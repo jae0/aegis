@@ -202,7 +202,7 @@ aegis_lookup = function(
 
     if ( is.null(parameters) ) stop( "parameters is required")
 
-    p = NULL
+    pL = NULL
     if ( class(parameters) == "character" ) {
       # then use generic defaults
       aegis_project = parameters
@@ -212,7 +212,7 @@ aegis_lookup = function(
         warning( "more than one parameter list sent, taking the first only")
         aegis_project = aegis_project[1]
       }
-      p = parameters[[aegis_project]]
+      pL = parameters[[aegis_project]]
     }
 
     if (is.vector(LOCS)) LOCS = list(AUID=LOCS)
@@ -226,12 +226,12 @@ aegis_lookup = function(
     if (is.null(LUT)) {
 
       if ( "bathymetry" %in% aegis_project ) {
-        if ( is.null(p) )  p = bathymetry_parameters(  project_class=project_class  )
-        if (is.null(space_resolution)) if (exists( "pres", p)) space_resolution = p$pres
+        if ( is.null(pL) )  pL = bathymetry_parameters(  project_class=project_class  )
+        if (is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
         if ( project_class %in% c("core" ) ) {
-          LUT = bathymetry_db ( p=p, DS=DS ) 
+          LUT = bathymetry_db ( p=pL, DS=DS ) 
           if (output_format == "points" ) {
-            if ( space_resolution != p$pres ) {
+            if ( space_resolution != pL$pres ) {
             # regrid to another resolution
               LUT$plon = trunc(LUT$plon / space_resolution + 1 ) * space_resolution
               LUT$plat = trunc(LUT$plat / space_resolution + 1 ) * space_resolution
@@ -243,17 +243,17 @@ aegis_lookup = function(
             }
           }
         } 
-        if ( project_class %in% c("stmv", "hybrid") ) LUT = bathymetry_db ( p=p, DS="complete" )   
-        if ( project_class %in% c("carstm" )) LUT = carstm_model( p=p, DS="carstm_modelled_summary" ) 
+        if ( project_class %in% c("stmv", "hybrid") ) LUT = bathymetry_db ( p=pL, DS="complete" )   
+        if ( project_class %in% c("carstm" )) LUT = carstm_model( p=pL, DS="carstm_modelled_summary" ) 
       }
 
       if ( "substrate" %in% aegis_project ) {
-        if ( is.null(p) )  p = substrate_parameters(  project_class=project_class  )
-        if (is.null(space_resolution)) if (exists( "pres", p)) space_resolution = p$pres
+        if ( is.null(pL) )  pL = substrate_parameters(  project_class=project_class  )
+        if (is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
         if ( project_class %in% c("core" ) ) {
-          LUT = substrate_db ( p=p, DS=DS ) 
+          LUT = substrate_db ( p=pL, DS=DS ) 
           if (output_format == "points" ) {
-            if ( space_resolution != p$pres ) {
+            if ( space_resolution != pL$pres ) {
               # regrid to another resolution
               LUT$plon = trunc(LUT$plon / space_resolution + 1 ) * space_resolution
               LUT$plat = trunc(LUT$plat / space_resolution + 1 ) * space_resolution
@@ -266,22 +266,23 @@ aegis_lookup = function(
           }
         }  
         if ( project_class %in% c("stmv", "hybrid") ) {
-          LUT = substrate_db ( p=p, DS="complete" )   
-          pB = bathymetry_parameters( spatial_domain=p$spatial_domain, project_class=project_class  )
+          LUT = substrate_db ( p=pL, DS="complete" )   
+          pB = bathymetry_parameters( spatial_domain=pL$spatial_domain, project_class=project_class  )
           BA = bathymetry_db ( p=pB, DS="baseline", varnames=c("lon", "lat")  )
           LUT = cbind( LUT, BA )
         }
-        if ( project_class %in% c("carstm" )) LUT = carstm_model( p=p, DS="carstm_modelled_summary" ) 
+        if ( project_class %in% c("carstm" )) LUT = carstm_model( p=pL, DS="carstm_modelled_summary" ) 
       }
 
       if ( "temperature" %in% aegis_project ) {
-        if ( is.null(p) )  p = temperature_parameters(  project_class=project_class )
-        if (is.null(space_resolution)) if (exists( "pres", p)) space_resolution = p$pres
-        if (is.null(time_resolution))  if (exists( "tres", p)) time_resolution =  p$tres
+
+        if (is.null(pL) )  pL = temperature_parameters(  project_class=project_class )
+        if (is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
+        if (is.null(time_resolution))  if (exists( "tres", pL)) time_resolution =  pL$tres
         if ( project_class %in% c("core" ))  {
-          LUT = temperature_db ( p=p, DS=DS )  # "aggregated_data", "bottom.all"
+          LUT = temperature_db ( p=pL, DS=DS )  # "aggregated_data", "bottom.all"
           if (output_format == "points" ) {
-            if ( space_resolution != p$pres ) {
+            if ( space_resolution != pL$pres ) {
               # regrid to another resolution
               LUT$plon = trunc(LUT$plon / space_resolution + 1 ) * space_resolution
               LUT$plat = trunc(LUT$plat / space_resolution + 1 ) * space_resolution
@@ -299,8 +300,8 @@ aegis_lookup = function(
             }
           }
         } 
-        if ( project_class %in% c("stmv", "hybrid") )  LUT = temperature_db ( p=p, DS="complete" ) 
-        if ( project_class %in% c("carstm" )) LUT = carstm_model( p=p, DS="carstm_modelled_summary" ) 
+        if ( project_class %in% c("stmv", "hybrid") )  LUT = temperature_db ( p=pL, DS="complete" ) 
+        if ( project_class %in% c("carstm" )) LUT = carstm_model( p=pL, DS="carstm_modelled_summary" ) 
       }
 
 
@@ -311,13 +312,13 @@ aegis_lookup = function(
         if (aegis_project == "speciescomposition_ca1")  sc_vn = "ca1" 
         if (aegis_project == "speciescomposition_ca2")  sc_vn = "ca2" 
         if (aegis_project == "speciescomposition_ca3")  sc_vn = "ca3" 
-        if (is.null(p) )  p = speciescomposition_parameters(  project_class=project_class, variabletomodel=sc_vn  )
-        if (is.null(space_resolution)) if (exists( "pres", p)) space_resolution = p$pres
-        if (is.null(time_resolution))  if (exists( "tres", p)) time_resolution =  p$tres
+        if (is.null(pL) )  pL = speciescomposition_parameters(  project_class=project_class, variabletomodel=sc_vn  )
+        if (is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
+        if (is.null(time_resolution))  if (exists( "tres", pL)) time_resolution =  pL$tres
         if ( project_class %in% c("core" ) ) {
-          LUT = speciescomposition_db ( p=p, DS=DS )  
+          LUT = speciescomposition_db ( p=pL, DS=DS )  
           if (output_format == "points" ) {
-            if ( space_resolution != p$pres ) {
+            if ( space_resolution != pL$pres ) {
               # regrid to another resolution
               LUT$plon = trunc(LUT$plon / space_resolution + 1 ) * space_resolution
               LUT$plat = trunc(LUT$plat / space_resolution + 1 ) * space_resolution
@@ -329,8 +330,8 @@ aegis_lookup = function(
             }
           }
         }
-        if ( project_class %in% c( "stmv", "hybrid") )  LUT = aegis_db( p=p, DS="complete" )   
-        if ( project_class %in% c("carstm" )) LUT = carstm_model( p=p, DS="carstm_modelled_summary" ) 
+        if ( project_class %in% c( "stmv", "hybrid") )  LUT = aegis_db( p=pL, DS="complete" )   
+        if ( project_class %in% c("carstm" )) LUT = carstm_model( p=pL, DS="carstm_modelled_summary" ) 
 
       }
 
@@ -348,12 +349,12 @@ aegis_lookup = function(
  
     # ------------------
 
-    if (p$aegis_dimensionality =="space" ) {
+    if (pL$aegis_dimensionality =="space" ) {
 
       if ( project_class %in% c("core", "stmv", "hybrid") & output_format == "points" )  {
         
-        if (!exists("plon", LUT))  LUT = lonlat2planar(LUT, proj.type=p$aegis_proj4string_planar_km)
-        if (!exists("plon", LOCS)) LOCS = lonlat2planar(LOCS, proj.type=p$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
+        if (!exists("plon", LUT))  LUT = lonlat2planar(LUT, proj.type=pL$aegis_proj4string_planar_km)
+        if (!exists("plon", LOCS)) LOCS = lonlat2planar(LOCS, proj.type=pL$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
 
         LOCS$tplon = trunc(LOCS$plon / space_resolution + 1 ) * space_resolution
         LOCS$tplat = trunc(LOCS$plat / space_resolution + 1 ) * space_resolution
@@ -391,7 +392,7 @@ aegis_lookup = function(
           LOCS0 = LOCS # store as modifications will be made to LOCS
 
           # next, get a x-y coordinate for each LOC by rasterizing to LOCS_AU  
-          raster_template = raster::raster( LOCS_AU, res=space_resolution, crs=st_crs( p$aegis_proj4string_planar_km ) )
+          raster_template = raster::raster( LOCS_AU, res=space_resolution, crs=st_crs( pL$aegis_proj4string_planar_km ) )
 
           # prep-pass with a au_index variable to get index
          
@@ -399,7 +400,7 @@ aegis_lookup = function(
           # LOCS_AU = st_cast( LOCS_AU, "MULTIPOLYGON")
           LOCS_AU = st_cast(LOCS_AU, "POLYGON" )
           LOCS_AU = st_make_valid(LOCS_AU)
-          LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
+          LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(pL$aegis_proj4string_planar_km) )
 
           LOCS_AU$au_index = 1:nrow(LOCS_AU)
           LOCS_AU_raster = fasterize::fasterize( LOCS_AU, raster::raster( LOCS_AU, res=space_resolution, crs=st_crs( LOCS_AU ) ), field="au_index" )  
@@ -420,7 +421,7 @@ aegis_lookup = function(
           st_crs(LUT) = st_crs( projection_proj4string("lonlat_wgs84") )
         } else if (exists("plon", LUT)) {
           LUT = sf::st_as_sf( LUT, coords=c("plon", "plat") )
-          st_crs(LUT) = st_crs(p$aegis_proj4string_planar_km) 
+          st_crs(LUT) = st_crs(pL$aegis_proj4string_planar_km) 
         } 
 
         if (!exists("AUID", LOCS_AU))  {
@@ -465,7 +466,7 @@ aegis_lookup = function(
         # LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
         LUT_AU = st_cast(LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
-        LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
+        LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(pL$aegis_proj4string_planar_km) )
 
         if (!exists("AUID", LUT_AU)) {
           message ("AUID not found in LOCS_AU polygons, setting AUID as row number of polygons")
@@ -476,10 +477,10 @@ aegis_lookup = function(
         if (exists("lon", LOCS)) {
           LOCS = sf::st_as_sf( LOCS, coords=c("lon", "lat") )
           st_crs(LOCS) = st_crs( projection_proj4string("lonlat_wgs84") )
-          LOCS = sf::st_transform( LOCS, crs=st_crs(p$aegis_proj4string_planar_km) )
+          LOCS = sf::st_transform( LOCS, crs=st_crs(pL$aegis_proj4string_planar_km) )
         } else if  (exists("plon", LOCS)) { 
           LOCS = sf::st_as_sf( LOCS, coords=c("lon", "lat") )
-          st_crs(LOCS) = st_crs(p$aegis_proj4string_planar_km)
+          st_crs(LOCS) = st_crs(pL$aegis_proj4string_planar_km)
         }
 
         LOCS$AUID = st_points_in_polygons( pts=LOCS, polys = LUT_AU[, "AUID"], varname= "AUID" )   
@@ -511,7 +512,7 @@ aegis_lookup = function(
         # LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
         LUT_AU = st_cast(LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
-        LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
+        LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(pL$aegis_proj4string_planar_km) )
 
         if (!exists("AUID", LUT_AU)) LUT_AU$AUID = as.character(1:nrow(LUT_AU))
         bm = match( LUT_AU$AUID, LUT$space )  # should not be required but just in case things are subsetted
@@ -535,7 +536,7 @@ aegis_lookup = function(
         if (! inherits(LOCS, "sf") )   {
           if (exists("lon", LOCS )) {
             LOCS = st_as_sf( LOCS, coords=c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84")) )
-            LOCS = sf::st_transform( LOCS, crs=st_crs(p$aegis_proj4string_planar_km) )
+            LOCS = sf::st_transform( LOCS, crs=st_crs(pL$aegis_proj4string_planar_km) )
             if (!exists("AUID", LOCS )) LOCS[["AUID"]]  = st_points_in_polygons( pts=LOCS, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
           }
         }
@@ -578,13 +579,13 @@ aegis_lookup = function(
 
     ######################################################
  
-    if (p$aegis_dimensionality =="space-year" ) {
+    if (pL$aegis_dimensionality =="space-year" ) {
 
 
       if ( project_class %in% c("core", "stmv", "hybrid") & output_format == "points" )  {
 
-        if (!exists("plon", LUT))  LUT = lonlat2planar(LUT, proj.type=p$aegis_proj4string_planar_km)
-        if (!exists("plon", LOCS)) LOCS = lonlat2planar(LOCS, proj.type=p$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
+        if (!exists("plon", LUT))  LUT = lonlat2planar(LUT, proj.type=pL$aegis_proj4string_planar_km)
+        if (!exists("plon", LOCS)) LOCS = lonlat2planar(LOCS, proj.type=pL$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
         if (!exists("dyear", LOCS) | (!exists("yr", LOCS)) ) {
           LOCS$tiyr = lubridate::decimal_date( LOCS$timestamp  ) 
           LOCS$yr = trunc( LOCS$tiyr )
@@ -644,16 +645,16 @@ aegis_lookup = function(
           st_crs(LUT) = st_crs( projection_proj4string("lonlat_wgs84") )
         } else if (exists("plon", LUT)) {
           LUT = sf::st_as_sf( LUT, coords=c("plon", "plat") )
-          st_crs(LUT) = st_crs(p$aegis_proj4string_planar_km) 
+          st_crs(LUT) = st_crs(pL$aegis_proj4string_planar_km) 
         } 
 
-        Tdims = c( diff( range(LUT$yr) ), p$nw )
-        Tres = c(1, p$tres)
+        Tdims = c( diff( range(LUT$yr) ), pL$nw )
+        Tres = c(1, pL$tres)
         Torigin = c( min(LUT$yr), 0 ) 
 
-        Sdims = c( p$nplons, p$nplats )
-        Sres = c( p$pres, p$pres )
-        Sorigin = p$origin
+        Sdims = c( pL$nplons, pL$nplats )
+        Sres = c( pL$pres, pL$pres )
+        Sorigin = pL$origin
 
         if (!exists("AUID", LOCS_AU))  {
           message ("AUID not found in LOCS_AU polygons, setting AUID as row number of polygons")
@@ -705,7 +706,7 @@ aegis_lookup = function(
         # LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
         LUT_AU = st_cast(LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
-        LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
+        LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(pL$aegis_proj4string_planar_km) )
         LUT_AU$au_index = 1:nrow(LUT_AU)
         if (!exists("AUID", LUT_AU)) {
           message ("AUID not found in LOCS_AU polygons, setting AUID as row number of polygons")
@@ -716,10 +717,10 @@ aegis_lookup = function(
         if (exists("lon", LOCS)) {
           LOCS = sf::st_as_sf( LOCS, coords=c("lon", "lat") )
           st_crs(LOCS) = st_crs( projection_proj4string("lonlat_wgs84") )
-          LOCS = sf::st_transform( LOCS, crs=st_crs(p$aegis_proj4string_planar_km) )
+          LOCS = sf::st_transform( LOCS, crs=st_crs(pL$aegis_proj4string_planar_km) )
         } else if  (exists("plon", LOCS)) { 
           LOCS = sf::st_as_sf( LOCS, coords=c("lon", "lat") )
-          st_crs(LOCS) = st_crs(p$aegis_proj4string_planar_km)
+          st_crs(LOCS) = st_crs(pL$aegis_proj4string_planar_km)
         }
 
         LOCS$AUID = st_points_in_polygons( pts=LOCS, polys = LUT_AU[, "AUID"], varname= "AUID" )   
@@ -765,7 +766,7 @@ aegis_lookup = function(
         # LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
         LUT_AU = st_cast(LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
-        LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
+        LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(pL$aegis_proj4string_planar_km) )
         
         # dims
         ny = length(LUT$time)
@@ -793,7 +794,7 @@ aegis_lookup = function(
         if (! inherits(LOCS, "sf") )   {
           if (exists("lon", LOCS )) {
             LOCS = st_as_sf( LOCS, coords=c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84")) )
-            LOCS = sf::st_transform( LOCS, crs=st_crs(p$aegis_proj4string_planar_km) )
+            LOCS = sf::st_transform( LOCS, crs=st_crs(pL$aegis_proj4string_planar_km) )
             if (!exists("AUID", LOCS )) LOCS[["AUID"]]  = st_points_in_polygons( pts=LOCS, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
           }
         }
@@ -852,12 +853,12 @@ aegis_lookup = function(
     ######################################################
 
 
-    if (p$aegis_dimensionality =="space-year-season" ) {
+    if (pL$aegis_dimensionality =="space-year-season" ) {
 
       if ( project_class %in% c("core", "stmv", "hybrid") & output_format == "points" )  {
 
-        if (!exists("plon", LOCS))  LOCS = lonlat2planar(LOCS, proj.type=p$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
-        if (!exists("plon", LUT))  LUT = lonlat2planar(LUT, proj.type=p$aegis_proj4string_planar_km)
+        if (!exists("plon", LOCS))  LOCS = lonlat2planar(LOCS, proj.type=pL$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
+        if (!exists("plon", LUT))  LUT = lonlat2planar(LUT, proj.type=pL$aegis_proj4string_planar_km)
         
         if (! inherits(LOCS$timestamp, "POSIXct") )  LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
     
@@ -921,16 +922,16 @@ aegis_lookup = function(
           st_crs(LUT) = st_crs( projection_proj4string("lonlat_wgs84") )
         } else if (exists("plon", LUT)) {
           LUT = sf::st_as_sf( LUT, coords=c("plon", "plat") )
-          st_crs(LUT) = st_crs(p$aegis_proj4string_planar_km) 
+          st_crs(LUT) = st_crs(pL$aegis_proj4string_planar_km) 
         } 
     
-        Tdims = c( diff( range(LUT$yr) ), p$nw )
-        Tres = c(1, p$tres)
+        Tdims = c( diff( range(LUT$yr) ), pL$nw )
+        Tres = c(1, pL$tres)
         Torigin = c( min(LUT$yr), 0 ) 
 
-        Sdims = c( p$nplons, p$nplats )
-        Sres = c( p$pres, p$pres )
-        Sorigin = p$origin
+        Sdims = c( pL$nplons, pL$nplats )
+        Sres = c( pL$pres, pL$pres )
+        Sorigin = pL$origin
 
         if (!exists("AUID", LOCS_AU))  {
           message ("AUID not found in LOCS_AU polygons, setting AUID as row number of polygons")
@@ -983,7 +984,7 @@ aegis_lookup = function(
         # LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")  # causes additional polys ..
         LUT_AU = st_cast( LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
-        LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
+        LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(pL$aegis_proj4string_planar_km) )
         LUT_AU$au_index = 1:nrow(LUT_AU)
         if (!exists("AUID", LUT_AU)) {
           message ("AUID not found in LOCS_AU polygons, setting AUID as row number of polygons")
@@ -995,10 +996,10 @@ aegis_lookup = function(
         if (exists("lon", LOCS)) {
           LOCS = sf::st_as_sf( LOCS, coords=c("lon", "lat") )
           st_crs(LOCS) = st_crs( projection_proj4string("lonlat_wgs84") )
-          LOCS = sf::st_transform( LOCS, crs=st_crs(p$aegis_proj4string_planar_km) )
+          LOCS = sf::st_transform( LOCS, crs=st_crs(pL$aegis_proj4string_planar_km) )
         } else if  (exists("plon", LOCS)) { 
           LOCS = sf::st_as_sf( LOCS, coords=c("lon", "lat") )
-          st_crs(LOCS) = st_crs(p$aegis_proj4string_planar_km)
+          st_crs(LOCS) = st_crs(pL$aegis_proj4string_planar_km)
         }
 
         LOCS$AUID = st_points_in_polygons( pts=LOCS, polys = LUT_AU[, "AUID"], varname= "AUID" )   
@@ -1053,7 +1054,7 @@ aegis_lookup = function(
         # LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
         LUT_AU = st_cast (LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
-        LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(p$aegis_proj4string_planar_km) )
+        LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(pL$aegis_proj4string_planar_km) )
 
         nw = length(LUT$cyclic)
         ny = length(LUT$time)
@@ -1083,7 +1084,7 @@ aegis_lookup = function(
         if (! inherits(LOCS, "sf") )   {
           if (exists("lon", LOCS )) {
             LOCS = st_as_sf( LOCS, coords=c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84")) )
-            LOCS = sf::st_transform( LOCS, crs=st_crs(p$aegis_proj4string_planar_km) )
+            LOCS = sf::st_transform( LOCS, crs=st_crs(pL$aegis_proj4string_planar_km) )
             if (!exists("AUID", LOCS )) LOCS[["AUID"]]  = st_points_in_polygons( pts=LOCS, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
           }
         }
