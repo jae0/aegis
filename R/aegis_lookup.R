@@ -442,17 +442,21 @@ aegis_lookup = function(
         LU_map =  st_points_in_polygons( pts=LUT, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
         if (!exists("AUID", LOCS ))  LOCS[["AUID"]]  = st_points_in_polygons( pts=LOCS, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
 
+        LUT = setDT(st_drop_geometry(LUT))
         for (vnm in variable_name) {
           if ( vnm %in% names(LUT )) {  
-            LUT_regridded = tapply( st_drop_geometry(LUT)[, vnm], LU_map, FUN=FUNC, na.rm=TRUE )
-            LOCS[[ vnm ]] = LUT_regridded[ match( LOCS$AUID, as.character( names( LUT_regridded )) ) ]
+            # LUT_regridded = tapply( st_drop_geometry(LUT)[, vnm], LU_map, FUN=FUNC, na.rm=TRUE )
+            LUT_regridded = LUT[, setNames(.(mean( get(vnm), na.rm=TRUE) ), vnm), by=.(LU_map) ]
+            LOCS[[ vnm ]] = LUT_regridded$z[ match( LOCS$AUID, LUT_regridded$LU_map ) ]
           }   
         }
-
+ 
+        # revert LOCS to original structure and add the vars to it
         if (!is.null(LOCS0)) {
           # summarize LOCS to to original AUID's
           setDT(LOCS)
-          o = LOCS[,  lapply(.SD, mean, na.rm=TRUE), by=AUID, .SDcols=variable_name]   
+          # o = LOCS[,  lapply(.SD, mean, na.rm=TRUE), by=AUID, .SDcols=variable_name]   
+          o = LOCS[,  setNames(.(mean( get(variable_name), na.rm=TRUE) ), variable_name), by=AUID ]   
           LOCS = o[ match( LOCS0$AUID, o$AUID), .SD, .SDcols=variable_name  ]        
         }
 
@@ -681,14 +685,18 @@ aegis_lookup = function(
           array_map( "ts->1", LOCS[, c("yr", "tdyear")], dims=Tdims, res=Tres, origin=Torigin ), 
           sep="_"
         )
-        
+   
+        LUT = setDT(st_drop_geometry(LUT))
+ 
         for (vnm in variable_name) {
-          if ( vnm %in% names(LUT ))  {
-            LUT_regridded = tapply( st_drop_geometry(LUT)[, vnm], LU_map, FUN=FUNC, na.rm=TRUE )
-            LOCS[[ vnm ]] = LUT_regridded[ match( LOCS_map, as.character( names( LUT_regridded )) ) ]
-          }
+          if ( vnm %in% names(LUT )) {  
+            # LUT_regridded = tapply( st_drop_geometry(LUT)[, vnm], LU_map, FUN=FUNC, na.rm=TRUE )
+            LUT_regridded = LUT[, setNames(.(mean( get(vnm), na.rm=TRUE) ), vnm), by=.(LU_map) ]
+            LOCS[[ vnm ]] = LUT_regridded$z[ match( LOCS$AUID, LUT_regridded$LU_map ) ]
+          }   
         }
 
+ 
       }
 
  
@@ -961,13 +969,18 @@ aegis_lookup = function(
           sep="_"
         )
 
+ 
+        LUT = setDT(st_drop_geometry(LUT))
+ 
         for (vnm in variable_name) {
-          if ( vnm %in% names(LUT )) {
-            LUT_regridded = tapply( st_drop_geometry(LUT)[, vnm], LU_map, FUN=FUNC, na.rm=TRUE )
-            LOCS[[vnm ]] = LUT_regridded[ match( LOCS_map, as.character( names( LUT_regridded )) ) ]
-          }
+          if ( vnm %in% names(LUT )) {  
+            # LUT_regridded = tapply( st_drop_geometry(LUT)[, vnm], LU_map, FUN=FUNC, na.rm=TRUE )
+            LUT_regridded = LUT[, setNames(.(mean( get(vnm), na.rm=TRUE) ), vnm), by=.(LU_map) ]
+            LOCS[[ vnm ]] = LUT_regridded$z[ match( LOCS$AUID, LUT_regridded$LU_map ) ]
+          }   
         }
 
+ 
       }
 
 
