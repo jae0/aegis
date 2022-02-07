@@ -392,28 +392,20 @@ aegis_lookup = function(
           LOCS0 = LOCS # store as modifications will be made to LOCS
 
           # next, get a x-y coordinate for each LOC by rasterizing to LOCS_AU  
+          LOCS_AU = st_make_valid(LOCS_AU)
+          LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(pL$aegis_proj4string_planar_km) )
           raster_template = raster::raster( LOCS_AU, res=space_resolution, crs=st_crs( pL$aegis_proj4string_planar_km ) )
 
           # prep-pass with a au_index variable to get index
-         
-          LOCS_AU = st_make_valid(LOCS_AU)
           # LOCS_AU = st_cast( LOCS_AU, "MULTIPOLYGON")
-          LOCS_AU = st_cast(LOCS_AU, "POLYGON" )
-          LOCS_AU = st_make_valid(LOCS_AU)
-          LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(pL$aegis_proj4string_planar_km) )
-
+          # LOCS_AU = st_cast( LOCS_AU, "POLYGON" )
           LOCS_AU$au_index = 1:nrow(LOCS_AU)
           LOCS_AU_raster = fasterize::fasterize( LOCS_AU, raster::raster( LOCS_AU, res=space_resolution, crs=st_crs( LOCS_AU ) ), field="au_index" )  
 
           # overwrite LOCS with discretized points 
           LOCS = sf::st_as_sf( as.data.frame( raster::rasterToPoints(LOCS_AU_raster)), coords=c("x", "y") )
+          st_crs(LOCS) = st_crs( LOCS_AU )
           LOCS$AUID = LOCS_AU$AUID[ match( LOCS[["layer"]], LOCS_AU$au_index )]
-          # ll = st_coordinates(LOCS)
-          # colnames(ll) = c("plon", "plat")
-          # LOCS = cbind( st_drop_geometry(LOCS), ll )
-          # ll = NULL
-          
-          # now match to empirical data using standard approach..
         }
 
         if (exists("lon", LUT)) {
@@ -428,17 +420,11 @@ aegis_lookup = function(
           message ("AUID not found in the polygons, setting AUID as row number of polygons")
           LOCS_AU$AUID = as.character(1:nrow(LOCS_AU))
         }
+        LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(LUT) )  # 
 
-        LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(LUT) )
-
-        if (!inherits(LOCS, "sf")) LOCS = st_as_sf( LOCS, coords=c("lon","lat"), crs=st_crs(projection_proj4string("lonlat_wgs84")) )
- 
         variable_name = intersect( names(LUT), variable_name )
         LUT = LUT[, variable_name]
 
-        # for (vnm in variable_name) {
-        #   LOCS[[vnm]] =  sf:::aggregate.sf( LUT[, vnm], LOCS, FUNC, na.rm=TRUE ) [[vnm]]
-        # }
         LU_map =  st_points_in_polygons( pts=LUT, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
         if (!exists("AUID", LOCS ))  LOCS[["AUID"]]  = st_points_in_polygons( pts=LOCS, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
 
@@ -454,10 +440,12 @@ aegis_lookup = function(
         # revert LOCS to original structure and add the vars to it
         if (!is.null(LOCS0)) {
           # summarize LOCS to to original AUID's
-          setDT(LOCS)
+          if ( "sf" %in% class(LOCS) ) st_geometry(LOCS) = NULL
+          LOCS = as.data.table( LOCS )
           # o = LOCS[,  lapply(.SD, mean, na.rm=TRUE), by=AUID, .SDcols=variable_name]   
           o = LOCS[,  setNames(.(mean( get(variable_name), na.rm=TRUE) ), variable_name), by=AUID ]   
-          LOCS = o[ match( LOCS0$AUID, o$AUID), .SD, .SDcols=variable_name  ]        
+          LOCS0[,variable_name] = o[ match( LOCS0$AUID, o$AUID), .SD, .SDcols=variable_name  ]        
+          LOCS = LOCS0
         }
 
       }
