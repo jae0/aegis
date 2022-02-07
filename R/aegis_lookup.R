@@ -447,7 +447,7 @@ aegis_lookup = function(
           if ( vnm %in% names(LUT )) {  
             # LUT_regridded = tapply( st_drop_geometry(LUT)[, vnm], LU_map, FUN=FUNC, na.rm=TRUE )
             LUT_regridded = LUT[, setNames(.(mean( get(vnm), na.rm=TRUE) ), vnm), by=.(LU_map) ]
-            LOCS[[ vnm ]] = LUT_regridded$z[ match( LOCS$AUID, LUT_regridded$LU_map ) ]
+            LOCS[[ vnm ]] = LUT_regridded[ match( LOCS$AUID, LUT_regridded$LU_map ), vnm, with=FALSE ]
           }   
         }
  
@@ -692,7 +692,7 @@ aegis_lookup = function(
           if ( vnm %in% names(LUT )) {  
             # LUT_regridded = tapply( st_drop_geometry(LUT)[, vnm], LU_map, FUN=FUNC, na.rm=TRUE )
             LUT_regridded = LUT[, setNames(.(mean( get(vnm), na.rm=TRUE) ), vnm), by=.(LU_map) ]
-            LOCS[[ vnm ]] = LUT_regridded$z[ match( LOCS$AUID, LUT_regridded$LU_map ) ]
+            LOCS[[ vnm ]] = LUT_regridded[ match( LOCS$AUID, LUT_regridded$LU_map ), vnm, with=FALSE ]
           }   
         }
 
@@ -976,7 +976,7 @@ aegis_lookup = function(
           if ( vnm %in% names(LUT )) {  
             # LUT_regridded = tapply( st_drop_geometry(LUT)[, vnm], LU_map, FUN=FUNC, na.rm=TRUE )
             LUT_regridded = LUT[, setNames(.(mean( get(vnm), na.rm=TRUE) ), vnm), by=.(LU_map) ]
-            LOCS[[ vnm ]] = LUT_regridded$z[ match( LOCS$AUID, LUT_regridded$LU_map ) ]
+            LOCS[[ vnm ]] = LUT_regridded[ match( LOCS$AUID, LUT_regridded$LU_map ), vnm, with=FALSE ]
           }   
         }
 
