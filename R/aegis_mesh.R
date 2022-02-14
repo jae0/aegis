@@ -102,7 +102,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
     if (tus !="none") {
       oo = st_drop_geometry(pts)
       if (inherits(oo, "data.table")) {
-        time_id = oo [, tus, with=FALSE]
+        time_id = oo [, ..tus, with=FALSE]
       } else {
         time_id = oo [, tus]
       }
