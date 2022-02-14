@@ -101,11 +101,8 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 
     if (tus !="none") {
       oo = st_drop_geometry(pts)
-      if (inherits(oo, "data.table")) {
-        time_id = oo [, ..tus, with=FALSE]
-      } else {
-        time_id = oo [, tus]
-      }
+      oo = as.data.frame(oo)
+      time_id = oo [, tus]
       oo = NULL
     }
 
@@ -198,7 +195,6 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       nAU = length(M_tokeep)
       ntmean = mean( AU$npts, na.rm=TRUE )
       ntsd = sd( AU$npts, na.rm=TRUE )
-
 
       if (verbose) message( "nAU: ", nAU, " ;   mean no pts: ", round(ntmean,2), " ;  sd no pts: ", round(ntsd,2), " ;  sd/mean no pts: ", round(ntsd/ntmean, 2) )
 
