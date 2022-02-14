@@ -99,7 +99,15 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 
     probs = c(fraction_todrop/2, 1-(fraction_todrop/2))
 
-    if (tus !="none") time_id = st_drop_geometry(pts) [, tus]
+    if (tus !="none") {
+      oo = st_drop_geometry(pts)
+      if (inherits(oo, "data.table")) {
+        time_id = oo [, tus, with=FALSE]
+      } else {
+        time_id = oo [, tus]
+      }
+      oo = NULL
+    }
 
     finished = FALSE
     while(!finished) {
