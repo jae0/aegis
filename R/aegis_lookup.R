@@ -332,6 +332,88 @@ aegis_lookup = function(
 
       }
 
+
+      if ( grepl("snowcrab", aegis_project) ) {
+        if (aegis_project == "snowcrab_number") sc_vn = "number" 
+        if (aegis_project == "snowcrab_biomass") sc_vn = "biomass" 
+        if (aegis_project == "snowcrab_meansize") sc_vn = "meansize" 
+        if (aegis_project == "snowcrab_pa")  sc_vn = "pa" 
+
+        if (is.null(pL) ) {
+          if ( sc_vn == "number" ) {
+            pL = snowcrab_parameters(
+              project_class="carstm",
+              yrs=1999:year.assessment,   
+              areal_units_type="tesselation",
+              family="poisson",
+              carstm_model_label = "1999_present",  # 1999_present is the default anything else and you are on your own
+              selection = list(type = "number")
+            )
+
+          } else if ( sc_vn == "biomass" ) {
+            pL = snowcrab_parameters(
+              project_class="carstm",
+              yrs=1999:year.assessment,   
+              areal_units_type="tesselation",
+              carstm_model_label = "1999_present",  # 1999_present is the default anything else and you are on your own
+            #   carstm_model_label = paste(   carstm_model_label,   variabletomodel, sep="_")  
+              family =  "gaussian" ,  
+              selection = list(type = "biomass")
+            )
+
+          } else if ( sc_vn == "meansize" ) {
+            pL = snowcrab_parameters(
+              project_class="carstm",
+              yrs=1999:year.assessment,   
+              areal_units_type="tesselation",
+              carstm_model_label = "1999_present",  # 1999_present is the default anything else and you are on your own
+            #   carstm_model_label = paste(   carstm_model_label,   variabletomodel, sep="_")  
+              family =  "gaussian" ,  
+              selection = list(type = "meansize")
+            )
+
+          } else if ( sc_vn == "pa" ) {
+            pL = snowcrab_parameters(
+              project_class="carstm",
+              yrs=1999:year.assessment,   
+              areal_units_type="tesselation",
+              carstm_model_label = "1999_present",  # 1999_present is the default anything else and you are on your own
+            #   carstm_model_label = paste(   carstm_model_label,   variabletomodel, sep="_")  
+              family =  "gaussian" ,  
+              selection = list(type = "presence_absence")
+            )
+
+          } else { 
+            pL = p = bio.snowcrab::load.environment( year.assessment=year.assessment )
+          }
+        } 
+
+        if (is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
+        if (is.null(time_resolution))  if (exists( "tres", pL)) time_resolution =  pL$tres
+        
+        if ( project_class %in% c("core" ) ) LUT = snowcrab.db ( p=pL, DS=DS )  
+        if ( project_class %in% c( "stmv", "hybrid") )  LUT = aegis_db( p=pL, DS="complete" )   
+        if ( project_class %in% c("carstm" )) LUT = carstm_model( p=pL, DS="carstm_modelled_summary" ) 
+
+          if ( project_class %in% c("core", "stmv", "hybrid") )  {
+            setDT(LUT)
+            if ( time_resolution != pL$tres ) {
+              LUT$dyear = trunc(LUT$dyear / time_resolution + 1 ) * time_resolution
+            }
+            if ( space_resolution != pL$pres ) {
+              # regrid to another resolution
+              LUT$plon = trunc(LUT$plon / space_resolution + 1 ) * space_resolution
+              LUT$plat = trunc(LUT$plat / space_resolution + 1 ) * space_resolution
+            }
+            if ( time_resolution != pL$tres |  space_resolution != pL$pres ) {
+              LUT = LUT[, setNames(.(mean( get(sc_vn), na.rm=TRUE) ), sc_vn), by=list(plon, plat, yr, dyear) ]
+              LUT$timestamp = lubridate::date_decimal( LUT$yr+LUT$dyear, tz=tz )
+            }
+            setDF(LUT)
+          }
+
+      }
+
     }
 
     if (is.null(LUT)) stop( "lookup data not found nor given")
