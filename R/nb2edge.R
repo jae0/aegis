@@ -1,13 +1,13 @@
-nb2edge = function( W.nb, output="nodelist" ) {
+nb2edge = function( NB_graph, output="nodelist" ) {
   
-  cW <- card(W.nb)
-  nW <- length(W.nb)
+  cW <- card(NB_graph)
+  nW <- length(NB_graph)
   Wn = sum(cW) / 2;
   n1 = vector(mode="numeric", length=Wn);
   n2 = vector(mode="numeric", length=Wn);
   jj = 0;
   for (i in 1:nW) {
-    nbi = W.nb[[i]]
+    nbi = NB_graph[[i]]
     for (j in 1:length(nbi)) {
       if ( i < nbi[j] ) {
         jj = jj + 1;
