@@ -1,7 +1,6 @@
-neighbourhood_structure = function( sppoly, areal_units_type="lattice" ) {
+neighbourhood_structure = function( sppoly, areal_units_type="lattice", snap=1 ) {
 
-  
-  # customized neighbourshood structure (hand edited)
+    # customized neighbourshood structure (hand edited)
   if (areal_units_type %in% c( "stratanal_polygons_pre2014", "stratanal_polygons", "groundfish_strata") ) {
     # predefined polygons with customized list of neighbours
     NB_graph = maritimes_groundfish_strata(  areal_units_timeperiod="pre2014" ,returntype="neighbourhoods" )  
@@ -20,8 +19,8 @@ neighbourhood_structure = function( sppoly, areal_units_type="lattice" ) {
 
   # ------------------------------------------------
   # otherwise, generic lattice, "tesselation", or "inla_mesh" 
-  
-    NB_graph = poly2nb(sppoly, row.names=sppoly$AUID, queen=TRUE)  # slow .. ~1hr?
+   
+    NB_graph = poly2nb(sppoly, row.names=sppoly$AUID, queen=TRUE, snap=snap )   
     NB_remove = which(card(NB_graph) == 0)
     if ( length(NB_remove) > 0 ) {
       # remove isolated locations and recreate sppoly .. alternatively add links to NB_graph
