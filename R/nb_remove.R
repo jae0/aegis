@@ -19,7 +19,10 @@ nb_remove = function( NB_graph, u, v=NULL ) {
 
   } else {
 
-    if (length(u) != length(v) ) stop ("u and v must be of the same length")
+    if (length(u) != length(v) ) {
+      warning ("u and v must be of the same length")
+      return (NB_graph)
+    }
     for( i in 1:length(u)) {
       NB_graph[[u[i]]] = as.integer( sort( unique( setdiff( NB_graph[[u[i]]], v[i] ) ) ) )
       NB_graph[[v[i]]] = as.integer( sort( unique( setdiff( NB_graph[[v[i]]], u[i] ) ) ) )

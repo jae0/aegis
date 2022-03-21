@@ -1,5 +1,8 @@
 nb_add = function( NB_graph, u, v ) {
-  if (length(u) != length(v) ) stop ("u and v must be of the same length")
+  if (length(u) != length(v) ) {
+    warning ("u and v must be of the same length")
+    return(NB_graph)
+  }
 
   w = unique(c(u,v))
   if ( any( w > length(NB_graph) ) ) {
