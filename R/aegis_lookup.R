@@ -23,25 +23,7 @@ aegis_lookup = function(
 
 
  if (0) {
-   # testing usign snow data
-    if (0) {
-      # generics
-      parameters="bathymetry" 
-      variable_name=list( "predictions", c("random", "space", "combined") )
-      LUT = NULL    # look up table from which to obtain results
-      LOCS = M[, c("lon", "lat", "timestamp")]   # look up locations for which results are desired
-      LUT_AU=NULL   # areal units associated with LUT
-      LOCS_AU=sppoly 
-      project_class="core"   # "project_class" to look up from
-      DS="aggregated_data" # "DS=.. "
-      output_format="points" 
-      statvars = c("mean")
-      tz="America/Halifax" 
-      FUNC=mean 
-      space_resolution=1
-    }
-
-
+   # testing usign snow data 
     p = bio.snowcrab::snowcrab_parameters(
       project_class="carstm",
       yrs=1999:2021,
@@ -59,13 +41,32 @@ aegis_lookup = function(
 
     # loadfunctions("aegis")
     # debug(aegis_lookup)
+    if (0) {
+      # generics
+      parameters="bathymetry" 
+      variable_name=list( "predictions", c("random", "space", "combined") )
+      LUT = NULL    # look up table from which to obtain results
+      LOCS = M[, c("lon", "lat", "timestamp")]   # look up locations for which results are desired
+      LUT_AU=NULL   # areal units associated with LUT
+      LOCS_AU=sppoly 
+      project_class="core"   # "project_class" to look up from
+      DS="aggregated_data" # "DS=.. "
+      output_format="points" 
+      statvars = c("mean")
+      tz="America/Halifax" 
+      FUNC=mean 
+      space_resolution=1
+    }
     
+    loadfunctions("aegis")
+
     # test raw data lookup
     # spatial
     o0 = aegis_lookup(  parameters="bathymetry", LOCS=M[, c("lon", "lat")],  
       project_class="core", output_format="points" , DS="aggregated_data", variable_name=c( "z.mean", "z.sd", "z.n"),
       returntype="sf" 
     ) 
+    plot(M[["z"]] ~ o0[["z.mean"]])
 
     o1 = aegis_lookup(  parameters="bathymetry", LOCS=M[, c("lon", "lat")],  
       project_class="core", output_format="points" , DS="aggregated_data", variable_name=c( "z.mean" ),
@@ -156,6 +157,7 @@ aegis_lookup = function(
 
 
     # space-time-season
+
     o1 = aegis_lookup(  parameters="temperature", LOCS=M[, c("lon", "lat", "timestamp")],   
       project_class="core", output_format="points" , DS="aggregated_data", variable_name=c( "t.mean", "t.sd", "t.n"), space_resolution=2  
     ) 
@@ -167,12 +169,20 @@ aegis_lookup = function(
     o3 = aegis_lookup(  parameters="temperature", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly,  
       project_class="core", output_format="areal_units" ,  variable_name=list( "t.mean",  "t.sd", "t.n"  )
     ) 
- 
-    o4 = aegis_lookup(  parameters="temperature", LOCS=M[, c("lon", "lat", "timestamp")], 
+
+    parameters = list( 
+      temperature = temperature_parameters( 
+        project_class="carstm", 
+        yrs=1970:year.assessment, 
+        carstm_model_label="1970_present" 
+      )
+    )
+
+    o4 = aegis_lookup(  parameters=parameters, LOCS=M[, c("lon", "lat", "timestamp")], 
       project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd")
     ) 
   
-    o5 = aegis_lookup(  parameters="temperature", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, 
+    o5 = aegis_lookup(  parameters=parameters, LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, 
       project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "combined") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
     ) 
 
@@ -197,6 +207,8 @@ aegis_lookup = function(
     }
  
   }  ## END consistency checks
+
+require(stars)
 
   # -----------
 
@@ -272,7 +284,7 @@ aegis_lookup = function(
 
       if ( "temperature" %in% aegis_project ) {
 
-        if (is.null(pL) )  pL = temperature_parameters(  project_class=project_class, year.assessment=year.assessment )
+        if (is.null(pL) )  pL = temperature_parameters(  project_class=project_class, year.assessment=year.assessment  )
         if (is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
         if (is.null(time_resolution))  if (exists( "tres", pL)) time_resolution =  pL$tres
         if ( project_class %in% c("core" ))  LUT = temperature_db ( p=pL, DS=DS )  # "aggregated_data", "bottom.all"
@@ -306,7 +318,7 @@ aegis_lookup = function(
         if (aegis_project == "speciescomposition_ca1")  sc_vn = "ca1" 
         if (aegis_project == "speciescomposition_ca2")  sc_vn = "ca2" 
         if (aegis_project == "speciescomposition_ca3")  sc_vn = "ca3" 
-        if (is.null(pL) )  pL = speciescomposition_parameters(  project_class=project_class, variabletomodel=sc_vn, year.assessment=year.assessment   )
+        if (is.null(pL) )  pL = speciescomposition_parameters(  project_class=project_class, variabletomodel=sc_vn , year.assessment=year.assessment )
         if (is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
         if (is.null(time_resolution))  if (exists( "tres", pL)) time_resolution =  pL$tres
         if ( project_class %in% c("core" ) ) LUT = speciescomposition_db ( p=pL, DS=DS )  
@@ -473,18 +485,25 @@ aegis_lookup = function(
           # next, get a x-y coordinate for each LOC by rasterizing to LOCS_AU  
           LOCS_AU = st_make_valid(LOCS_AU)
           LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(pL$aegis_proj4string_planar_km) )
-          raster_template = raster::raster( LOCS_AU, res=space_resolution, crs=st_crs( pL$aegis_proj4string_planar_km ) )
 
-          # prep-pass with a au_index variable to get index
-          # LOCS_AU = st_cast( LOCS_AU, "MULTIPOLYGON")
-          # LOCS_AU = st_cast( LOCS_AU, "POLYGON" )
           LOCS_AU$au_index = 1:nrow(LOCS_AU)
-          LOCS_AU_raster = fasterize::fasterize( LOCS_AU, raster::raster( LOCS_AU, res=space_resolution, crs=st_crs( LOCS_AU ) ), field="au_index" )  
+          LOCS_AU_raster = stars::st_rasterize( LOCS_AU["au_index"], dx=space_resolution, dy=space_resolution )
 
           # overwrite LOCS with discretized points 
-          LOCS = sf::st_as_sf( as.data.frame( raster::rasterToPoints(LOCS_AU_raster)), coords=c("x", "y") )
+          LOCS = sf::st_as_sf( LOCS_AU_raster, as_points=TRUE, na.rm=FALSE )
           st_crs(LOCS) = st_crs( LOCS_AU )
-          LOCS$AUID = LOCS_AU$AUID[ match( LOCS[["layer"]], LOCS_AU$au_index )]
+          LOCS$AUID = LOCS_AU$AUID[ st_extract(LOCS_AU_raster, LOCS )$au_index ]
+
+        } else {
+
+          if (exists("lon", LOCS)) {
+            LOCS = sf::st_as_sf( LOCS, coords=c("lon", "lat") )
+            st_crs(LOCS) = st_crs( projection_proj4string("lonlat_wgs84") )
+          } else if (exists("plon", LOCS)) {
+            LOCS = sf::st_as_sf( LOCS, coords=c("plon", "plat") )
+            st_crs(LOCS) = st_crs(pL$aegis_proj4string_planar_km) 
+          } 
+
         }
 
         if (exists("lon", LUT)) {
@@ -501,9 +520,11 @@ aegis_lookup = function(
         }
         LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(LUT) )  # 
 
+
         variable_name = intersect( names(LUT), variable_name )
         LUT = LUT[, variable_name]
         LU_map =  st_points_in_polygons( pts=LUT, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
+
         if (!exists("AUID", LOCS ))  LOCS[["AUID"]]  = st_points_in_polygons( pts=LOCS, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
 
         st_geometry(LUT) = NULL
@@ -564,10 +585,7 @@ aegis_lookup = function(
             if (exists(vnh[[1]], LUT)) {
               vnm = paste( paste0(vnh,  collapse="_"),  stat_var, sep="_" )
               LUT_AU[[vnm]] = carstm_results_unpack( LUT, vnh ) [ bm, stat_var ]
-              LL = fasterize::fasterize( LUT_AU, raster_template, field=vnm )
-              o = sf::st_as_sf( as.data.frame( raster::rasterToPoints(LL)), coords=c("x", "y") )
-              st_crs(o) = st_crs( LUT_AU )
-              LOCS[[vnm]] = o[["layer"]][ ii ]
+              LOCS[[vnm]] = LUT_AU[[vnm]] [ ii ]
             }
           }
         } 
@@ -590,8 +608,8 @@ aegis_lookup = function(
 
         # lut_uid is A LOCAL index of LUT_AU /LUT .. rasterize it
         LUT_AU$lut_uid = 1:nrow(LUT_AU)
-        LUT_AU_raster = fasterize::fasterize( LUT_AU, raster::raster( LUT_AU, res=space_resolution, crs=st_crs( LUT_AU ) ), field="lut_uid" )  
-        LUT_AU_pts = sf::st_as_sf( as.data.frame( raster::rasterToPoints(LUT_AU_raster)), coords=c("x", "y") )
+        LUT_AU_raster = stars::st_rasterize( LUT_AU["lut_uid"], dx=space_resolution, dy=space_resolution )
+        LUT_AU_pts = sf::st_as_sf( LUT_AU_raster, as_points=TRUE, na.rm=FALSE )
         st_crs(LUT_AU_pts) = st_crs( LUT_AU ) 
 
         # format output polygon structure 
@@ -852,8 +870,8 @@ aegis_lookup = function(
 
         # lut_uid is A LOCAL index of LUT_AU /LUT .. rasterize it
         LUT_AU$lut_uid = 1:nrow(LUT_AU)
-        LUT_AU_raster = fasterize::fasterize( LUT_AU, raster::raster( LUT_AU, res=space_resolution, crs=st_crs( LUT_AU ) ), field="lut_uid" )  
-        LUT_AU_pts = sf::st_as_sf( as.data.frame( raster::rasterToPoints(LUT_AU_raster)), coords=c("x", "y") )
+        LUT_AU_raster = stars::st_rasterize( LUT_AU["lut_uid"], dx=space_resolution, dy=space_resolution )
+        LUT_AU_pts = sf::st_as_sf( LUT_AU_raster, as_points=TRUE, na.rm=FALSE )
         st_crs(LUT_AU_pts) = st_crs( LUT_AU ) 
 
         # format output polygon structure 
@@ -1145,10 +1163,9 @@ aegis_lookup = function(
 
         # lut_uid is A LOCAL index of LUT_AU /LUT .. rasterize it
         LUT_AU$lut_uid = 1:nrow(LUT_AU)
-        raster_template = raster::raster( LUT_AU, res=space_resolution, crs=st_crs( LUT_AU ) )
-        
-        LUT_AU_raster = fasterize::fasterize( LUT_AU, raster_template, field="lut_uid" )  
-        LUT_AU_pts = sf::st_as_sf( as.data.frame( raster::rasterToPoints(LUT_AU_raster)), coords=c("x", "y") )
+      
+        LUT_AU_raster = stars::st_rasterize( LUT_AU["lut_uid"], dx=space_resolution, dy=space_resolution )
+        LUT_AU_pts = sf::st_as_sf( LUT_AU_raster, as_points=TRUE, na.rm=FALSE )
         st_crs(LUT_AU_pts) = st_crs( LUT_AU ) 
 
         # format output polygon structure 
