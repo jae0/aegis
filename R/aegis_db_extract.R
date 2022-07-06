@@ -195,7 +195,7 @@ aegis_db_extract = function( vars, spatial_domain, yrs=NULL, dyear=NULL, dyear_i
       vns = setdiff( names(spdf0), "year" )
       for (y in yrs ) {
         dta = spdf0[ spdf0$year==y ,]
-        O = as( rasterize(dta, raster_template, vns, fun=mean, na.rm=TRUE), "SpatialPointsDataFrame" )
+        O = as( rasterize(dta, raster_template, vns, fun=mean, na.rm=TRUE), "SpatialPointsDataFrame" ) #NOTE :: TODO : move to stars::st_rasterize 
         O$year = y
         out = rbind(out, as.data.frame(O) )
       }

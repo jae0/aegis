@@ -49,7 +49,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 
 
   if ( output_type=="grid" ) {
-    require(raster)
+    require(raster)  #NOTE :: TODO : move to stars::st_rasterize 
     raster_template = raster(extent(pts))
     res(raster_template) = resolution
     crs(raster_template) = crs(pts_crs$proj4string) # projection(pts) # transfer the coordinate system to the raster
@@ -60,7 +60,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 
 
   if ( output_type=="grid.count" ) {
-    require(raster)
+    require(raster) #NOTE :: TODO : move to stars::st_rasterize 
     raster_template = raster(extent(pts)) # +1 to increase the area
     res(raster_template) = resolution
     crs(raster_template) = crs(pts_crs$proj4string) # projection(pts) # transfer the coordinate system to the raster

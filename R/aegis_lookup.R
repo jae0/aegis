@@ -636,7 +636,7 @@ require(stars)
         # id membership of LUT raster in LOCS_AU
         LUT_AU_pts_LOCS_AU_AUID = st_points_in_polygons( pts=LUT_AU_pts, polys=LOCS_AU[,"AUID"], varname="AUID" ) 
   
-        pts_AU = match(LUT_AU_pts$layer, LUT_AU$lut_uid[match(LUT$space, LUT_AU$AUID)] ) ## (layer==lut_uid) -- to -- LUT
+        pts_AU = match(LUT_AU_pts$lut_uid, LUT_AU$lut_uid[match(LUT$space, LUT_AU$AUID)] ) ## (layer==lut_uid) -- to -- LUT
 
         aggFUN = function( LUV ) tapply(X=LUV, INDEX=LUT_AU_pts_LOCS_AU_AUID, FUN=FUNC, na.rm=TRUE) 
 
@@ -903,7 +903,7 @@ require(stars)
         # id membership of LUT raster in LOCS_AU
         LUT_AU_pts_LOCS_AU_AUID = st_points_in_polygons( pts=LUT_AU_pts, polys=LOCS_AU[,"AUID"], varname="AUID" ) 
   
-        pts_AU = match(LUT_AU_pts$layer, LUT_AU$lut_uid[match(LUT$space, LUT_AU$AUID)] ) ## (layer==lut_uid) -- to -- LUT
+        pts_AU = match(LUT_AU_pts$lut_uid, LUT_AU$lut_uid[match(LUT$space, LUT_AU$AUID)] ) ## (layer==lut_uid) -- to -- LUT
         aggFUN = function( LUV ) {
                   tapply(X=LUV, INDEX=LUT_AU_pts_LOCS_AU_AUID, FUN=FUNC, na.rm=TRUE) 
         }
@@ -1210,7 +1210,7 @@ require(stars)
         # id membership of LUT raster in LOCS_AU
         LUT_AU_pts_LOCS_AU_AUID = st_points_in_polygons( pts=LUT_AU_pts, polys=LOCS_AU[,"AUID"], varname="AUID" ) 
 
-        pts_AU = match(LUT_AU_pts$layer, LUT_AU$lut_uid[match(LUT$space, LUT_AU$AUID)] ) ## (layer==lut_uid) -- to -- LUT
+        pts_AU = match(LUT_AU_pts$lut_uid, LUT_AU$lut_uid[match(LUT$space, LUT_AU$AUID)] ) ## (layer==lut_uid) -- to -- LUT
         aggFUN = function( LUV ) {
                   tapply(X=LUV, INDEX=LUT_AU_pts_LOCS_AU_AUID, FUN=FUNC, na.rm=TRUE) 
         }
