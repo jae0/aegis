@@ -208,7 +208,7 @@ aegis_lookup = function(
  
   }  ## END consistency checks
 
-require(stars)
+  require(stars)
 
   # -----------
 

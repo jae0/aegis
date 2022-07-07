@@ -10,7 +10,8 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
   #require(rgeos)
   require(sf)
-
+  require(stars)
+  
   if (0) {
     require(sp)
     data(meuse)
@@ -49,24 +50,20 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 
 
   if ( output_type=="grid" ) {
-    require(raster)  #NOTE :: TODO : move to stars::st_rasterize 
-    raster_template = raster(extent(pts))
-    res(raster_template) = resolution
-    crs(raster_template) = crs(pts_crs$proj4string) # projection(pts) # transfer the coordinate system to the raster
-    rast = rasterize( as(pts, "Spatial"), raster_template, setdiff(names(pts), "geometry"), fun=mean, na.rm=TRUE) # not meaningful fir factors
-    O = as( as(rast, "SpatialPolygonsDataFrame"), "sf")
+    rast = stars::st_rasterize( pts, dx=resolution, dy=resolution )
+    O = stars::st_apply(rast, c("x", "y"), mean, na.rm=TRUE)
+    # O = sf::st_as_sf( rast, as_points=TRUE, na.rm=FALSE )
+    # st_crs(O) = st_crs( pts )
     return(O)
   }
 
 
   if ( output_type=="grid.count" ) {
-    require(raster) #NOTE :: TODO : move to stars::st_rasterize 
-    raster_template = raster(extent(pts)) # +1 to increase the area
-    res(raster_template) = resolution
-    crs(raster_template) = crs(pts_crs$proj4string) # projection(pts) # transfer the coordinate system to the raster
     pts$count = 1
-    rast = rasterize( as(pts, "Spatial"), raster_template, field="count", fun="count", background=0) # not meaningful fir factors
-    O = as( as( as(rast, "SpatialGridDataFrame"), "SpatialPointsDataFrame"), "sf")
+    rast = stars::st_rasterize( pts["count"], dx=resolution, dy=resolution )
+    O = stars::st_apply(rast, c("x", "y"), sum, na.rm=TRUE)
+    O = sf::st_as_sf( rast, as_points=TRUE, na.rm=FALSE )
+    st_crs(O) = st_crs( pts )
     return(O)
   }
 
@@ -76,7 +73,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 
     # fine grid representation
     M = aegis_mesh( pts=pts,  resolution=resolution, output_type="grid.count" )
-    M = M[ M$layer > 0, ]
+    M = M[ M$count > 0, ]
     M_xy = st_coordinates( M ) 
 
     if ( is.null(boundary)) boundary="non_convex_hull"
