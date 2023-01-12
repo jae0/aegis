@@ -1,8 +1,8 @@
 
 
-non_convex_hull = function( xy, alpha=NULL, plot=FALSE, dres=NULL ) {
+non_convex_hull = function( xy, alpha=NULL, plot=FALSE, dres=NA ) {
   
-  if( is.null(dres)) {
+  if( !is.finite(dres) ) {
     # best that xy be planar (km)
     bb = sf::st_bbox( xy)
     xr = bb["xmax"] - bb["xmin"]
@@ -18,8 +18,8 @@ non_convex_hull = function( xy, alpha=NULL, plot=FALSE, dres=NULL ) {
  
   sf_triangles = st_collection_extract( st_triangulate(do.call(c, st_geometry(xy_pts) )  ))
 
+  lens = st_length(st_cast(sf_triangles, "LINESTRING"))
   if (is.null(alpha) ) {
-    lens = st_length(st_cast(sf_triangles, "LINESTRING"))
     alpha = max( quantile(lens, 0.95), dres*10 )
   }
 
