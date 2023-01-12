@@ -3,10 +3,10 @@
 non_convex_hull = function( xy, alpha=NULL, plot=FALSE, dres=NULL ) {
   
   if( is.null(dres)) {
-    # best that xy be planar 
+    # best that xy be planar (km)
     bb = sf::st_bbox( xy)
     xr = bb["xmax"] - bb["xmin"]
-    yr = bb["xmax"] - bb["ymin"]
+    yr = bb["ymax"] - bb["ymin"]
     dres = round( min(c(xr, yr)) / 1000 ) 
   }
   
