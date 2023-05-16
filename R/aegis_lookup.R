@@ -432,7 +432,7 @@ aegis_lookup = function(
 
     if (is.null(variable_name)) {
       if ( project_class %in% c("carstm" )) {
-        variable_name = LUT$formula_parsed$dependent_variable
+        variable_name = LUT$fm$dependent_variable
       } else {
         variable_name = setdiff( names(LUT), c("plon", "plat", "lon", "lat", "timestamp", "year", "dyear", "yr" ))
       }
