@@ -6,11 +6,11 @@ temporal_parameters = function( p=list(), ... ) {
   # ----------------------------------
   # determine problem's temporal dimensionality
   
-  if ( p$aegis_dimensionality == "space" ) {
+  if ( p$dimensionality == "space" ) {
 
     #nothing else to do
 
-  } else if ( p$aegis_dimensionality == "space-year" ) {
+  } else if ( p$dimensionality == "space-time" ) {
 
     if (!exists("yrs", p)) p$yrs = c(1999:lubridate::year(lubridate::now()))  # years for modelling and interpolation
     p$ny = length(p$yrs)
@@ -22,7 +22,7 @@ temporal_parameters = function( p=list(), ... ) {
     if (!exists("nt", p)) p$nt = p$ny   # ie, default is an annual model (no p$nw)
     if (!exists("prediction_ts", p)) p$prediction_ts = p$yrs + p$prediction_dyear # output timeslices for predictions in decimla years, yes all of them here
 
-  } else if ( p$aegis_dimensionality == "space-year-season" ) {
+  } else if ( p$dimensionality == "space-time-cyclic" ) {
 
     if (!exists("yrs", p)) p$yrs = c(1999:lubridate::year(lubridate::now()))  # years for modelling and interpolation
     p$ny = length(p$yrs)

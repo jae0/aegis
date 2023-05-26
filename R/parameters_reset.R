@@ -6,7 +6,7 @@ parameters_reset = function( parameter_list,
       "datadir",  # reset data locations ( in aggregated_rawdata )
       "modeldir", 
       "variabletomodel",  # in case we need to run the modelling step on the fly  and data access
-      "aegis_dimensionality", # in case we need to run modelling on the fly
+      "dimensionality", # in case we need to run modelling on the fly
       "areal_units_type",
       "areal_units_resolution_km",
       "areal_units_proj4string_planar_km",

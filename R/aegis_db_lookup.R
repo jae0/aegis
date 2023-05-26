@@ -8,7 +8,7 @@ aegis_db_lookup = function( X, lookupvars, xy_vars=c("lon", "lat"), time_var="ti
 
   p = spatial_parameters( spatial_domain=spatial_domain )  # default (= only supported resolution of 0.2 km discretization)  .. do NOT change
   p$yrs = yrs
-  p = temporal_parameters(p=p, aegis_dimensionality="space-year" )
+  p = temporal_parameters(p=p, dimensionality="space-time-cyclic" )
 
   p$stmv_variables = list(
     LOCS=c("plon", "plat"),

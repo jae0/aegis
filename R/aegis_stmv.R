@@ -60,7 +60,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
 
     p = spatial_parameters( p=p )
 
-    if (!exists("aegis_dimensionality", p))  p$aegis_dimensionality="space-year"
+    if (!exists("dimensionality", p))  p$dimensionality="space-time"
     p = temporal_parameters(p=p)
 
     if (!exists("storage_backend", p)) p$storage_backend="bigmemory.ram"

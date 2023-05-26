@@ -440,7 +440,7 @@ aegis_lookup = function(
  
     # ------------------
 
-    if (pL$aegis_dimensionality =="space" ) {
+    if (pL$dimensionality =="space" ) {
 
       if ( project_class %in% c("core", "stmv", "hybrid") & output_format == "points" )  {
         
@@ -668,7 +668,7 @@ aegis_lookup = function(
 
     ######################################################
  
-    if (pL$aegis_dimensionality =="space-year" ) {
+    if (pL$dimensionality =="space-time" ) {
 
 
       if ( project_class %in% c("core", "stmv", "hybrid") & output_format == "points" )  {
@@ -946,7 +946,7 @@ aegis_lookup = function(
     ######################################################
 
 
-    if (pL$aegis_dimensionality =="space-year-season" ) {
+    if (pL$dimensionality =="space-time-cyclic" ) {
 
       if ( project_class %in% c("core", "stmv", "hybrid") & output_format == "points" )  {
 
@@ -1258,7 +1258,7 @@ aegis_lookup = function(
           } 
         }
       }
-    } # end space-year-season
+    } # end space-time-cyclic
 
 
     if (returntype =="sf" ) {
