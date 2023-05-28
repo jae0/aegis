@@ -242,7 +242,10 @@ aegis_lookup = function(
         if (is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
         if ( project_class %in% c("core" ) ) LUT = bathymetry_db ( p=pL, DS=DS ) 
         if ( project_class %in% c("stmv", "hybrid") ) LUT = bathymetry_db ( p=pL, DS="complete" )   
-        if ( project_class %in% c("carstm" )) LUT = carstm_model( p=pL, DS="carstm_modelled_summary" ) 
+        if ( project_class %in% c("carstm" )) {
+          LUT = carstm_model( p=pL, DS="carstm_modelled_summary" ) 
+          LUT$space = LUT$space_id  
+        }
 
           if ( project_class %in% c("core", "stmv", "hybrid") )  {
             setDT(LUT)
@@ -267,8 +270,11 @@ aegis_lookup = function(
           BA = bathymetry_db ( p=pB, DS="baseline", varnames=c("lon", "lat")  )
           LUT = cbind( LUT, BA )
         }
-        if ( project_class %in% c("carstm" )) LUT = carstm_model( p=pL, DS="carstm_modelled_summary" ) 
-                
+        if ( project_class %in% c("carstm" )) {
+          LUT = carstm_model( p=pL, DS="carstm_modelled_summary" ) 
+          LUT$space = LUT$space_id  
+        }
+      
           if ( project_class %in% c("core", "stmv", "hybrid") )  {
             setDT(LUT)
             if ( space_resolution != pL$pres ) {
@@ -289,8 +295,13 @@ aegis_lookup = function(
         if (is.null(time_resolution))  if (exists( "tres", pL)) time_resolution =  pL$tres
         if ( project_class %in% c("core" ))  LUT = temperature_db ( p=pL, DS=DS )  # "aggregated_data", "bottom.all"
         if ( project_class %in% c("stmv", "hybrid") )  LUT = temperature_db ( p=pL, DS="complete" ) 
-        if ( project_class %in% c("carstm" )) LUT = carstm_model( p=pL, DS="carstm_modelled_summary" ) 
-        
+        if ( project_class %in% c("carstm" )) {
+          LUT = carstm_model( p=pL, DS="carstm_modelled_summary" ) 
+          LUT$space = LUT$space_id  
+          LUT$time  = LUT$time_id  
+          LUT$cyclic = LUT$cyclic_id  
+        }
+
           if ( project_class %in% c("core", "stmv", "hybrid") )  {
             setDT(LUT)
             if ( time_resolution != pL$tres ) {
@@ -323,8 +334,12 @@ aegis_lookup = function(
         if (is.null(time_resolution))  if (exists( "tres", pL)) time_resolution =  pL$tres
         if ( project_class %in% c("core" ) ) LUT = speciescomposition_db ( p=pL, DS=DS )  
         if ( project_class %in% c( "stmv", "hybrid") )  LUT = aegis_db( p=pL, DS="complete" )   
-        if ( project_class %in% c("carstm" )) LUT = carstm_model( p=pL, DS="carstm_modelled_summary" ) 
-
+        if ( project_class %in% c("carstm" )) {
+          LUT = carstm_model( p=pL, DS="carstm_modelled_summary" ) 
+          LUT$space = LUT$space_id  
+          LUT$time  = LUT$time_id  
+          LUT$cyclic = LUT$cyclic_id  
+        }
           if ( project_class %in% c("core", "stmv", "hybrid") )  {
             setDT(LUT)
             if ( time_resolution != pL$tres ) {
@@ -405,7 +420,12 @@ aegis_lookup = function(
         
         if ( project_class %in% c("core" ) ) LUT = snowcrab.db ( p=pL, DS=DS )  
         if ( project_class %in% c( "stmv", "hybrid") )  LUT = aegis_db( p=pL, DS="complete" )   
-        if ( project_class %in% c("carstm" )) LUT = carstm_model( p=pL, DS="carstm_modelled_summary" ) 
+        if ( project_class %in% c("carstm" )) {
+          LUT = carstm_model( p=pL, DS="carstm_modelled_summary" ) 
+          LUT$space = LUT$space_id  
+          LUT$time  = LUT$time_id  
+          LUT$cyclic = LUT$cyclic_id  
+        }
 
           if ( project_class %in% c("core", "stmv", "hybrid") )  {
             setDT(LUT)
