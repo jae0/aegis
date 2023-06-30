@@ -51,13 +51,12 @@ non_convex_hull = function( xy, alpha=NULL, plot=FALSE, dres=NA, method="voronoi
     st_crs(sf_triangles) = st_crs( xy ) 
 
     lens = st_length(st_cast(sf_triangles, "LINESTRING"))
-    if (is.null(alpha) ) {
-      alpha = max( quantile(lens, 0.95), dres*10 )
-    }
-    units(alpha) = units(lens)
-    sfu = sf_triangles[lens <= alpha]
-    sfu = st_buffer( sfu, dist=alpha * 1.5) 
+    units(lens) = NULL
+    lenll = max( quantile(lens, 0.95), dres*10 )
+    
+    sfu = sf_triangles[ which(lens <= lenll) ]
     sfu = st_union( sfu )
+    sfu = st_buffer( sfu, dist=dres ) 
     
     return ( sfu )
   }

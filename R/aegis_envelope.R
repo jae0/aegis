@@ -1,6 +1,6 @@
 aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returntype="sf", proj4string=NULL, hull_alpha=1 ) {
 
-  # obtain boundary of a bunch of points .. expect spatiial points
+  # obtain boundary of a bunch of points .. expect spatial points
   drange = range( c( diff(range( xy[,1] )), diff(range(xy[,2] )) ) )
   spbuffer_default =  trunc( min(drange)/ 25 )
 
