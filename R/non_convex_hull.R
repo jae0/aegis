@@ -1,6 +1,12 @@
 
 
-non_convex_hull = function( xy, alpha=NULL, plot=FALSE, dres=NA, method="voronoi" ) {
+non_convex_hull = function( xy, plot=FALSE, lengthscale=NULL, method="voronoi" ) {
+
+  # best that xy be planar (km)
+  bb = sf::st_bbox( xy)
+  xr = bb["xmax"] - bb["xmin"]
+  yr = bb["ymax"] - bb["ymin"]
+
 
   if (method=="alpha_hull" ) {
       # old method .. 
@@ -9,11 +15,13 @@ non_convex_hull = function( xy, alpha=NULL, plot=FALSE, dres=NA, method="voronoi
       #\\ see stmv::ah2sp
       require(alphahull)
       require(igraph)
+
+      if( is.null(lengthscale) ) lengthscale = signif( min(c(xr, yr)) / 100, 2 ) 
       
       xy = st_coordinates(xydata)
       xy = unique(xy)
 
-      o = ashape( xy[,1], xy[,2], alpha=alpha )
+      o = ashape( xy[,1], xy[,2], alpha=lengthscale )
       u = cbind( as.character(o$edges[, "ind1"]),  as.character(o$edges[, "ind2"]))
       ograph = graph.edgelist( u, directed = FALSE)
       cutg = ograph - E(ograph)[1]
@@ -33,30 +41,24 @@ non_convex_hull = function( xy, alpha=NULL, plot=FALSE, dres=NA, method="voronoi
 
   if (method=="voronoi" ) {
       
-    if( !is.finite(dres) ) {
-      # best that xy be planar (km)
-      bb = sf::st_bbox( xy)
-      xr = bb["xmax"] - bb["xmin"]
-      yr = bb["ymax"] - bb["ymin"]
-      dres = signif( min(c(xr, yr)) / 1000, 2 ) 
-    }
-    
+    if( is.null(lengthscale) ) lengthscale = signif( min(c(xr, yr)) / 1000, 2 ) 
+
     xy$uid = 1:nrow(xy)
-    xy_raster = stars::st_rasterize( xy["uid"], dx=dres, dy=dres )
+    xy_raster = stars::st_rasterize( xy["uid"], dx=lengthscale, dy=lengthscale )
     xy_pts = sf::st_as_sf( xy_raster, as_points=TRUE, na.rm=FALSE )
     xy_pts = xy_pts[ which(is.finite(xy_pts$uid)), ]
     st_crs(xy_pts) = st_crs( xy ) 
-  
+  browser()
     sf_triangles = st_collection_extract( st_triangulate(do.call(c, st_geometry(xy_pts) )  ))
     st_crs(sf_triangles) = st_crs( xy ) 
 
     lens = st_length(st_cast(sf_triangles, "LINESTRING"))
     units(lens) = NULL
-    lenll = max( quantile(lens, 0.95), dres*10 )
+    lenll = max( quantile(lens, 0.95), lengthscale*10 )
     
     sfu = sf_triangles[ which(lens <= lenll) ]
     sfu = st_union( sfu )
-    sfu = st_buffer( sfu, dist=dres ) 
+    sfu = st_buffer( sfu, dist=lengthscale ) 
     
     return ( sfu )
   }

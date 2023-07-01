@@ -1,8 +1,9 @@
-aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returntype="sf", proj4string=NULL, hull_alpha=1 ) {
+aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returntype="sf", proj4string=NULL, hull_lengthscale=NULL ) {
 
   # obtain boundary of a bunch of points .. expect spatial points
   drange = range( c( diff(range( xy[,1] )), diff(range(xy[,2] )) ) )
   spbuffer_default =  trunc( min(drange)/ 25 )
+
 
   if (is.null(spbuffer)) {
     spbuffer = spbuffer_default
@@ -12,6 +13,10 @@ aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returnty
   if (spbuffer < spbuffer_default / 4 ) {
     spbuffer = spbuffer_default
     # message( "spbuffer very low. Setting initial spbuffer =", spbuffer/4)
+  }
+
+  if (is.null(hull_lengthscale)) {
+    hull_lengthscale =  drange / 100   
   }
 
   # define boundary of points if no boundary -- could also use convex hull ...
@@ -25,7 +30,7 @@ aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returnty
   }
 
   if (method=="concave.hull.sp") {
-    v = concave.hull( xy, ub=hull_alpha)
+    v = concave.hull( xy, ub=hull_lengthscale)
     if ( any( !is.finite(v) )) next()
     w = list( Polygons(list( Polygon( as.matrix( v ) )), ID="boundary" ))
     bnd = SpatialPolygons( w, proj4string=sp::CRS(proj4string) )
@@ -34,7 +39,7 @@ aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returnty
   }
 
   if (method=="non_convex_hull.sp") {
-    v = non_convex_hull( xy, alpha=hull_alpha  )
+    v = non_convex_hull( xy, lengthscale=hull_lengthscale  )
     if ( any( !is.finite(v) )) next()
     w = list( Polygons(list( Polygon( as.matrix( v ) )), ID="boundary" ))
     bnd = SpatialPolygons( w, proj4string=sp::CRS(proj4string) )
@@ -43,7 +48,7 @@ aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returnty
   }
 
   if (method=="concave.hull") {
-    v = concave.hull( xy, ub=hull_alpha)
+    v = concave.hull( xy, ub=hull_lengthscale)
     if ( any( !is.finite(v) )) next()
     bnd = (
 #      st_sfc( st_multipoint( xy ), crs=st_crs(proj4string) )
@@ -60,7 +65,7 @@ aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returnty
   }
 
   if (method=="non_convex_hull") {
-    v = non_convex_hull( xy, alpha=hull_alpha  )
+    v = non_convex_hull( xy, lengthscale=hull_lengthscale  )
     if ( any( !is.finite(v) )) next()
     bnd = (
 #      st_sfc( st_multipoint( xy ), crs=st_crs(proj4string) )
