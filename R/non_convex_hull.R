@@ -7,6 +7,7 @@ non_convex_hull = function( xy, plot=FALSE, lengthscale=NULL, method="voronoi" )
   xr = bb["xmax"] - bb["xmin"]
   yr = bb["ymax"] - bb["ymin"]
 
+  lsc = min(c(xr, yr))  
 
   if (method=="alpha_hull" ) {
       # old method .. 
@@ -16,7 +17,7 @@ non_convex_hull = function( xy, plot=FALSE, lengthscale=NULL, method="voronoi" )
       require(alphahull)
       require(igraph)
 
-      if( is.null(lengthscale) ) lengthscale = signif( min(c(xr, yr)) / 100, 2 ) 
+      if( is.null(lengthscale) ) lengthscale = signif( lsc/100, 2 ) 
       
       xy = st_coordinates(xydata)
       xy = unique(xy)
@@ -41,24 +42,30 @@ non_convex_hull = function( xy, plot=FALSE, lengthscale=NULL, method="voronoi" )
 
   if (method=="voronoi" ) {
       
-    if( is.null(lengthscale) ) lengthscale = signif( min(c(xr, yr)) / 1000, 2 ) 
+    if( is.null(lengthscale) ) lengthscale = signif( min(c(xr, yr)) / 100, 2 ) 
 
     xy$uid = 1:nrow(xy)
     xy_raster = stars::st_rasterize( xy["uid"], dx=lengthscale, dy=lengthscale )
     xy_pts = sf::st_as_sf( xy_raster, as_points=TRUE, na.rm=FALSE )
     xy_pts = xy_pts[ which(is.finite(xy_pts$uid)), ]
+    xy_pts = unique(xy_pts)
     st_crs(xy_pts) = st_crs( xy ) 
-  browser()
+
     sf_triangles = st_collection_extract( st_triangulate(do.call(c, st_geometry(xy_pts) )  ))
     st_crs(sf_triangles) = st_crs( xy ) 
 
     lens = st_length(st_cast(sf_triangles, "LINESTRING"))
     units(lens) = NULL
-    lenll = max( quantile(lens, 0.95), lengthscale*10 )
-    
+    lenll = max( quantile(lens, 0.9), lengthscale*10 )
+ 
     sfu = sf_triangles[ which(lens <= lenll) ]
     sfu = st_union( sfu )
-    sfu = st_buffer( sfu, dist=lengthscale ) 
+    sfu = st_buffer( sfu, dist=lenll*0.1 )  
+    sfu = st_union( sfu )
+    sfu = st_cast(sfu, "POLYGON")
+    sfu = st_cast(sfu[1], "LINESTRING")
+    sfu = st_cast(sfu[1], "POLYGON")
+    sfu = st_make_valid(sfu)
     
     return ( sfu )
   }
