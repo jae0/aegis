@@ -60,7 +60,7 @@ non_convex_hull = function( xy, plot=FALSE, lengthscale=NULL, method="voronoi" )
  
     sfu = sf_triangles[ which(lens <= lenll) ]
     sfu = st_union( sfu )
-    sfu = st_buffer( sfu, dist=lengthscale )  
+    sfu = st_buffer( sfu, dist=lengthscale*1.25 )  
     sfu = st_union( sfu )
     sfu = st_cast(sfu, "POLYGON")
     sfu = st_cast(sfu[1], "LINESTRING")
