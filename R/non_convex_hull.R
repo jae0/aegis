@@ -45,7 +45,7 @@ non_convex_hull = function( xy, plot=FALSE, lengthscale=NULL, method="voronoi" )
     if( is.null(lengthscale) ) lengthscale = signif( min(c(xr, yr)) / 100, 2 ) 
 
     xy$uid = 1:nrow(xy)
-    xy_raster = stars::st_rasterize( xy["uid"], dx=lengthscale/10, dy=lengthscale/10 )
+    xy_raster = stars::st_rasterize( xy["uid"], dx=lengthscale, dy=lengthscale )
     xy_pts = sf::st_as_sf( xy_raster, as_points=TRUE, na.rm=FALSE )
     xy_pts = xy_pts[ which(is.finite(xy_pts$uid)), ]
     xy_pts = unique(xy_pts)
@@ -65,6 +65,7 @@ non_convex_hull = function( xy, plot=FALSE, lengthscale=NULL, method="voronoi" )
     sfu = st_cast(sfu, "POLYGON")
     sfu = st_cast(sfu[1], "LINESTRING")
     sfu = st_cast(sfu[1], "POLYGON")
+    sfu = st_buffer( sfu, dist=lengthscale )  
     sfu = st_make_valid(sfu)
     
     return ( sfu )
