@@ -4,7 +4,6 @@ aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returnty
   drange = range( c( diff(range( xy[,1] )), diff(range(xy[,2] )) ) )
   spbuffer_default =  trunc( min(drange)/ 25 )
 
-
   if (is.null(spbuffer)) {
     spbuffer = spbuffer_default
     # message( "spbuffer not set, using spbuffer=", spbuffer)
