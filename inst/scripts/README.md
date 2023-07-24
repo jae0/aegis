@@ -1,14 +1,15 @@
 # aegis
 
-[aegis](https://github.com/jae0/aegis) is a R-library of utility functions that help interoperate with other aegis*, bio*, and stmv packages. The latter are used for data QA/QC, modelling and predicting with a focus upon spatial and spatiotemporal data manipulations.
+[aegis](https://github.com/jae0/aegis) is a R-library of utility functions that help interoperate with other aegis*, bio*, and stmv packages. They support data QA/QC, modelling and predicting with a focus upon spatial and spatiotemporal data manipulations.
 
 If you do not want to deal with this as a package, you can load in functions to memory as:
 
 ```r
-# download aegis to some local directory
-setwd("where you saved aegis")
-source( "./aegis/R/loadfunctions.r" )
-loadfunctions("aegis") # read in the rest 
+# download aegis to some local directory (=="savdir")
+
+source( "https://github.com/jae0/aegis/blob/master/R/loadfunctions.r" )
+
+loadfunctions("aegis", directory=savdir ) # read in the rest 
 
 ```
 
