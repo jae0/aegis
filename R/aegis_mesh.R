@@ -8,7 +8,7 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
 # fraction_cv = 1 means  ~ poisson
 
   # wrapper to tessellate (tile geometry), taking spatial points data and converting to spatial polygons data
-  #require(rgeos)
+ 
   require(sf)
   require(stars)
   

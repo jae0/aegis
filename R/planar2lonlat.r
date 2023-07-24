@@ -39,6 +39,8 @@
         stop( "The proj4 CRS requires an explicit +units=km ")
       }
 
+message("FIXE ME::: deprecated libs, use sf/stars")
+
       y = rgdal::project( as.matrix(x[, input_names, with=FALSE ]), proj=crsX, inv=TRUE )
       
       # sf method is a bit too strict to use ..
