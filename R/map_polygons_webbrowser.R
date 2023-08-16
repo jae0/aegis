@@ -19,9 +19,9 @@ map_polygons_webbrowser = function(
 
     tmap_mode("view")
 
-    tmout = tm_basemap(leaflet::providers$CartoDB.Positron, alpha=0.8)
+    plt = tm_basemap(leaflet::providers$CartoDB.Positron, alpha=0.8)
 
-    tmout = tmout +
+    plt = plt +
       tm_shape( data  ) +
         tm_polygons(
             col  = vn,
@@ -40,14 +40,14 @@ map_polygons_webbrowser = function(
 
     if (!is.null(additional_features) ) {
       # e.g. management lines, etc
-      tmout = tmout + additional_features
+      plt = plt + additional_features
     }
 
-    tmout = tmout +
+    plt = plt +
       tm_scale_bar( position=c("right", "bottom" ), width=0.2, text.size=0.7) +
       tm_layout(legend.outside = TRUE, legend.outside.position="bottom", legend.text.size= 0.77, frame=FALSE )
 
-    return(tmout)
+    return(plt)
 
 
 

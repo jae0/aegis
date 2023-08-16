@@ -41,13 +41,13 @@ spatial_neighbourhood_plot = function( poly, crs_view=NULL, additional_features=
       tm_shape( nb, projection=crs_view ) +
         tm_lines( col="gray", alpha=0.8, lwd=2.5 )
 
-    tmout =  map_polygons_webbrowser(
+    plt =  map_polygons_webbrowser(
         data = poly,
         vn = "AUID",
         vn_title = paste( "Neighbourhood graph\n", attributes(poly)$geography ),
         additional_features=additional_features
     )
-    print(tmout)
+    print(plt)
 
   }
 
