@@ -103,6 +103,10 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
       oo = NULL
     }
 
+    message( "Targets:" )
+    message( "areal_units_constraint_ntarget: ", areal_units_constraint_ntarget )
+    message( "fraction_cv: ", fraction_cv )
+
     finished = FALSE
     while(!finished) {
 
@@ -199,8 +203,8 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
         if (verbose) message ("breaking on criterion: areal_units_constraint_ntarget")
         finished=TRUE   # when var is more constrained and mean is greater than target
       }
-      if (  (  ntsd/ntmean ) <= fraction_cv ) {
-        if (verbose) message ("breaking on criterion: fraction_cv")
+      if ( (ntmean > areal_units_constraint_ntarget) & (  ntsd/ntmean ) <= fraction_cv ) {
+        if (verbose) message ("breaking on criterion: areal_units_constraint_ntarget & fraction_cv")
         finished=TRUE   # when var is more constrained and mean is greater than target
       }
        if ( ntr <= 1 ) {

@@ -25,10 +25,10 @@ tessellate = function(xy, outformat="sf", method="sf", crs=NULL ) {
   if (method=="sf") {
     require(sf)
     mp = st_multipoint(xy)
-    bbox =  st_as_sfc(st_bbox( mp ))
+    bb =  st_as_sfc(st_bbox( mp ))
 
-    # sfpoly = st_sfc(st_collection_extract( st_voronoi(mp, bbox)  ) ) #  plot(sfpoly, col=0)
-    sfpoly = st_sfc(st_collection_extract( st_voronoi(do.call(c, st_geometry(mp)), bbox)  ) )  
+    # sfpoly = st_sfc(st_collection_extract( st_voronoi(mp, bb)  ) ) #  plot(sfpoly, col=0)
+    sfpoly = st_sfc(st_collection_extract( st_voronoi(do.call(c, st_geometry(mp)), bb)  ) )  
     # st_voronoi does not keep order:   and drops duplicates well
     o = unlist(st_intersects(mp, sfpoly)) # find the unique sort of polygons to points
     sfpoly = st_make_valid(sfpoly[o])
