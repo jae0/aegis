@@ -276,11 +276,15 @@ makeActiveBinding(".pr", pkg_reinstall, .GlobalEnv)
 
 # ---- load bio specific libs:
 
+# in case aegis is not loaded, bootstrap here
+try( source( system.file( "scripts", "aegis_startup.R", package = "aegis") ) )
+
 # uncomment this out if you do want to load the environment automatically  
 # -- this loads aegis, and any other libraries ..
 # -- separation helps prevent race conditions when installing libraries
 
 load_bio_enviroment = function() { try( source( file.path( code_root, "bio_startup.R" ) ) ) }  # various user-specific local options
+
 makeActiveBinding(".bio", load_bio_enviroment, .GlobalEnv)
 
 .bio  
