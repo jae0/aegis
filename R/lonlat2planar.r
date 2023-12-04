@@ -34,13 +34,12 @@
       stop( "The proj4 CRS requires an explicit +units=km ")
     }
 
- 
-    y = terra::project( terra::vect(x[, input_names, with=FALSE ], geom=input_names, keepgeom=FALSE, crs=sf::st_crs("EPSG:4326")), crsX ) 
+    y = terra::project( terra::vect(x[, input_names, with=FALSE ], geom=input_names, keepgeom=FALSE, crs="EPSG:4326"), crsX ) 
     # y = rgdal::project( as.matrix(x[,input_names, with=FALSE]), proj=crsX , inv=FALSE )
     
     # sf method is a bit too srtict with bounds TODO
     # y = sf::sf_project( from=sf::st_crs("EPSG:4326"), to=proj4.params, pts=as.matrix(x[,input_names, with=FALSE]))
-
+    y = geom(y)[,c("x", "y")]
     colnames(y) = newnames
     for (i in 1:length( newnames)) {
       if ( newnames[i] %in% colnames(x) ) x[[newnames[i]]] = NULL
