@@ -103,7 +103,6 @@ pkgs_reqd = unique( c(
   "DBI", 
   "deSolve", 
   "grid",
-  "GADMTools" , 
   "Hmisc", 
   "interp", 
   "FactoMineR",

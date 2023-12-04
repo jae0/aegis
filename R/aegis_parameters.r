@@ -11,8 +11,8 @@ aegis_parameters = function( p=NULL, DS=NULL, ... ) {
 
   # ---------------------
   # create/update library list
-  p$libs = c( p$libs, RLibrary ( "colorspace",  "fields", "geosphere", "lubridate",  "lattice",
-   "parallel", "sp", "splancs", "GADMTools" ) )
+  p$libs = c( p$libs, RLibrary ( "colorspace",  "fields", "lubridate",  "lattice",
+   "parallel", "sf" ) )
   p$libs = unique( c( p$libs, project.library ( "aegis") ) )
 
 
