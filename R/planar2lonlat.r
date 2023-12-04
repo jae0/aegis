@@ -39,12 +39,14 @@
         stop( "The proj4 CRS requires an explicit +units=km ")
       }
 
-message("FIXE ME::: deprecated libs, use sf/stars")
+      message("FIXE ME::: deprecated libs, use sf/stars")
 
-      y = rgdal::project( as.matrix(x[, input_names, with=FALSE ]), proj=crsX, inv=TRUE )
+      # y = rgdal::project( as.matrix(x[, input_names, with=FALSE ]), proj=crsX, inv=TRUE )
       
       # sf method is a bit too strict to use ..
       # y = sf::sf_project( from=proj4.params, to=sf::st_crs("EPSG:4326"), pts=as.matrix(x[, input_names, with=FALSE ]) )
+      
+      y = terra::project( terra::vect(x[, input_names, with=FALSE ], geom=input_names, keepgeom=FALSE, crs=crsX), sf::st_crs("EPSG:4326") ) 
 
       colnames(y) = newnames
       for (i in 1:length( newnames)) {
