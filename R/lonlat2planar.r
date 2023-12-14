@@ -40,7 +40,7 @@
     # sf method is a bit too srtict with bounds TODO
     # y = sf::sf_project( from=sf::st_crs("EPSG:4326"), to=proj4.params, pts=as.matrix(x[,input_names, with=FALSE]))
     y = geom(y)[,c("x", "y")]
-    colnames(y) = newnames
+    names(y) = newnames
     for (i in 1:length( newnames)) {
       if ( newnames[i] %in% colnames(x) ) x[[newnames[i]]] = NULL
     }
