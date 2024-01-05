@@ -575,8 +575,8 @@ aegis_lookup = function(
 
         if (is.null(LUT_AU)) LUT_AU = LUT$sppoly
         LUT_AU = st_make_valid(LUT_AU)
-        # LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
-        LUT_AU = st_cast(LUT_AU, "POLYGON" )
+        LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
+        # LUT_AU = st_cast(LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(pL$aegis_proj4string_planar_km) )
 
@@ -618,8 +618,8 @@ aegis_lookup = function(
        
         if (is.null(LUT_AU)) LUT_AU = LUT$sppoly
         LUT_AU = st_make_valid(LUT_AU)
-        # LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
-        LUT_AU = st_cast(LUT_AU, "POLYGON" )
+        LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
+        # LUT_AU = st_cast(LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(pL$aegis_proj4string_planar_km) )
 
@@ -817,8 +817,8 @@ aegis_lookup = function(
 
         if (is.null(LUT_AU)) LUT_AU = LUT$sppoly
         LUT_AU = st_make_valid(LUT_AU)
-        # LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
-        LUT_AU = st_cast(LUT_AU, "POLYGON" )
+        LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
+        # LUT_AU = st_cast(LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(pL$aegis_proj4string_planar_km) )
         LUT_AU$au_index = 1:nrow(LUT_AU)
@@ -877,8 +877,8 @@ aegis_lookup = function(
         # format coordinate systems   
         if (is.null(LUT_AU)) LUT_AU = LUT$sppoly
         LUT_AU = st_make_valid(LUT_AU)
-        # LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
-        LUT_AU = st_cast(LUT_AU, "POLYGON" )
+        LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
+        # LUT_AU = st_cast(LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(pL$aegis_proj4string_planar_km) )
         
@@ -1101,8 +1101,8 @@ aegis_lookup = function(
         if (is.null(LUT_AU)) LUT_AU = LUT$sppoly
         LUT_AU = st_make_valid(LUT_AU)
 
-        # LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")  # causes additional polys ..
-        LUT_AU = st_cast( LUT_AU, "POLYGON" )
+        LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")  # causes additional polys ..
+        # LUT_AU = st_cast( LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(pL$aegis_proj4string_planar_km) )
         LUT_AU$au_index = 1:nrow(LUT_AU)
@@ -1171,8 +1171,8 @@ aegis_lookup = function(
         # format coordinate systems   
         if (is.null(LUT_AU)) LUT_AU = LUT$sppoly
         LUT_AU = st_make_valid(LUT_AU)
-        # LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
-        LUT_AU = st_cast (LUT_AU, "POLYGON" )
+        LUT_AU = st_cast( LUT_AU, "MULTIPOLYGON")
+        # LUT_AU = st_cast (LUT_AU, "POLYGON" )
         LUT_AU = st_make_valid(LUT_AU)
         LUT_AU = sf::st_transform( LUT_AU, crs=st_crs(pL$aegis_proj4string_planar_km) )
 
