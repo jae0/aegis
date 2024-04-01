@@ -42,11 +42,9 @@ pca_basic = function(cm=NULL, indat=NULL, rotate="none",  nfactors=2, ev_templat
   }
   rownames(eigenvectors) = varnames
   colnames(eigenvectors) = pcnames
-
-
-
-  stdev = sqrt( eigenvalues )
-	loadings = eigenvectors %*% diag( c(stdev)  ) # Loadings are eigenvectors scaled by the square roots of the respective eigenvalues
+ 
+  # error 2: 
+	loadings = eigenvectors  %*% diag(sqrt( eigenvalues ))    # Loadings are eigenvectors scaled by the square roots of the respective eigenvalues
   colnames(loadings) = pcnames
 
   if (0) {
@@ -68,7 +66,9 @@ pca_basic = function(cm=NULL, indat=NULL, rotate="none",  nfactors=2, ev_templat
 
   }
 
-  scores = indat %*% t(pracma::pinv(loadings ))  # again, scaled by eigenvectors ( unscaled scores give "distance biplots" )
+  # error 1 fixed:
+  scores = indat %*% loadings  # again, scaled by eigenvectors ( unscaled scores give "distance biplots" )
+
   colnames(scores) = pcnames
 
   total_variance = length(eigenvalues)  # note forcing this to be for scaled and standardized matrices .. ie. .. not for covariance
@@ -105,4 +105,35 @@ pca_basic = function(cm=NULL, indat=NULL, rotate="none",  nfactors=2, ev_templat
   if ( !is.null(save_fn)) save( pca_results, file=save_fn, compress=TRUE )
 
 	return(  pca_results )
+
+
+
+    # testing in R: (https://stats.stackexchange.com/questions/276645/arrows-of-underlying-variables-in-pca-biplot-in-r)
+    X=iris[,1:4]
+    CEN = scale(X, center = T, scale = T) # Centering and scaling the data
+    PCA = prcomp(CEN)
+    pca = pca_basic( cm=cor(CEN), indat=CEN )
+
+    # EIGENVECTORS:
+    (evecs.ei = eigen(cor(CEN))$vectors)       # Using eigen() method
+    (evecs.svd = svd(CEN)$v)                   # PCA with SVD...
+    (evecs = prcomp(CEN)$rotation)             # Confirming with prcomp()
+    (pca$eigenvectors)
+
+    # EIGENVALUES:
+    (evals.ei = eigen(cor(CEN))$values)        # Using the eigen() method
+    (evals.svd = svd(CEN)$d^2/(nrow(X) - 1))   # and SVD: sing.values^2/n - 1
+    (evals = prcomp(CEN)$sdev^2)               # with prcomp() (needs squaring)
+    ( pca$eigenvalues)
+
+    # SCORES:
+    scr.svd = svd(CEN)$u %*% diag(svd(CEN)$d)  # with SVD
+    scr = prcomp(CEN)$x                        # with prcomp()
+    scr.mm = CEN %*% prcomp(CEN)$rotation      # "Manually" [data] [eigvecs]
+    pca$scores
+
+    # LOADINGS:
+    loaded = evecs %*% diag(sqrt(evals))  # [E-vectors] [sqrt(E-values)]
+    pca$loadings
+
 }
