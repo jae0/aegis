@@ -17,17 +17,16 @@ pca_basic = function(cm=NULL, indat=NULL, rotate="none",  nfactors=2, ev_templat
       stop()
     }
 
-   cm = cm [varnames,]
-   cm = cm [,varnames]
+  cm = cm [varnames,]
+  cm = cm [,varnames]
 
-
-
-  s = svd( cm ) # usually svd is done on the indat data matrix but here we use it on the cor/covar matrix  so essentially eignanalysis
+  # usually svd is done on the indat data matrix but here we use it on the cor/covar matrix so essentially eignanalysis
+  # if used on data then it would have to be scaled to nobs : s = svd(indat/sqrt(nobs-1))
+  s = svd( cm ) 
   eigenvalues = s$d
   eigenvectors = s$v
 
   pcnames = paste("PC", 1:length(eigenvalues), sep="")
-
 
   names(eigenvalues) = pcnames
 
@@ -43,7 +42,6 @@ pca_basic = function(cm=NULL, indat=NULL, rotate="none",  nfactors=2, ev_templat
   rownames(eigenvectors) = varnames
   colnames(eigenvectors) = pcnames
  
-  # error 2: 
 	loadings = eigenvectors  %*% diag(sqrt( eigenvalues ))    # Loadings are eigenvectors scaled by the square roots of the respective eigenvalues
   colnames(loadings) = pcnames
 
@@ -66,10 +64,15 @@ pca_basic = function(cm=NULL, indat=NULL, rotate="none",  nfactors=2, ev_templat
 
   }
 
-  # error 1 fixed:
+  # error .. these are the usual (unscaled) scores
   scores = indat %*% loadings  # again, scaled by eigenvectors ( unscaled scores give "distance biplots" )
-
   colnames(scores) = pcnames
+
+  # these are scaled scores
+  # essentially identical to (unscaled) scores, except that their magnitudes are smaller, but correlation is 100%
+  # usually used for plotting (in biplots..  scaled by eigenvectors ) as in R package factominer
+  scores_old = indat %*% t(pracma::pinv(loadings ))  
+  colnames(scores_old) = pcnames
 
   total_variance = length(eigenvalues)  # note forcing this to be for scaled and standardized matrices .. ie. .. not for covariance
 
@@ -81,6 +84,7 @@ pca_basic = function(cm=NULL, indat=NULL, rotate="none",  nfactors=2, ev_templat
     eigenvectors=	eigenvectors,
     loadings=loadings,
     scores= scores,
+    scores_old=scores_old,
     variance = eigenvalues,
     variance_percent = round(eigenvalues  / total_variance * 100, 2) ,
     total_variance = total_variance
