@@ -17,6 +17,11 @@ pca_basic = function(cm=NULL, indat=NULL, rotate="none",  nfactors=2, ev_templat
       stop()
     }
 
+  if (is.null(cm)) {
+    # could add corr or cov matrix here but we want to for pre-computation by user so, error out
+    stop("cm, that is a corr or cov matrix is required")
+  }
+
   cm = cm [varnames,]
   cm = cm [,varnames]
 
