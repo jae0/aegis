@@ -70,14 +70,14 @@ pca_basic = function(cm=NULL, indat=NULL, rotate="none",  nfactors=2, ev_templat
   }
 
   # error .. these are the usual (unscaled) scores
-  scores = indat %*% loadings  # again, scaled by eigenvectors ( unscaled scores give "distance biplots" )
+  scores = indat %*% eigenvectors  # again, scaled by eigenvectors ( unscaled scores give "distance biplots" )
   colnames(scores) = pcnames
 
   # these are scaled scores
   # essentially identical to (unscaled) scores, except that their magnitudes are smaller, but correlation is 100%
   # usually used for plotting (in biplots..  scaled by eigenvectors ) as in R package factominer
-  scores_old = indat %*% t(pracma::pinv(loadings ))  
-  colnames(scores_old) = pcnames
+  scores_factominer = indat %*% t(pracma::pinv(loadings ))  
+  colnames(scores_factominer) = pcnames
 
   total_variance = length(eigenvalues)  # note forcing this to be for scaled and standardized matrices .. ie. .. not for covariance
 
@@ -144,5 +144,5 @@ pca_basic = function(cm=NULL, indat=NULL, rotate="none",  nfactors=2, ev_templat
     # LOADINGS:
     loaded = evecs %*% diag(sqrt(evals))  # [E-vectors] [sqrt(E-values)]
     pca$loadings
-
+    # loadings::pca_loading(PCA)  # same, with p-values
 }

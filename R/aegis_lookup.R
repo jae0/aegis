@@ -1,6 +1,6 @@
 
-# TODO:: tapply can be converted into data.table computations for speed
-## WARNING:: if you polygons are misspecified, they can result in some au's being dropped .. check your polygons
+# TODO:: apply and tapply can be converted into data.table computations for speed
+## WARNING:: if your polygons are misspecified, they can result in some au's being dropped .. check your polygons
 
 aegis_lookup = function( 
   parameters = NULL, 
@@ -239,7 +239,7 @@ aegis_lookup = function(
 
       if ( "bathymetry" %in% aegis_project ) {
         if ( is.null(pL) )  pL = bathymetry_parameters(  project_class=project_class  )
-        if (is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
+        if ( is.null(space_resolution) ) if (exists( "pres", pL)) space_resolution = pL$pres
         if ( project_class %in% c("core" ) ) LUT = bathymetry_db ( p=pL, DS=DS ) 
         if ( project_class %in% c("stmv", "hybrid") ) LUT = bathymetry_db ( p=pL, DS="complete" )   
         if ( project_class %in% c("carstm" )) {
@@ -262,7 +262,7 @@ aegis_lookup = function(
 
       if ( "substrate" %in% aegis_project ) {
         if ( is.null(pL) )  pL = substrate_parameters(  project_class=project_class  )
-        if (is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
+        if ( is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
         if ( project_class %in% c("core" ) ) LUT = substrate_db ( p=pL, DS=DS ) 
         if ( project_class %in% c("stmv", "hybrid") ) {
           LUT = substrate_db ( p=pL, DS="complete" )   
@@ -290,9 +290,9 @@ aegis_lookup = function(
 
       if ( "temperature" %in% aegis_project ) {
 
-        if (is.null(pL) )  pL = temperature_parameters(  project_class=project_class, year.assessment=year.assessment  )
-        if (is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
-        if (is.null(time_resolution))  if (exists( "tres", pL)) time_resolution =  pL$tres
+        if ( is.null(pL) )  pL = temperature_parameters(  project_class=project_class, year.assessment=year.assessment  )
+        if ( is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
+        if ( is.null(time_resolution))  if (exists( "tres", pL)) time_resolution =  pL$tres
         if ( project_class %in% c("core" ))  LUT = temperature_db ( p=pL, DS=DS )  # "aggregated_data", "bottom.all"
         if ( project_class %in% c("stmv", "hybrid") )  LUT = temperature_db ( p=pL, DS="complete" ) 
         if ( project_class %in% c("carstm" )) {
@@ -415,8 +415,8 @@ aegis_lookup = function(
           }
         } 
 
-        if (is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
-        if (is.null(time_resolution))  if (exists( "tres", pL)) time_resolution =  pL$tres
+        if ( is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
+        if ( is.null(time_resolution))  if (exists( "tres", pL)) time_resolution =  pL$tres
         
         if ( project_class %in% c("core" ) ) LUT = snowcrab.db ( p=pL, DS=DS )  
         if ( project_class %in% c( "stmv", "hybrid") )  LUT = aegis_db( p=pL, DS="complete" )   
@@ -796,7 +796,6 @@ aegis_lookup = function(
  
         for (vnm in variable_name) {
           if ( vnm %in% names(LUT )) {  
-            # LUT_regridded = tapply( st_drop_geometry(LUT)[, vnm], LU_map, FUN=FUNC, na.rm=TRUE )
             LUT_regridded = LUT[, setNames(.(mean( get(vnm), na.rm=TRUE) ), vnm), by=.(LU_map) ]
             LOCS[[ vnm ]] = LUT_regridded[ match( LOCS$AUID, LUT_regridded$LU_map ), vnm, with=FALSE ]
           }   
@@ -927,7 +926,7 @@ aegis_lookup = function(
   
         pts_AU = match(LUT_AU_pts$lut_uid, LUT_AU$lut_uid[match(LUT$space, LUT_AU$AUID)] ) ## (layer==lut_uid) -- to -- LUT
         aggFUN = function( LUV ) {
-                  tapply(X=LUV, INDEX=LUT_AU_pts_LOCS_AU_AUID, FUN=FUNC, na.rm=TRUE) 
+            tapply(X=LUV, INDEX=LUT_AU_pts_LOCS_AU_AUID, FUN=FUNC, na.rm=TRUE) 
         }
  
         for (g in 1:length(statvars)) {
@@ -1081,8 +1080,7 @@ aegis_lookup = function(
  
         for (vnm in variable_name) {
           if ( vnm %in% names(LUT )) {  
-            # LUT_regridded = tapply( st_drop_geometry(LUT)[, vnm], LU_map, FUN=FUNC, na.rm=TRUE )
-            LUT_regridded = LUT[, setNames(.(mean( get(vnm), na.rm=TRUE) ), vnm), by=.(LU_map) ]
+            LUT_regridded = LUT[, setNames(.(FUNC( get(vnm), na.rm=TRUE) ), vnm), by=.(LU_map) ]
             LOCS[[ vnm ]] = LUT_regridded[ match( LOCS$AUID, LUT_regridded$LU_map ), vnm, with=FALSE ]
           }   
         }
@@ -1235,9 +1233,8 @@ aegis_lookup = function(
 
         pts_AU = match(LUT_AU_pts$lut_uid, LUT_AU$lut_uid[match(LUT$space, LUT_AU$AUID)] ) ## (layer==lut_uid) -- to -- LUT
         aggFUN = function( LUV ) {
-                  tapply(X=LUV, INDEX=LUT_AU_pts_LOCS_AU_AUID, FUN=FUNC, na.rm=TRUE) 
+            tapply(X=LUV, INDEX=LUT_AU_pts_LOCS_AU_AUID, FUN=FUNC, na.rm=TRUE) 
         }
- 
  
         for (g in 1:length(statvars)) {
           stat_var = statvars[g]
