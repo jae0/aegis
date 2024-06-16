@@ -43,7 +43,7 @@ aegis_lookup = function(
     if (0) {
       # generics
       parameters="bathymetry" 
-      variable_name=list( "predictions", c("random", "space", "re") )
+      variable_name=list( "predictions", c("random", "space", "re_total") )
       LUT = NULL    # look up table from which to obtain results
       LOCS = M[, c("lon", "lat", "timestamp")]   # look up locations for which results are desired
       LUT_AU=NULL   # areal units associated with LUT
@@ -108,7 +108,7 @@ aegis_lookup = function(
 
     # lookup from areal unit predictions
     o5 = aegis_lookup(  parameters="bathymetry", LOCS=M[, c("lon", "lat")],  
-      project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)
+      project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)
     ) 
 
     o5 = aegis_lookup( pL = pL, LOCS=M[, c("lon", "lat")],  LUT=LUT,
@@ -132,22 +132,22 @@ aegis_lookup = function(
     }
     # slow 
     o6 = aegis_lookup(  parameters="bathymetry", LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly,
-      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
+      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
     ) 
 
     # au to au match (LOCS=NULL)
     o7 = aegis_lookup(  parameters="bathymetry", LOCS=list(AUID=sppoly$AUID), LOCS_AU=sppoly,
-      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
+      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
     ) 
 
     # au to au match (LOCS=NULL)
     o7 = aegis_lookup(  parameters="bathymetry", LOCS=sppoly[,"AUID"], LOCS_AU=sppoly,
-      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
+      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
     ) 
 
     # au to au match (LOCS=NULL)
     o7 = aegis_lookup(  parameters="bathymetry", LOCS=sppoly$AUID, LOCS_AU=sppoly,
-      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
+      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
     ) 
 
     # consistency checks
@@ -174,18 +174,18 @@ aegis_lookup = function(
 
  
     o4 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=M[, c("lon", "lat", "timestamp")], 
-      project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd")
+      project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd")
     ) 
   
     o5 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly,  
-      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
+      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
     ) 
 
     mm = expand.grid(AUID=sppoly$AUID, timestamp=lubridate::date_decimal( p$yrs, tz="America/Halifax" ))
     mm = expand.grid(AUID=sppoly$AUID, timestamp= p$yrs )
 
     o6 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=mm, LOCS_AU=sppoly,  
-      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
+      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
     ) 
 
 
@@ -197,9 +197,24 @@ aegis_lookup = function(
 
     # space-time-season
 
-    year.assessment=2023
-    pL = temperature_parameters( 
-        project_class="carstm", yrs=1999:year.assessment, carstm_model_label="default" 
+    o1 = aegis_lookup(  parameters="temperature", LOCS=M[, c("lon", "lat", "timestamp")],   
+      project_class="core", output_format="points" , DS="aggregated_data", variable_name=c( "t.mean", "t.sd", "t.n"), space_resolution=2  
+    ) 
+
+    o2 = aegis_lookup(  parameters="temperature", LOCS=M[, c("lon", "lat", "timestamp")],    
+      project_class="stmv", output_format="points" , DS="complete", variable_name=c( "t") 
+    ) 
+
+    o3 = aegis_lookup(  parameters="temperature", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly,  
+      project_class="core", output_format="areal_units" ,  variable_name=list( "t.mean",  "t.sd", "t.n"  )
+    ) 
+
+    parameters = list( 
+      temperature = temperature_parameters( 
+        project_class="carstm", 
+        yrs=1970:year.assessment, 
+        carstm_model_label="default" 
+      )
     )
      LUT = aegis_survey_lookuptable(
             aegis_project="temperature",
@@ -209,11 +224,11 @@ aegis_lookup = function(
           )
 
     o4 = aegis_lookup(  parameters=parameters, LOCS=M[, c("lon", "lat", "timestamp")], 
-      project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd")
+      project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd")
     ) 
   
     o5 = aegis_lookup(  parameters=parameters, LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, 
-      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
+      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
     ) 
 
 
@@ -221,7 +236,7 @@ aegis_lookup = function(
     mm = expand.grid(AUID=sppoly$AUID, timestamp= p$yrs )
 
     o6 = aegis_lookup(  parameters="temperature", LOCS=mm, LOCS_AU=sppoly, 
-      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
+      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
     ) 
 
     # consistency checks
@@ -270,147 +285,65 @@ aegis_lookup = function(
     }
   }
 
-  if (is.null(time_resolution)) { 
-    if (length(i)>0) {
-      if ("time_resolution" %in% names(i)) time_resolution = i[["time_resolution"]]
+        
+    
+    if (is.null(space_resolution)) {
+      if (!is.null(pL) )  {
+        if (exists( "pres", pL)) {
+          space_resolution = pL$pres
+        }
+      }        
     }
-  }
 
-  if (is.vector(LOCS)) LOCS = list(AUID=LOCS)
-  if (!is.null(LOCS)) setDT(LOCS)
-
-  crs_lonlat =  st_crs(projection_proj4string("lonlat_wgs84"))
+    if (is.null(time_resolution)) {
+      if (!is.null(pL) )  {
+        if (exists( "tres", pL)) {
+          time_resolution = pL$tres
+        }
+      }        
+    }
+       
+    if (is.vector(LOCS)) LOCS = list(AUID=LOCS)
+    if (!is.null(LOCS)) setDT(LOCS)
+ 
+    crs_lonlat =  st_crs(projection_proj4string("lonlat_wgs84"))
   
 
-  if (is.null(variable_name)) {
-    if ( project_class %in% c("carstm" )) {
-      variable_name = LUT$fm$dependent_variable
-    } else {
-      variable_name = setdiff( names(LUT), c("plon", "plat", "lon", "lat", "timestamp", "year", "dyear", "yr" ))
-    }
-  } 
-
-
-  if ( project_class %in% c("core", "stmv", "hybrid") )  {
-    
-    if ( pL$dimensionality == "space" ) {
-        if ( space_resolution != pL$pres ) {
-          setDT(LUT)
-          # regrid to another resolution
-          LUT$plon = trunc(LUT$plon / space_resolution + 1 ) * space_resolution
-          LUT$plat = trunc(LUT$plat / space_resolution + 1 ) * space_resolution
-          LUT = LUT[, setNames(.(mean( get(variable_name), na.rm=TRUE) ), variable_name), by=list(plon, plat) ]
-          setDF(LUT)
-        }
-        attr(LUT, "space_resolution") = space_resolution
-        attr(LUT, "pL") = pL
-    }
-
-  
-    if (pL$dimensionality == "space-time"  ) {
-    
-        if ( time_resolution != pL$tres ) {
-          setDT(LUT)
-          LUT$yr = trunc( (LUT$yr + LUT$dyear )/ time_resolution + 1 ) * time_resolution
-        }
-        if ( space_resolution != pL$pres ) {
-          # regrid to another resolution
-          setDT(LUT)
-          LUT$plon = trunc(LUT$plon / space_resolution + 1 ) * space_resolution
-          LUT$plat = trunc(LUT$plat / space_resolution + 1 ) * space_resolution
-        }
-        if ( time_resolution != pL$tres | space_resolution != pL$pres ) {
-          setDT(LUT)
-          LUT = LUT[, setNames(.(mean( get(variable_name), na.rm=TRUE) ), variable_name), by=list(plon, plat, yr ) ]
-          LUT$timestamp = lubridate::date_decimal( LUT$yr, tz=tz )
-        }
-        setDF(LUT)
-        attr(LUT, "space_resolution") = space_resolution
-        attr(LUT, "time_resolution") = time_resolution
-        attr(LUT, "pL") = pL
-    }
-
-    if (pL$dimensionality == "space-time-cyclic")  {
-    
-        if ( time_resolution != pL$tres ) {
-          setDT(LUT)
-          LUT$dyear = trunc(LUT$dyear / time_resolution + 1 ) * time_resolution
-        }
-        if ( space_resolution != pL$pres ) {
-          # regrid to another resolution
-          setDT(LUT)
-          LUT$plon = trunc(LUT$plon / space_resolution + 1 ) * space_resolution
-          LUT$plat = trunc(LUT$plat / space_resolution + 1 ) * space_resolution
-        }
-        if ( time_resolution != pL$tres | space_resolution != pL$pres ) {
-          setDT(LUT)
-          LUT = LUT[, setNames(.(mean( get(variable_name), na.rm=TRUE) ), variable_name), by=list(plon, plat, yr, dyear) ]
-          LUT$timestamp = lubridate::date_decimal( LUT$yr+LUT$dyear, tz=tz )
-        }
-        setDF(LUT)
-        attr(LUT, "space_resolution") = space_resolution
-        attr(LUT, "time_resolution") = time_resolution
-        attr(LUT, "pL") = pL
-      }
-
-  }
-
-
-  # ------------------
-
-  if (pL$dimensionality =="space" ) {
-
-    if ( project_class %in% c("core", "stmv", "hybrid") & output_format == "points" )  {
-      
-      if (!exists("plon", LUT))  LUT = lonlat2planar(LUT, proj.type=pL$aegis_proj4string_planar_km)
-      if (!exists("plon", LOCS)) LOCS = lonlat2planar(LOCS, proj.type=pL$aegis_proj4string_planar_km) # get planar projections of lon/lat in km
-
-      LOCS$tplon = trunc(LOCS$plon / space_resolution + 1 ) * space_resolution
-      LOCS$tplat = trunc(LOCS$plat / space_resolution + 1 ) * space_resolution
-
-      plon_range = range( LUT$plon )
-      plat_range = range( LUT$plat )
-      plons = seq(plon_range[1], plon_range[2], by=space_resolution)
-      plats = seq(plat_range[1], plat_range[2], by=space_resolution)
-      Sdims = c(length(plons), length(plats))
-      Sres = c(space_resolution, space_resolution)
-      Sorigin = c( plon_range[1], plat_range[1] )
-
-      ii = match( 
-          array_map( "xy->1", LOCS[, c("tplon","tplat")], dims=Sdims, res=Sres, origin=Sorigin ),
-          array_map( "xy->1", LUT[,c("plon","plat")], dims=Sdims, res=Sres, origin=Sorigin )
+    # determine LUT (lookup table)
+    if (is.null(LUT)) {
+      LUT = aegis_survey_lookuptable( 
+        aegis_project=aegis_project, 
+        project_class=project_class, 
+        variable_name=variable_name, 
+        DS=DS,
+        pL=pL,
+        space_resolution=space_resolution,
+        time_resolution=time_resolution,
+        tz=tz
       )
-
-      LOCS$tplon = LOCS$tplat  = NULL
-      gc()
-
-      for (vnm in variable_name) {
-        if ( vnm %in% names(LUT )) {
-          LOCS[[vnm]] = NA  
-          LOCS[[vnm]] = LUT[ ii, vnm ]
-        } 
-      } 
-
     }
 
-    if ( project_class %in% c("core", "stmv", "hybrid") & output_format == "areal_units" )  {
+    if (is.null(LUT)) stop( "lookup data not found nor given")
+    
+    i = attributes(LUT)
 
-      LOCS0 = NULL
-      if (exists("AUID", LOCS)) {
-        # this is a special class of lookup taking LUT (usually empirical or aggregated data) and estimating from it for an areal unit (via rasterization)
-        LOCS0 = LOCS # store as modifications will be made to LOCS
+    if (is.null(space_resolution)) {
+      if (length(i)>0) {
+        if ("space_resolution" %in% names(i)) space_resolution = i[["space_resolution"]]
+      }
+    }
 
-        # next, get a x-y coordinate for each LOC by rasterizing to LOCS_AU  
-        LOCS_AU = st_make_valid(LOCS_AU)
-        LOCS_AU = sf::st_transform( LOCS_AU, crs=st_crs(pL$aegis_proj4string_planar_km) )
+    if (is.null(time_resolution)) { 
+      if (length(i)>0) {
+        if ("time_resolution" %in% names(i)) time_resolution = i[["time_resolution"]]
+      }
+    }
 
-        LOCS_AU$au_index = 1:nrow(LOCS_AU)
-        LOCS_AU_raster = stars::st_rasterize( LOCS_AU["au_index"], dx=space_resolution, dy=space_resolution )
-
-        # overwrite LOCS with discretized points 
-        LOCS = sf::st_as_sf( LOCS_AU_raster, as_points=TRUE, na.rm=FALSE )
-        st_crs(LOCS) = st_crs( LOCS_AU )
-        LOCS$AUID = LOCS_AU$AUID[ st_extract(LOCS_AU_raster, LOCS )$au_index ]
+    if (is.null(pL)) {
+      if (length(i)>0) {
+        if ("pL" %in% names(i)) pL = i[["pL"]]
+      }    
+    }
 
       } else {
 
