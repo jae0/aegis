@@ -23,7 +23,7 @@ aegis_lookup = function(
 
 
  if (0) {
-   # testing usign snow data 
+   # testing using snow data 
     p = bio.snowcrab::snowcrab_parameters(
       project_class="carstm",
       yrs=1999:2021,
@@ -44,7 +44,7 @@ aegis_lookup = function(
     if (0) {
       # generics
       parameters="bathymetry" 
-      variable_name=list( "predictions", c("random", "space", "re") )
+      variable_name=list( "predictions", c("random", "space", "re_total") )
       LUT = NULL    # look up table from which to obtain results
       LOCS = M[, c("lon", "lat", "timestamp")]   # look up locations for which results are desired
       LUT_AU=NULL   # areal units associated with LUT
@@ -59,6 +59,8 @@ aegis_lookup = function(
     }
     
     loadfunctions("aegis")
+    loadfunctions("aegis.survey")
+    
 
     # test raw data lookup
     # spatial
@@ -72,6 +74,7 @@ aegis_lookup = function(
       project_class="core", output_format="points" , DS="aggregated_data", variable_name=c( "z.mean" ),
       returntype="vector"
     ) 
+    plot(M[["z"]] ~ o1)
 
     o2 = aegis_lookup(  parameters="bathymetry", LOCS=M[, c("lon", "lat")],  
       project_class="stmv", output_format="points" , DS="complete", variable_name=c( "z", "dZ", "ddZ") 
@@ -90,27 +93,27 @@ aegis_lookup = function(
 
     # lookup from areal unit predictions
     o5 = aegis_lookup(  parameters="bathymetry", LOCS=M[, c("lon", "lat")],  
-      project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)
+      project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)
     ) 
 
     # slow 
     o6 = aegis_lookup(  parameters="bathymetry", LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly,
-      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
+      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
     ) 
 
     # au to au match (LOCS=NULL)
     o7 = aegis_lookup(  parameters="bathymetry", LOCS=list(AUID=sppoly$AUID), LOCS_AU=sppoly,
-      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
+      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
     ) 
 
     # au to au match (LOCS=NULL)
     o7 = aegis_lookup(  parameters="bathymetry", LOCS=sppoly[,"AUID"], LOCS_AU=sppoly,
-      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
+      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
     ) 
 
     # au to au match (LOCS=NULL)
     o7 = aegis_lookup(  parameters="bathymetry", LOCS=sppoly$AUID, LOCS_AU=sppoly,
-      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
+      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
     ) 
 
     # consistency checks
@@ -135,18 +138,18 @@ aegis_lookup = function(
     ) 
  
     o4 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=M[, c("lon", "lat", "timestamp")], 
-      project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd")
+      project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd")
     ) 
   
     o5 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly,  
-      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
+      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
     ) 
 
     mm = expand.grid(AUID=sppoly$AUID, timestamp=lubridate::date_decimal( p$yrs, tz="America/Halifax" ))
     mm = expand.grid(AUID=sppoly$AUID, timestamp= p$yrs )
 
     o6 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=mm, LOCS_AU=sppoly,  
-      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
+      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
     ) 
 
 
@@ -174,16 +177,16 @@ aegis_lookup = function(
       temperature = temperature_parameters( 
         project_class="carstm", 
         yrs=1970:year.assessment, 
-        carstm_model_label="1970_present" 
+        carstm_model_label="default" 
       )
     )
 
     o4 = aegis_lookup(  parameters=parameters, LOCS=M[, c("lon", "lat", "timestamp")], 
-      project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd")
+      project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd")
     ) 
   
     o5 = aegis_lookup(  parameters=parameters, LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, 
-      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
+      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
     ) 
 
 
@@ -191,7 +194,7 @@ aegis_lookup = function(
     mm = expand.grid(AUID=sppoly$AUID, timestamp= p$yrs )
 
     o6 = aegis_lookup(  parameters="temperature", LOCS=mm, LOCS_AU=sppoly, 
-      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
+      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
     ) 
 
     # consistency checks
@@ -227,228 +230,65 @@ aegis_lookup = function(
       pL = parameters[[aegis_project]]
     }
 
+        
+    
+    if (is.null(space_resolution)) {
+      if (!is.null(pL) )  {
+        if (exists( "pres", pL)) {
+          space_resolution = pL$pres
+        }
+      }        
+    }
+
+    if (is.null(time_resolution)) {
+      if (!is.null(pL) )  {
+        if (exists( "tres", pL)) {
+          time_resolution = pL$tres
+        }
+      }        
+    }
+       
     if (is.vector(LOCS)) LOCS = list(AUID=LOCS)
     if (!is.null(LOCS)) setDT(LOCS)
  
-
     crs_lonlat =  st_crs(projection_proj4string("lonlat_wgs84"))
   
 
     # determine LUT (lookup table)
     if (is.null(LUT)) {
-
-      if ( "bathymetry" %in% aegis_project ) {
-        if ( is.null(pL) )  pL = bathymetry_parameters(  project_class=project_class  )
-        if ( is.null(space_resolution) ) if (exists( "pres", pL)) space_resolution = pL$pres
-        if ( project_class %in% c("core" ) ) LUT = bathymetry_db ( p=pL, DS=DS ) 
-        if ( project_class %in% c("stmv", "hybrid") ) LUT = bathymetry_db ( p=pL, DS="complete" )   
-        if ( project_class %in% c("carstm" )) {
-          LUT = carstm_model( p=pL, DS="carstm_modelled_summary" ) 
-          LUT$space = LUT$space_id  
-        }
-
-          if ( project_class %in% c("core", "stmv", "hybrid") )  {
-            setDT(LUT)
-            if ( space_resolution != pL$pres ) {
-              # regrid to another resolution
-              LUT$plon = trunc(LUT$plon / space_resolution + 1 ) * space_resolution
-              LUT$plat = trunc(LUT$plat / space_resolution + 1 ) * space_resolution
-              LUT = LUT[, setNames(.(mean( get(variable_name), na.rm=TRUE) ), variable_name), by=list(plon, plat) ]
-            }
-            setDF(LUT)
-          }
-
-      }
-
-      if ( "substrate" %in% aegis_project ) {
-        if ( is.null(pL) )  pL = substrate_parameters(  project_class=project_class  )
-        if ( is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
-        if ( project_class %in% c("core" ) ) LUT = substrate_db ( p=pL, DS=DS ) 
-        if ( project_class %in% c("stmv", "hybrid") ) {
-          LUT = substrate_db ( p=pL, DS="complete" )   
-          pB = bathymetry_parameters( spatial_domain=pL$spatial_domain, project_class=project_class  )
-          BA = bathymetry_db ( p=pB, DS="baseline", varnames=c("lon", "lat")  )
-          LUT = cbind( LUT, BA )
-        }
-        if ( project_class %in% c("carstm" )) {
-          LUT = carstm_model( p=pL, DS="carstm_modelled_summary" ) 
-          LUT$space = LUT$space_id  
-        }
-      
-          if ( project_class %in% c("core", "stmv", "hybrid") )  {
-            setDT(LUT)
-            if ( space_resolution != pL$pres ) {
-              # regrid to another resolution
-              LUT$plon = trunc(LUT$plon / space_resolution + 1 ) * space_resolution
-              LUT$plat = trunc(LUT$plat / space_resolution + 1 ) * space_resolution
-              LUT = LUT[, setNames(.(mean( get(variable_name), na.rm=TRUE) ), variable_name), by=list(plon, plat) ]
-            }
-            setDF(LUT)
-          }
-
-      }
-
-      if ( "temperature" %in% aegis_project ) {
-
-        if ( is.null(pL) )  pL = temperature_parameters(  project_class=project_class, year.assessment=year.assessment  )
-        if ( is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
-        if ( is.null(time_resolution))  if (exists( "tres", pL)) time_resolution =  pL$tres
-        if ( project_class %in% c("core" ))  LUT = temperature_db ( p=pL, DS=DS )  # "aggregated_data", "bottom.all"
-        if ( project_class %in% c("stmv", "hybrid") )  LUT = temperature_db ( p=pL, DS="complete" ) 
-        if ( project_class %in% c("carstm" )) {
-          LUT = carstm_model( p=pL, DS="carstm_modelled_summary" ) 
-          LUT$space = LUT$space_id  
-          LUT$time  = LUT$time_id  
-          LUT$cyclic = LUT$cyclic_id  
-        }
-
-          if ( project_class %in% c("core", "stmv", "hybrid") )  {
-            setDT(LUT)
-            if ( time_resolution != pL$tres ) {
-              LUT$dyear = trunc(LUT$dyear / time_resolution + 1 ) * time_resolution
-            }
-            if ( space_resolution != pL$pres ) {
-              # regrid to another resolution
-              LUT$plon = trunc(LUT$plon / space_resolution + 1 ) * space_resolution
-              LUT$plat = trunc(LUT$plat / space_resolution + 1 ) * space_resolution
-            }
-            if ( time_resolution != pL$tres |  space_resolution != pL$pres ) {
-              LUT = LUT[, setNames(.(mean( get(variable_name), na.rm=TRUE) ), variable_name), by=list(plon, plat, yr, dyear) ]
-              LUT$timestamp = lubridate::date_decimal( LUT$yr+LUT$dyear, tz=tz )
-            }
-            setDF(LUT)
-          }
-    
-      }
-
-
-      if ( grepl("speciescomposition", aegis_project) ) {
-        if (aegis_project == "speciescomposition_pca1") sc_vn = "pca1" 
-        if (aegis_project == "speciescomposition_pca2") sc_vn = "pca2" 
-        if (aegis_project == "speciescomposition_pca3") sc_vn = "pca3" 
-        if (aegis_project == "speciescomposition_ca1")  sc_vn = "ca1" 
-        if (aegis_project == "speciescomposition_ca2")  sc_vn = "ca2" 
-        if (aegis_project == "speciescomposition_ca3")  sc_vn = "ca3" 
-        if (is.null(pL) )  pL = speciescomposition_parameters(  project_class=project_class, variabletomodel=sc_vn , year.assessment=year.assessment )
-        if (is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
-        if (is.null(time_resolution))  if (exists( "tres", pL)) time_resolution =  pL$tres
-        if ( project_class %in% c("core" ) ) LUT = speciescomposition_db ( p=pL, DS=DS )  
-        if ( project_class %in% c( "stmv", "hybrid") )  LUT = aegis_db( p=pL, DS="complete" )   
-        if ( project_class %in% c("carstm" )) {
-          LUT = carstm_model( p=pL, DS="carstm_modelled_summary" ) 
-          LUT$space = LUT$space_id  
-          LUT$time  = LUT$time_id  
-          LUT$cyclic = LUT$cyclic_id  
-        }
-          if ( project_class %in% c("core", "stmv", "hybrid") )  {
-            setDT(LUT)
-            if ( time_resolution != pL$tres ) {
-              LUT$dyear = trunc(LUT$dyear / time_resolution + 1 ) * time_resolution
-            }
-            if ( space_resolution != pL$pres ) {
-              # regrid to another resolution
-              LUT$plon = trunc(LUT$plon / space_resolution + 1 ) * space_resolution
-              LUT$plat = trunc(LUT$plat / space_resolution + 1 ) * space_resolution
-            }
-            if ( time_resolution != pL$tres |  space_resolution != pL$pres ) {
-              LUT = LUT[, setNames(.(mean( get(sc_vn), na.rm=TRUE) ), sc_vn), by=list(plon, plat, yr, dyear) ]
-              LUT$timestamp = lubridate::date_decimal( LUT$yr+LUT$dyear, tz=tz )
-            }
-            setDF(LUT)
-          }
-
-      }
-
-
-      if ( grepl("snowcrab", aegis_project) ) {
-        if (aegis_project == "snowcrab_number") sc_vn = "number" 
-        if (aegis_project == "snowcrab_biomass") sc_vn = "biomass" 
-        if (aegis_project == "snowcrab_meansize") sc_vn = "meansize" 
-        if (aegis_project == "snowcrab_pa")  sc_vn = "pa" 
-
-        if (is.null(pL) ) {
-          if ( sc_vn == "number" ) {
-            pL = snowcrab_parameters(
-              project_class="carstm",
-              yrs=1999:year.assessment,   
-              areal_units_type="tesselation",
-              family="poisson",
-              carstm_model_label = "1999_present",  # 1999_present is the default anything else and you are on your own
-              selection = list(type = "number")
-            )
-
-          } else if ( sc_vn == "biomass" ) {
-            pL = snowcrab_parameters(
-              project_class="carstm",
-              yrs=1999:year.assessment,   
-              areal_units_type="tesselation",
-              carstm_model_label = "1999_present",  # 1999_present is the default anything else and you are on your own
-            #   carstm_model_label = paste(   carstm_model_label,   variabletomodel, sep="_")  
-              family =  "gaussian" ,  
-              selection = list(type = "biomass")
-            )
-
-          } else if ( sc_vn == "meansize" ) {
-            pL = snowcrab_parameters(
-              project_class="carstm",
-              yrs=1999:year.assessment,   
-              areal_units_type="tesselation",
-              carstm_model_label = "1999_present",  # 1999_present is the default anything else and you are on your own
-            #   carstm_model_label = paste(   carstm_model_label,   variabletomodel, sep="_")  
-              family =  "gaussian" ,  
-              selection = list(type = "meansize")
-            )
-
-          } else if ( sc_vn == "pa" ) {
-            pL = snowcrab_parameters(
-              project_class="carstm",
-              yrs=1999:year.assessment,   
-              areal_units_type="tesselation",
-              carstm_model_label = "1999_present",  # 1999_present is the default anything else and you are on your own
-            #   carstm_model_label = paste(   carstm_model_label,   variabletomodel, sep="_")  
-              family =  "gaussian" ,  
-              selection = list(type = "presence_absence")
-            )
-
-          } else { 
-            pL = p = bio.snowcrab::load.environment( year.assessment=year.assessment )
-          }
-        } 
-
-        if ( is.null(space_resolution)) if (exists( "pres", pL)) space_resolution = pL$pres
-        if ( is.null(time_resolution))  if (exists( "tres", pL)) time_resolution =  pL$tres
-        
-        if ( project_class %in% c("core" ) ) LUT = snowcrab.db ( p=pL, DS=DS )  
-        if ( project_class %in% c( "stmv", "hybrid") )  LUT = aegis_db( p=pL, DS="complete" )   
-        if ( project_class %in% c("carstm" )) {
-          LUT = carstm_model( p=pL, DS="carstm_modelled_summary" ) 
-          LUT$space = LUT$space_id  
-          LUT$time  = LUT$time_id  
-          LUT$cyclic = LUT$cyclic_id  
-        }
-
-          if ( project_class %in% c("core", "stmv", "hybrid") )  {
-            setDT(LUT)
-            if ( time_resolution != pL$tres ) {
-              LUT$dyear = trunc(LUT$dyear / time_resolution + 1 ) * time_resolution
-            }
-            if ( space_resolution != pL$pres ) {
-              # regrid to another resolution
-              LUT$plon = trunc(LUT$plon / space_resolution + 1 ) * space_resolution
-              LUT$plat = trunc(LUT$plat / space_resolution + 1 ) * space_resolution
-            }
-            if ( time_resolution != pL$tres |  space_resolution != pL$pres ) {
-              LUT = LUT[, setNames(.(mean( get(sc_vn), na.rm=TRUE) ), sc_vn), by=list(plon, plat, yr, dyear) ]
-              LUT$timestamp = lubridate::date_decimal( LUT$yr+LUT$dyear, tz=tz )
-            }
-            setDF(LUT)
-          }
-
-      }
-
+      LUT = aegis_survey_lookuptable( 
+        aegis_project=aegis_project, 
+        project_class=project_class, 
+        variable_name=variable_name, 
+        DS=DS,
+        pL=pL,
+        space_resolution=space_resolution,
+        time_resolution=time_resolution,
+        tz=tz
+      )
     }
 
     if (is.null(LUT)) stop( "lookup data not found nor given")
+    
+    i = attributes(LUT)
+
+    if (is.null(space_resolution)) {
+      if (length(i)>0) {
+        if ("space_resolution" %in% names(i)) space_resolution = i[["space_resolution"]]
+      }
+    }
+
+    if (is.null(time_resolution)) { 
+      if (length(i)>0) {
+        if ("time_resolution" %in% names(i)) time_resolution = i[["time_resolution"]]
+      }
+    }
+
+    if (is.null(pL)) {
+      if (length(i)>0) {
+        if ("pL" %in% names(i)) pL = i[["pL"]]
+      }    
+    }
 
     if (is.null(variable_name)) {
       if ( project_class %in% c("carstm" )) {
