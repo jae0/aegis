@@ -43,7 +43,7 @@ aegis_lookup = function(
     if (0) {
       # generics
       parameters="bathymetry" 
-      variable_name=list( "predictions", c("random", "space", "re") )
+      variable_name=list( "predictions", c("random", "space", "re_total") )
       LUT = NULL    # look up table from which to obtain results
       LOCS = M[, c("lon", "lat", "timestamp")]   # look up locations for which results are desired
       LUT_AU=NULL   # areal units associated with LUT
@@ -108,7 +108,7 @@ aegis_lookup = function(
 
     # lookup from areal unit predictions
     o5 = aegis_lookup(  parameters="bathymetry", LOCS=M[, c("lon", "lat")],  
-      project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)
+      project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)
     ) 
 
     o5 = aegis_lookup( pL = pL, LOCS=M[, c("lon", "lat")],  LUT=LUT,
@@ -132,22 +132,22 @@ aegis_lookup = function(
     }
     # slow 
     o6 = aegis_lookup(  parameters="bathymetry", LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly,
-      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
+      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
     ) 
 
     # au to au match (LOCS=NULL)
     o7 = aegis_lookup(  parameters="bathymetry", LOCS=list(AUID=sppoly$AUID), LOCS_AU=sppoly,
-      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
+      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
     ) 
 
     # au to au match (LOCS=NULL)
     o7 = aegis_lookup(  parameters="bathymetry", LOCS=sppoly[,"AUID"], LOCS_AU=sppoly,
-      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
+      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
     ) 
 
     # au to au match (LOCS=NULL)
     o7 = aegis_lookup(  parameters="bathymetry", LOCS=sppoly$AUID, LOCS_AU=sppoly,
-      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
+      project_class="carstm", output_format="areal_units", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
     ) 
 
     # consistency checks
@@ -174,18 +174,18 @@ aegis_lookup = function(
 
  
     o4 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=M[, c("lon", "lat", "timestamp")], 
-      project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd")
+      project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd")
     ) 
   
     o5 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly,  
-      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
+      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
     ) 
 
     mm = expand.grid(AUID=sppoly$AUID, timestamp=lubridate::date_decimal( p$yrs, tz="America/Halifax" ))
     mm = expand.grid(AUID=sppoly$AUID, timestamp= p$yrs )
 
     o6 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=mm, LOCS_AU=sppoly,  
-      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
+      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
     ) 
 
 
@@ -224,11 +224,11 @@ aegis_lookup = function(
           )
 
     o4 = aegis_lookup(  parameters=parameters, LOCS=M[, c("lon", "lat", "timestamp")], 
-      project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd")
+      project_class="carstm", output_format="points", variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd")
     ) 
   
     o5 = aegis_lookup(  parameters=parameters, LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, 
-      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
+      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
     ) 
 
 
@@ -236,7 +236,7 @@ aegis_lookup = function(
     mm = expand.grid(AUID=sppoly$AUID, timestamp= p$yrs )
 
     o6 = aegis_lookup(  parameters="temperature", LOCS=mm, LOCS_AU=sppoly, 
-      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
+      project_class="carstm", output_format="areal_units" , variable_name=list( "predictions", c("random", "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
     ) 
 
     # consistency checks
