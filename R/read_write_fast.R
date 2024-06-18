@@ -33,18 +33,14 @@ read_write_fast = function ( file="", data=NULL, version=NULL, compress="qs-pres
         on.exit(close(con))
         o = try( .Internal(unserializeFromConn(con, refhook)), silent=TRUE )  # input method for RDS
         
-        if (inherits(o, "try-error")) {
-            o = try( qread(file ), silent=TRUE)
-            if (!inherits(o, "try-error")) { 
-                return( o )
-            } else {
-                # an fst-object
-                return( .Internal(unserialize(fst::decompress_fst(readBin(file, "raw", file.size(file))), refhook ) ) )
-            }
-        } else {
-            return( o )
-        }
+        if (!inherits(o, "try-error"))  return( o )
 
+        o = try( qread(file ), silent=TRUE)
+        if (!inherits(o, "try-error")) return( o )
+
+        # an fst-object
+        return( .Internal(unserialize(fst::decompress_fst(readBin(file, "raw", file.size(file))), refhook ) ) )
+ 
     } else {   # save data 
     
         con = NULL
