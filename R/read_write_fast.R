@@ -9,7 +9,7 @@ read_write_fast = function ( file="", data=NULL, version=NULL, compress="qs-pres
    
     # nearly a drop-in replacement for base::readRDS and base::saveRDS -- expects file name as first argument
     # copied from base::saveRDS readRDS and modified to allow other compression_levels and compression methods .. default uses fst's zstd and lz4
-    #NOTE -- this fails when file size exceeds R's vector limit .. needs to chunk .. done by qs
+    # NOTE -- fst fails when file size exceeds R's vector limit .. needs to chunk .. so we default to qs
     
     compression_level = as.integer( compression_level)
 
