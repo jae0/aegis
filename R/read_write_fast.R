@@ -20,13 +20,9 @@ read_write_fast = function ( file="", data=NULL, version=NULL, compress="qs-pres
         if (is.character(data)) message( "First argument is file ('file') name and second is a data object ('data'), if not then use named arguments" )
         
         if (is.character(file)) {
-            con <- gzfile(file, "rb")
+            con <- file(file, "rb", raw=TRUE)
         } else if (inherits(file, "connection")) {
-            if (inherits(file, "url")) { 
-                con = gzcon(file)
-            } else {
-                con = file
-            }
+            con = file
         } else {
             stop("bad 'file' argument")
         }
@@ -36,21 +32,19 @@ read_write_fast = function ( file="", data=NULL, version=NULL, compress="qs-pres
         
         if (!inherits(o, "try-error"))  return( o )
 
-        o = try( qread(file ), silent=TRUE)
+        o = try( qs::qread(file ), silent=TRUE)
         if (!inherits(o, "try-error")) return( o )
 
+        o = try(.Internal(unserialize(fst::decompress_fst(readBin(file, "raw", file.size(file))), refhook ) ))
+
         # an fst-object
-        return( .Internal(unserialize(fst::decompress_fst(readBin(file, "raw", file.size(file))), refhook ) ) )
+        return( o )
  
     } else {   # save data 
     
         con = NULL
         if (inherits(file, "connection")) {
-            if (inherits(file, "url")) {
-                con= gzcon(file)
-            } else {
-                con = file
-            }
+            con = file
         } else {
             if (is.logical(compress)) { 
                 if (compress) {
@@ -85,7 +79,9 @@ read_write_fast = function ( file="", data=NULL, version=NULL, compress="qs-pres
         }
 
         if (is.null(con)) con = file(file, "wb" )
+        
         on.exit(close(con))
+
         .Internal(serializeToConn(data, con, FALSE, version, refhook))
   
         return( message( "save completed", file )   )
