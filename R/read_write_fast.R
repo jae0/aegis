@@ -12,6 +12,7 @@ read_write_fast = function ( file="", data=NULL, version=NULL, compress="qs-pres
     # NOTE -- fst fails when file size exceeds R's vector limit .. needs to chunk .. so we default to qs
     
     compression_level = as.integer( compression_level)
+    
 
 
     if (is.null(data)) {  # no data to save so, must be to load ... 
