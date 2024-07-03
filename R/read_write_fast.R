@@ -63,12 +63,12 @@ read_write_fast = function ( file="", data=NULL, version=NULL, compress="qs-pres
                 if ( compress =="gzip" ) con = gzfile(file, "wb", compression = compression_level)  # compress: 0-9
   
                 if ( compress =="fst-zstd" ) {
-                    writeBin( fst:::fstcomp( base::serialize(data, NULL, ascii, xdr=xdr), "ZSTD", compression_level, hash), file ) 
+                    writeBin( fst::compress_fst( x=base::serialize(data, NULL, ascii, xdr=xdr), compressor="ZSTD", compression=compression_level, hash), file ) 
                     return(file)
                 }
                 if ( compress =="fst-lz4" ) {
                     message("Large files > 2^31-1 bytes causes issues ... use qs based methods")
-                    writeBin( fst:::fstcomp( base::serialize(data, NULL, ascii, xdr=xdr), "LZ4", compression_level, hash), file ) 
+                    writeBin( fst::compress_fst( x=base::serialize(data, NULL, ascii, xdr=xdr), compressor="LZ4", compression=compression_level, hash), file ) 
                     return(file)
                 }
                 if ( compress =="qs-preset" ) {
