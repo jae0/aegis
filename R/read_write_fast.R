@@ -1,5 +1,5 @@
 
-read_write_fast = function ( file="", data=NULL, version=NULL, compress="qs-preset", qs_preset="high", 
+read_write_fast = function ( file, data=NULL, version=NULL, compress="qs-preset", qs_preset="high", 
      compression_level=1, refhook=NULL, hash=TRUE, ascii=FALSE, xdr=TRUE, ...)  {
      
 
@@ -20,7 +20,7 @@ read_write_fast = function ( file="", data=NULL, version=NULL, compress="qs-pres
         if (is.character(data)) message( "First argument is file ('file') name and second is a data object ('data'), if not then use named arguments" )
         
         if (is.character(file)) {
-            con <- file(file, "rb", raw=TRUE)
+            con = file(file, raw=TRUE)
         } else if (inherits(file, "connection")) {
             con = file
         } else {
@@ -28,10 +28,11 @@ read_write_fast = function ( file="", data=NULL, version=NULL, compress="qs-pres
         }
         
         on.exit(close(con))
-        o = try( .Internal(unserializeFromConn(con, refhook)), silent=TRUE )  # input method for RDS
+
+        o = try( readRDS(file), silent=TRUE )  # input method for RDS
         
         if (!inherits(o, "try-error"))  return( o )
-
+ 
         o = try( qs::qread(file ), silent=TRUE)
         if (!inherits(o, "try-error")) return( o )
 
@@ -75,6 +76,10 @@ read_write_fast = function ( file="", data=NULL, version=NULL, compress="qs-pres
                     return(file)
                 }
   
+                if ( compress =="RDS" ) {
+                    saveRDS( object=data, file=file, compress = TRUE ) 
+                    return(file)
+                }
             }
         }
 
