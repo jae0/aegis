@@ -50,14 +50,37 @@ read_write_fast = function ( file, data=NULL, version=NULL, compress="qs-preset"
             if (is.logical(compress)) { 
                 if (compress) {
                     con = gzfile(file, "wb", compression = compression_level)
+                    on.exit(close(con))
+                    .Internal(serializeToConn(data, con, FALSE, version, refhook))
+                    return(file)
                 } else {
                     con = file(file, "wb")
+                    on.exit(close(con))
+                    .Internal(serializeToConn(data, con, FALSE, version, refhook))
+                    return(file)
                 }
             } else {
-                if ( compress =="bzip2" ) con = bzfile(file, "wb", compression = compression_level)
-                if ( compress =="xz" ) con = xzfile(file, "wb", compression = compression_level)
-                if ( compress =="gzip" ) con = gzfile(file, "wb", compression = compression_level)  # compress: 0-9
-  
+                if ( compress =="bzip2" ) {
+                    con = bzfile(file, "wb", compression = compression_level)
+                    on.exit(close(con))
+                    .Internal(serializeToConn(data, con, FALSE, version, refhook))
+                    return(file)
+                }
+                
+                if ( compress =="xz" ) {
+                    con = xzfile(file, "wb", compression = compression_level)
+                    on.exit(close(con))
+                    .Internal(serializeToConn(data, con, FALSE, version, refhook))
+                    return(file)
+                }
+                
+                if ( compress =="gzip" ) {
+                    con = gzfile(file, "wb", compression = compression_level)  # compress: 0-9
+                    on.exit(close(con))
+                    .Internal(serializeToConn(data, con, FALSE, version, refhook))
+                    return(file)
+                }
+
                 if ( compress =="fst-zstd" ) {
                     writeBin( fst::compress_fst( x=base::serialize(data, NULL, ascii, xdr=xdr), compressor="ZSTD", compression=compression_level, hash), file ) 
                     return(file)
@@ -75,11 +98,16 @@ read_write_fast = function ( file, data=NULL, version=NULL, compress="qs-preset"
                     qs::qsave( x=data, file=file, preset="custom", ... ) 
                     return(file)
                 }
-  
+
                 if ( compress =="RDS" ) {
                     saveRDS( object=data, file=file, compress = TRUE ) 
                     return(file)
                 }
+
+                # save as RDS as last resort
+                saveRDS( object=data, file=file, compress = FALSE ) 
+                return(file)
+
             }
         }
 
