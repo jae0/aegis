@@ -89,7 +89,7 @@ pca_basic = function(cm=NULL, indat=NULL, rotate="none",  nfactors=2, ev_templat
     eigenvectors=	eigenvectors,
     loadings=loadings,
     scores= scores,
-    scores_old=scores_old,
+    scores_scaled=scores_factominer,
     variance = eigenvalues,
     variance_percent = round(eigenvalues  / total_variance * 100, 2) ,
     total_variance = total_variance
