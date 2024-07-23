@@ -28,7 +28,7 @@ aegis_lookup = function(
       project_class="carstm",
       yrs=1999:2021,
       areal_units_type="tesselation",
-      carstm_model_label = "tesselation",   # default is the name of areal_units_type
+      carstm_model_label = "default",   # default is the name of areal_units_type
       selection = list(type = "number")
     )
 
