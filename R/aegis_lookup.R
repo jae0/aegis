@@ -42,7 +42,7 @@ aegis_lookup = function(
     # debug(aegis_lookup)
     if (0) {
       # generics
-     pL = pL 
+     pL = p
       variable_name=list( "predictions" )
       # LUT = NULL    # look up table from which to obtain results
       LOCS = M[, c("lon", "lat", "timestamp")]   # look up locations for which results are desired
@@ -70,19 +70,21 @@ aegis_lookup = function(
         pL=pL 
       )
 
+    # lookup raw data
     o0 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat")],  LUT=LUT,
       project_class="core", output_format="points" , variable_name=c("z.mean" ),
       returntype="sf" 
     ) 
     plot(M[["z"]] ~ o0[["z.mean"]])
 
+    # same as above but return as vector
     o1 = aegis_lookup( pL = pL, LOCS=M[, c("lon", "lat")],  LUT=LUT,
       project_class="core", output_format="points" ,  variable_name=c( "z.mean" ),
       returntype="vector"
     ) 
     plot(M[["z"]] ~ o1)
 
-
+    # lookup from stmv solution
     pL = bathymetry_parameters( project_class="stmv"  )
     LUT = aegis_survey_lookuptable( aegis_project="bathymetry", project_class="stmv", 
         DS="complete",
@@ -91,8 +93,9 @@ aegis_lookup = function(
     o2 = aegis_lookup( pL = pL, LOCS=M[, c("lon", "lat")],  LUT=LUT,  
       project_class="stmv", output_format="points" ,   variable_name=c( "z", "dZ", "ddZ") 
     ) 
- 
-    # spatial averaging by areal unit
+    plot(M[["z"]] ~ o2[["z"]])
+
+    # spatial averaging to areal unit
     # this one is slow .. could be sped up if used 
     o3 = aegis_lookup( pL = pL, LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly, LUT=LUT,  
       project_class="stmv", output_format="areal_units" ,  variable_name=c( "z", "dZ", "ddZ") 
@@ -115,6 +118,7 @@ aegis_lookup = function(
     o5 = aegis_lookup( pL = pL, LOCS=M[, c("lon", "lat")],  LUT=LUT,
       project_class="carstm", output_format="points", variable_name=list( "predictions" ), statvars=c("mean", "sd"), space_resolution=min(p$pres)
     ) 
+    plot(M[["z"]] ~ o5)
 
     if (0){
     pL = bathymetry_parameters( project_class="carstm",  carstm_model_label="default" )
@@ -159,34 +163,48 @@ aegis_lookup = function(
 
 
     # space-time
-    pL = temperature = temperature_parameters( 
-        project_class="carstm", yrs=1999:year.assessment, carstm_model_label="default" 
+    year.assessment=2023
+    pL = speciescomposition_parameters( 
+        project_class="carstm", yrs=1999:year.assessment, carstm_model_label="default" ,
+        variabletomodel="pca1"
     )
+     
+        LUT = aegis_survey_lookuptable(
+            aegis_project="speciescomposition",
+            project_class="carstm",  
+            DS="carstm_predictions",
+            pL=pL 
+          )
 
-    o1 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=M[, c("lon", "lat", "timestamp")],   
-      project_class="core", output_format="points" , variable_name=c( "pca1"), space_resolution=2  
-    ) 
-
-    o2 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=M[, c("lon", "lat", "timestamp")],   
-      project_class="stmv", output_format="points" ,   variable_name=c( "pca1") 
-    ) 
-
-    o3 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, 
-      project_class="core", output_format="areal_units" ,  variable_name=list( "pca1",  "pca2", "ca1", "ca2" )
-    ) 
  
-    o4 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=M[, c("lon", "lat", "timestamp")], 
+    # o1 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")],   LUT=LUT,
+    #   project_class="core", output_format="points" , variable_name=c( "pca1"), space_resolution=2  
+    # ) 
+
+    # o1 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")],     LUT=LUT,
+    #   project_class="core", output_format="points" , variable_name=c( "pca1"), space_resolution=2  
+    # ) 
+
+    # o2 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")],     LUT=LUT,
+    #   project_class="stmv", output_format="points" ,   variable_name=c( "pca1") 
+    # ) 
+
+    # o3 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly,   LUT=LUT,
+    #   project_class="core", output_format="areal_units" ,  variable_name=list( "pca1",  "pca2", "ca1", "ca2" )
+    # ) 
+ 
+    o4 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")],   LUT=LUT,
       project_class="carstm", output_format="points", variable_name=list( "predictions" ), statvars=c("mean", "sd")
     ) 
-  
-    o5 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly,  
+
+    o5 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly,    LUT=LUT,
       project_class="carstm", output_format="areal_units" , variable_name=list( "predictions" ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
     ) 
 
     mm = expand.grid(AUID=sppoly$AUID, timestamp=lubridate::date_decimal( p$yrs, tz="America/Halifax" ))
     mm = expand.grid(AUID=sppoly$AUID, timestamp= p$yrs )
 
-    o6 = aegis_lookup(  parameters="speciescomposition_pca1", LOCS=mm, LOCS_AU=sppoly,  
+    o6 = aegis_lookup(  pL=pL, LOCS=mm, LOCS_AU=sppoly,    LUT=LUT,
       project_class="carstm", output_format="areal_units" , variable_name=list( "predictions" ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
     ) 
 
@@ -199,31 +217,36 @@ aegis_lookup = function(
 
     # space-time-season
 
-    o1 = aegis_lookup(  parameters="temperature", LOCS=M[, c("lon", "lat", "timestamp")],   
-      project_class="core", output_format="points" ,  variable_name=c( "t.mean", "t.sd", "t.n"), space_resolution=2  
-    ) 
-
-    o2 = aegis_lookup(  parameters="temperature", LOCS=M[, c("lon", "lat", "timestamp")],    
-      project_class="stmv", output_format="points" ,  variable_name=c( "t") 
-    ) 
-
-    o3 = aegis_lookup(  parameters="temperature", LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly,  
-      project_class="core", output_format="areal_units" ,  variable_name=list( "t.mean",  "t.sd", "t.n"  )
-    ) 
-
-    parameters = list( 
-      temperature = temperature_parameters( 
-        project_class="carstm", 
-        yrs=1970:year.assessment, 
-        carstm_model_label="default" 
-      )
+    year.assessment=2023
+    pL = temperature_parameters( 
+        project_class="carstm", yrs=1999:year.assessment, carstm_model_label="default" 
     )
+     LUT = aegis_survey_lookuptable(
+            aegis_project="temperature",
+            project_class="carstm",  
+            DS="carstm_predictions",
+            pL=pL 
+          )
 
-    o4 = aegis_lookup(  parameters=parameters, LOCS=M[, c("lon", "lat", "timestamp")], 
+ 
+    # o1 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")],    LUT=LUT, 
+    #   project_class="core", output_format="points" ,  variable_name=c( "t.mean", "t.sd", "t.n"), space_resolution=2  
+    # ) 
+
+    # o2 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")],    LUT=LUT,  
+    #   project_class="stmv", output_format="points" ,  variable_name=c( "t") 
+    # ) 
+
+    # o3 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly,    LUT=LUT,
+    #   project_class="core", output_format="areal_units" ,  variable_name=list( "t.mean",  "t.sd", "t.n"  )
+    # ) 
+ 
+    o4 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")], LUT=LUT,
       project_class="carstm", output_format="points", variable_name=list( "predictions" ), statvars=c("mean", "sd")
     ) 
-  
-    o5 = aegis_lookup(  parameters=parameters, LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly, 
+    plot(M$t ~o4 )
+
+    o5 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly,  LUT=LUT,
       project_class="carstm", output_format="areal_units" , variable_name=list( "predictions" ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
     ) 
 
@@ -231,7 +254,7 @@ aegis_lookup = function(
    # mm = expand.grid(AUID=sppoly$AUID, timestamp=lubridate::date_decimal( p$yrs, tz="America/Halifax" ))
     mm = expand.grid(AUID=sppoly$AUID, timestamp= p$yrs )
 
-    o6 = aegis_lookup(  parameters="temperature", LOCS=mm, LOCS_AU=sppoly, 
+    o6 = aegis_lookup(  pL=pL, LOCS=mm, LOCS_AU=sppoly,  LUT=LUT,
       project_class="carstm", output_format="areal_units" , variable_name=list( "predictions" ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
     ) 
 
