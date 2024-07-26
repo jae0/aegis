@@ -6,8 +6,7 @@
     # first try an internal conversion /lookup for CRS
   
     datatype = ifelse("data.table" %in% class(x), "data.table", "data.frame")
-
-    
+   
     require(data.table)
     setDT(x)
     ii = which( is.finite( rowSums( x[,input_names, with=FALSE] ) ) )   
@@ -33,10 +32,15 @@
       print (crsX)
       stop( "The proj4 CRS requires an explicit +units=km ")
     }
-
-    y = terra::project( terra::vect(x[, input_names, with=FALSE ], geom=input_names, keepgeom=FALSE, crs="EPSG:4326"), crsX ) 
+    gc()
+    y = terra::project( 
+      terra::vect(
+        x[, input_names, with=FALSE ], geom=input_names, keepgeom=FALSE, crs="EPSG:4326"
+      ),
+      crsX 
+    ) 
     # y = rgdal::project( as.matrix(x[,input_names, with=FALSE]), proj=crsX , inv=FALSE )
-    
+    gc()
     # sf method is a bit too srtict with bounds TODO
     # y = sf::sf_project( from=sf::st_crs("EPSG:4326"), to=proj4.params, pts=as.matrix(x[,input_names, with=FALSE]))
     y = geom(y)[,c("x", "y")]
