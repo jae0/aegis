@@ -48,7 +48,10 @@
       
       y = terra::project( terra::vect(x[, input_names, with=FALSE ], geom=input_names, keepgeom=FALSE, crs=crsX), "EPSG:4326")  
 
-      y = geom(y)[,c("x", "y")]
+      y = geom(y)
+      if (nrow(x) == 1)  y =  as.data.frame(y) 
+      y = y[,c("x", "y")]
+
       if (!is.null(colnames(y))) {
         colnames(y) = newnames
       } else {

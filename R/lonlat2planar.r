@@ -43,7 +43,9 @@
     gc()
     # sf method is a bit too srtict with bounds TODO
     # y = sf::sf_project( from=sf::st_crs("EPSG:4326"), to=proj4.params, pts=as.matrix(x[,input_names, with=FALSE]))
-    y = geom(y)[,c("x", "y")]
+    y = geom(y)
+    if (nrow(x) == 1)  y =  as.data.frame(y) 
+    y = y[,c("x", "y")]
 
     if (!is.null(colnames(y))) {
       colnames(y) = newnames
@@ -54,6 +56,7 @@
     for (i in 1:length( newnames)) {
       if ( newnames[i] %in% colnames(x) ) x[[newnames[i]]] = NULL
     }
+    
     x = cbind(x,y)
     if (datatype != "data.table") setDF(x)
     return (x)
