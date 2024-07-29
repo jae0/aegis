@@ -68,7 +68,7 @@ pca_basic = function(cm=NULL, indat=NULL, rotate="none",  nfactors=2, ev_templat
     # scores = m %*% s$v  # i.e., b %*% s$v  .. force a multiplication ignoring NAs
 
   }
-
+   
   # error .. these are the usual (unscaled) scores
   scores = indat %*% eigenvectors  # again, scaled by eigenvectors ( unscaled scores give "distance biplots" )
   colnames(scores) = pcnames
