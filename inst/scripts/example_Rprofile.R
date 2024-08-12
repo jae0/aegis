@@ -1,3 +1,5 @@
+# An example Rprofile .. adjust to your own needs
+
 
 # NOTE: use of makeActiveBinding in MSWindows may not work .. just comment them out
 
@@ -34,7 +36,7 @@ repositories["INLA"] = "https://inla.r-inla-download.org/R/testing"
 # package management
 
 gituser="jae0"
-bitbucketuser="ecomod"
+bitbucketuser="autocatalysis"
 
 
 options(
@@ -140,22 +142,22 @@ pkgs_local_git = unique( c(
   "aegis.odemod",  
   "aegis.bathymetry",    
   "aegis.coastline",    
-  "aegis.condition",    
-  "aegis.metabolism",    
-  "aegis.mpa",    
+#  "aegis.condition",    
+#  "aegis.metabolism",    
+#  "aegis.mpa",    
   "aegis.polygons",    
-  "aegis.sizespectrum",    
+#  "aegis.sizespectrum",    
   "aegis.substrate",    
   "aegis.survey",    
-  "aegis.speciesarea",    
+#  "aegis.speciesarea",    
   "aegis.speciescomposition",    
   "aegis.temperature",    
   "bio.taxonomy",
   "bio.snowcrab",
-  "carstm", 
-  "ecomod",
-  "netmensuration",  
-  "stmv"
+  "carstm"
+#  "ecomod",
+#  "stmv"
+#  "netmensuration"  
 ) )
 git_projects_to_install = data.frame( libname=pkgs_local_git, source="local" )
 
