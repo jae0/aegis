@@ -538,7 +538,7 @@
       #Z$yr = yrs
 
       # fishery data
-      res = get.fishery.stats.by.region()
+      res = logbook.db(DS="aggregated")
       res$landings = res$landings / 1000
       res$effort = res$effort / 1000
       # rownames(res) = yrs
