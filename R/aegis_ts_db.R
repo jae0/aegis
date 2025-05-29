@@ -538,8 +538,11 @@
       #Z$yr = yrs
 
       # fishery data
-      res = fishery_data( toget="summary_annual", regions=list( subarea=c("cfanorth", "cfa23", "cfa24", "cfa4x") ) )
-      
+      res = bio.snowcrab::fishery_data( toget="aggregated" )
+
+      res$landings = res$landings / 1000
+      res$effort = res$effort / 1000
+      # rownames(res) = yrs
       colnames(res) = paste("snowcrab.fishery", colnames(res), sep="." )
 
       names(res)[which(names(res)=="snowcrab.fishery.yr") ] = "yr"
