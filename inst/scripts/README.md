@@ -2,6 +2,7 @@
 
 [aegis](https://github.com/jae0/aegis) is a R-library of utility functions that help interoperate with other aegis*, bio*, and stmv packages. They support data QA/QC, modelling and predicting with a focus upon spatial and spatiotemporal data manipulations.
 
+
 If you do not want to deal with this as a package, you can load in functions to memory as:
 
 ```r
