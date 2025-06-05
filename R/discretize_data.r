@@ -1,7 +1,8 @@
 
 discretize_data = function( x=NULL, brks=NULL, span=NULL, additional_digits=3,
   labels=NULL, digits=NULL, resolution=NULL, truncation_factor=0.1, toreturn="midpoints" ) {
-  # discretize data x along the break points .. and midpoints as labels, with signif digits digits
+  
+	# discretize data x along the break points .. and midpoints as labels, with signif digits digits
   
   if (!is.null(span) & is.null(brks)) {
     # create sequence:
@@ -72,5 +73,5 @@ discretize_data = function( x=NULL, brks=NULL, span=NULL, additional_digits=3,
     return( o )
   }
 
-  return( message("Makes no sense .. check arguments?"))
+  return( message("Error .. check your arguments?"))
 }
