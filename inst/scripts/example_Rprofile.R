@@ -126,8 +126,7 @@ pkgs_reqd = unique( c(
   "SimInf", 
   "sf", 
   "stars",
-  "term", 
-  "tmap",
+  "term",  
   "truncnorm",
   "vegan" 
 ) )

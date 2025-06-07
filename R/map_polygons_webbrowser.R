@@ -24,18 +24,24 @@ map_polygons_webbrowser = function(
     plt = plt +
       tm_shape( data  ) +
         tm_polygons(
-            col  = vn,
-            # style = ifelse ( exists("style", ellps), ellps[["style"]], "fixed" ),
-            # breaks = ifelse ( exists("vn_breaks", ellps), ellps[["vn_breaks"]], quantile( ns[[vn]], probs=seq(005, 0.975, by=0.1), na.rm=TRUE) ),
-            title = ifelse ( exists("vn_title", ellps), ellps[["vn_title"]], vn ),
-            border.col = "lightgray",
+            fill  = vn,
+            fill.scale = tm_scale_continuous(
+              ticks = ifelse ( exists("vn_ticks", ellps), ellps[["vn_ticks"]], quantile( ns[[vn]], probs=seq(005, 0.975, by=0.1), na.rm=TRUE) ),
+              values = ifelse ( exists("values", ellps), ellps[["values"]], "-viridis")
+            ),
+            fill.legend = tm_legend(
+              na.show=FALSE,
+              title = ifelse ( 
+                exists("vn_title", ellps), 
+                ellps[["vn_title"]], 
+                vn
+              )
+            ),
+            col = "lightgray",
             colorNA = NULL,
-            showNA=FALSE,
             lwd = 0.75,
-            palette = ifelse ( exists("palette", ellps), ellps[["palette"]], "-viridis"),
-            border.alpha = 0.75,
-            alpha=0.95,
-            legend.is.portrait = FALSE )
+            col_alpha = 0.75,
+            fill_alpha=0.95 )
 
 
     if (!is.null(additional_features) ) {
@@ -44,7 +50,7 @@ map_polygons_webbrowser = function(
     }
 
     plt = plt +
-      tm_scale_bar( position=c("right", "bottom" ), width=0.2, text.size=0.7) +
+      tm_scalebar( position=c("right", "bottom" ), width=0.2, text.size=0.7) +
       tm_layout(legend.outside = TRUE, legend.outside.position="bottom", legend.text.size= 0.77, frame=FALSE )
 
     return(plt)

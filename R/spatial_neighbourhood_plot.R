@@ -38,8 +38,8 @@ spatial_neighbourhood_plot = function( poly, crs_view=NULL, additional_features=
     require(tmap)
 
     additional_features = additional_features +
-      tm_shape( nb, projection=crs_view ) +
-        tm_lines( col="gray", alpha=0.8, lwd=2.5 )
+      tm_shape( nb, crs=crs_view ) +
+        tm_lines( col="gray", col_alpha=0.8, lwd=2.5 )
 
     plt =  map_polygons_webbrowser(
         data = poly,
