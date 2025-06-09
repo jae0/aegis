@@ -66,10 +66,7 @@ discretize_data = function( x=NULL, brks=NULL, span=NULL, additional_digits=3,
       labels=labels[-length(labels)], 
       include.lowest=TRUE ) 
     ))
-    
-    o = trunc(o / resolution)*resolution
-    o = round(o, digits=digits )
-  
+     
     return( o )
   }
 
