@@ -50,6 +50,5 @@
             filenames( "/home/jae/tmp/TextMining/myData/test!._d%" )  # strange characters ok
             filenames( "/home/jae/tmp/Text Mining/my Data/test!._d%", clean=TRUE )  
         }
-        
 
     }

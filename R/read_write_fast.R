@@ -1,8 +1,7 @@
 
 read_write_fast = function ( fn, data=NULL, compress="", filetype=NULL,
-     compression_level=9,  ascii=FALSE, force_lower_case_extension=TRUE, ...)  {
+     compression_level=9,  ascii=FALSE, force_lower_case_extension=TRUE, override_extension=FALSE, ...)  {
      
-
     # required params for some functions below:
     version=NULL
     refhook=NULL
@@ -16,18 +15,30 @@ read_write_fast = function ( fn, data=NULL, compress="", filetype=NULL,
     # NOTE -- fst fails when file size exceeds R's vector limit .. needs to chunk .. so we default to qs
 
    
-    FN = filenames(fn, force_lower_case_extension=force_lower_case_extension, clean=TRUE )  # decompose file name
+    FN = filenames(fn )  #, force_lower_case_extension=force_lower_case_extension, clean=TRUE )  # decompose file name
+
     if (is.null(filetype)) {
-        filetype = tolower(FN[["extension"]])
-    } else {
-        if (FN[["extension"]] != filetype) {
+        filetype = FN[["extension"]]
+    } 
+    
+    filetype = tolower(filetype)
+
+    if (FN[["extension"]] != filetype ) {
+        
+        if (tolower(FN[["extension"]]) == filetype) {
+            message("Mismatch of filename extension and filetype letter case ... consider using only lower case")
+        }
+
+        if (override_extension) {
             FN[["extension"]] = filetype
             FN[["basename"]] = paste(FN[["corename"]], FN[["extension"]], sep=".")
             FN[["fullname"]] = file.path( FN[["dirname"]], FN[["basename"]] )
-            message("Mismatch of filename extension and filetype ... \noverriding to filetype provided and changing file name: \n", FN[["fullname"]])
+            message("Overriding to filetype provided and changing file name: \n", FN[["fullname"]])
             message("If you do not want to change it, then override with correct filetype")
         }
     }
+
+    
 
     fn = FN[["fullname"]]
 
