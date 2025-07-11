@@ -16,13 +16,16 @@ convert_file_format = function( convert_from="rds", convert_to="rdz", directory=
                         file.remove(fn)
                     }
                 }
-                return("\nSkipping as destination file already exists.\n")
+                message("\nSkipping as destination file already exists.\n")
+                return()
             }
 
         } 
         
         if (dry_run) {
-            return("dry run: no changes made")
+
+            message("dry run: no changes made")
+            return()
         }
 
         if (ask) {
@@ -33,11 +36,13 @@ convert_file_format = function( convert_from="rds", convert_to="rdz", directory=
 
         o = read_write_fast(fn=fn)
 
-        if (is.null(o)) {
+        if (is.null(o) || (object.size(get("o")) ==0 ) ) {
 
-            return("\nLooks like an empty file ... skipping\n\n")
-        
+            message("\nLooks like an empty file ... skipping\n\n")
+            return()
+
         } else {
+
             if (ask) {
                 message("\nCreate new file?\n")
                 a = readline(prompt="\nPress y and enter to continue, anything else to skip, CTRL-c to stop, to stop message send ask=FALSE:  ")
@@ -56,7 +61,8 @@ convert_file_format = function( convert_from="rds", convert_to="rdz", directory=
                 }
             }
         }
-        return("done")
+        
+        return()
     }
 
     if (!is.null(directory)) {
@@ -74,7 +80,6 @@ convert_file_format = function( convert_from="rds", convert_to="rdz", directory=
         }
 
         for (fn in fns) {
-
             convert_file_format( convert_from=convert_from, convert_to=convert_to, fn=fn, delete_original=delete_original, ask=ask, dry_run=dry_run, skip_if_already_exists=skip_if_already_exists)
         }
 
@@ -83,10 +88,11 @@ convert_file_format = function( convert_from="rds", convert_to="rdz", directory=
         }
 
 
-        return("done")
+        return()
     }
 
-    return("complete")
+    return()
+
 
     if (0) {
         
