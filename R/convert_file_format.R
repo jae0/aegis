@@ -1,31 +1,14 @@
-convert_file_format = function( convert_from="rds", convert_to="rdz", directory=NULL, fn=NULL, delete_original=FALSE, recursive=FALSE, ask=TRUE, dry_run=TRUE ) {
+convert_file_format = function( convert_from="rds", convert_to="rdz", directory=NULL, fn=NULL, delete_original=FALSE, recursive=FALSE, ask=TRUE, dry_run=TRUE, skip_if_already_exists=TRUE ) {
 
     if (!is.null(fn)) {
-        if (file.exists(fn)) {
-            message(fn)
+        if (!file.exists(fn))  stop("file not found")
 
-            if (dry_run) return()
+        FN = filenames( fn, extension=convert_to )
 
-            if (ask) {
-                a = readline(prompt="\nPress y and enter to continue, anything else to skip, CTRL-c to stop:  ")
-                if (a!="y") return()
-            }
+        message(fn)
 
-            o = read_write_fast(fn=fn)
-
-            if (is.null(o)) {
-
-                message(fn, " looks like an empty file ... skipping\n\n")
-                return()
-            
-            } else {
-
-                FN = filenames( fn, extension=convert_to )
-                
-                read_write_fast( data=o, fn=FN[["fullname_new"]] )
-                message( "\nConverting: ", fn, " -> \n  ", FN[["fullname_new"]], "\n") 
-                o = NULL; gc() 
-
+        if (file.exists(FN[["fullname_new"]]) ) {
+            if (skip_if_already_exists) {
                 if (delete_original) {
                     if (convert_from != convert_to) {
                         # don't want to delete newly created file .. :)
@@ -33,9 +16,47 @@ convert_file_format = function( convert_from="rds", convert_to="rdz", directory=
                         file.remove(fn)
                     }
                 }
+                return("\nSkipping as destination file already exists.\n")
+            }
+
+        } 
+        
+        if (dry_run) {
+            return("dry run: no changes made")
+        }
+
+        if (ask) {
+            message("\nLoad source file?\n")
+            a = readline(prompt="\nPress y and enter to continue, anything else to skip, CTRL-c to stop, to stop message send ask=FALSE:  ")
+            if (a!="y") return()
+        }
+
+        o = read_write_fast(fn=fn)
+
+        if (is.null(o)) {
+
+            return("\nLooks like an empty file ... skipping\n\n")
+        
+        } else {
+            if (ask) {
+                message("\nCreate new file?\n")
+                a = readline(prompt="\nPress y and enter to continue, anything else to skip, CTRL-c to stop, to stop message send ask=FALSE:  ")
+                if (a!="y") return()
+            }
+             
+            read_write_fast( data=o, fn=FN[["fullname_new"]] )
+            message( "\nConverting: ", fn, " -> \n  ", FN[["fullname_new"]], "\n") 
+            o = NULL; gc() 
+
+            if (delete_original) {
+                if (convert_from != convert_to) {
+                    # don't want to delete newly created file .. :)
+                    message("Deleting: " )
+                    file.remove(fn)
+                }
             }
         }
-        return("\n")
+        return("done")
     }
 
     if (!is.null(directory)) {
@@ -47,10 +68,21 @@ convert_file_format = function( convert_from="rds", convert_to="rdz", directory=
             recursive=recursive,
             ignore.case=TRUE
         ) 
-        
-        for (fn in fns) {
-            convert_file_format( convert_from=convert_from, convert_to=convert_to, fn=fn, delete_original=delete_original, ask=ask, dry_run=dry_run)
+
+        if (dry_run) {
+            message("\nDry run: showing files that would be changed. To make real changes, send: dry_run=FALSE \n")
         }
+
+        for (fn in fns) {
+
+            convert_file_format( convert_from=convert_from, convert_to=convert_to, fn=fn, delete_original=delete_original, ask=ask, dry_run=dry_run, skip_if_already_exists=skip_if_already_exists)
+        }
+
+        if (dry_run) {
+            message("\nDry run: showing files that would be changed. To make real changes, send: dry_run=FALSE \n")
+        }
+
+
         return("done")
     }
 
@@ -79,6 +111,8 @@ convert_file_format = function( convert_from="rds", convert_to="rdz", directory=
 
         list.files("~/tmp/")
 
+
+        convert_file_format(directory="/home/bio.data/bio.snowcrab", convert_from="rdata", delete_original=TRUE, recursive=TRUE, ask=FALSE, dry_run=FALSE, skip_if_already_exists=TRUE)
     }
 
 }
