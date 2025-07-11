@@ -8,9 +8,9 @@ project.search = function(  h="project.help", ... ) {
     return("Pass keyword or a regular expression (?regex)")
   }
 
-  fn.code = file.path( work_root, "project.help.sourcecode.rdata" )
+  fn.code = file.path( work_root, "project.help.sourcecode.rdz" )
   if ( !file.exists( fn.code) ) project.help( "refresh" )
-  load( fn.code )
+  code = read_write_fast( fn.code )
 
     extractData = function(X, h, ... ) {
       ee = grep( h, X, ignore.case=TRUE, ... )

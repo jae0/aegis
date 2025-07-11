@@ -218,9 +218,9 @@
     if ( source %in% c("sable.meteorological", "sable.meteorological.refresh")) {
 
       ## http://www.climate.weatheroffice.ec.gc.ca/prods_servs/documentation_index_e.html
-      outfile = file.path( project.datadirectory("aegis"), "data", "osd", "sable.met.merged.rdata")  ## large file .. save a merged instance
+      outfile = file.path( project.datadirectory("aegis"), "data", "osd", "sable.met.merged.rdz")  ## large file .. save a merged instance
       if ( source=="sable.meteorological") {
-        load( outfile)
+        data = read_write_fast( outfile)
         return(data)
       }
 
@@ -298,7 +298,7 @@
         data = merge( data, d.rad, by=c("year", "month", "day", "hour"), all.x=T, all.y=F, sort=F)
         date$date = lubridate::ymd( paste( data$year, data$month, data$day, sep="-") )
 
-        save( data, file=outfile, compress=T)
+        read_write_fast( data, file=outfile)
 
         return (data )
       }  # end refresh

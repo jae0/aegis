@@ -2,8 +2,8 @@
 project.help = function( h="project.help", filepattern="\\.r$") {
   #// project.help( "aegis function name" ) - searches for help inside a function
 
-  fn.docs = file.path( work_root, "project.help.docs.rdata")
-  fn.code = file.path( work_root, "project.help.sourcecode.rdata" )
+  fn.docs = file.path( work_root, "project.help.docs.rdz")
+  fn.code = file.path( work_root, "project.help.sourcecode.rdz" )
 
   if (h=="refresh") {
     #// project.help( "refresh" ) - refresh list of functions available locally
@@ -25,13 +25,13 @@ project.help = function( h="project.help", filepattern="\\.r$") {
       docs[f] = res
       code[f] = list( o )
     }
-    save( docs, file=fn.docs, compress=TRUE )
-    save( code, file=fn.code, compress=TRUE )
+    read_write_fast( docs, file=fn.docs )
+    read_write_fast( code, file=fn.code )
     print( paste( "Local help files saved to ", work_root ))
   }
 
   if ( !file.exists( fn.docs) | !file.exists( fn.code) ) project.help( "refresh" )
-  load( fn.docs )
+  docs = read_write_fast( fn.docs )
 
   mm = grep( h, names( docs), ignore.case=TRUE )
   if (length(mm) == 0) return( "Function not found. Try refreshing local help with: project.help('refresh')) ")

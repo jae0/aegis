@@ -6,10 +6,10 @@
     mpadir = project.datadirectory( "aegis", "data")
 
     if (DS %in% c( "polygons.redo", "polygons" ) ) {
-      fn = file.path( mpadir, "sab.polygons.rdata" )
+      fn = file.path( mpadir, "sab.polygons.rdz" )
       if (DS == "polygons" ) {
         out = NULL
-        if  (file.exists( fn)) load(fn)
+        if  (file.exists( fn)) out = read_write_fast(fn)
           if ( !is.null(project_to)) {
             out$map.contours = st_transform(out$map.contours, st_crs(project_to))
             out$map.coastline = st_transform(out$map.coastline, st_crs(project_to))
@@ -48,7 +48,7 @@
       out$map.coastline = as( aegis.coastline::coastline_db( DS=" gshhg coastline highres redo ",
         xlim=p$corners$lon+c(-1,1), ylim=p$corners$lat+c(-1,1), no.clip=FALSE, level=1 ), "Spatial" )
 
-      save( out, file=fn, compress=TRUE )
+      read_write_fast( out, file=fn )
       if ( !is.null(project_to)) {
         out$map.contours = st_transform(out$map.contours, st_crs(project_to))
         out$map.coastline = st_transform(out$map.coastline, st_crs(project_to))

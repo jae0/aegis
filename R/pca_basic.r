@@ -5,7 +5,7 @@ pca_basic = function(cm=NULL, indat=NULL, rotate="none",  nfactors=2, ev_templat
 
   if (is.null(cm)) {
     if( !is.null(save_fn)) {
-      if (file.exists(save_fn)) load( save_fn)
+      if (file.exists(save_fn)) pca_results = read_write_fast( save_fn)
       return(pca_results)
     }
   }
@@ -111,7 +111,7 @@ pca_basic = function(cm=NULL, indat=NULL, rotate="none",  nfactors=2, ev_templat
     pca_results$rotation_id = rotate
 	}
 
-  if ( !is.null(save_fn)) save( pca_results, file=save_fn, compress=TRUE )
+  if ( !is.null(save_fn)) read_write_fast( pca_results, file=save_fn )
 
 	return(  pca_results )
 

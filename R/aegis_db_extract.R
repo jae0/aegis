@@ -30,13 +30,13 @@ aegis_db_extract = function( vars, spatial_domain, yrs=NULL, dyear=NULL, dyear_i
   }
 
   outputdirectory = getwd()
-  fn = file.path( outputdirectory, paste( "aegis_db_extract", spatial_domain, areal_units_resolution_km, returntype, "rdata", sep="." ) )
+  fn = file.path( outputdirectory, paste( "aegis_db_extract", spatial_domain, areal_units_resolution_km, returntype, "rdz", sep="." ) )
   message ( "\n Temporary file being made in the current work directory:  ", fn, "\n")
 
   out = NULL
 
   if (!redo) {
-    if (file.exists(fn)) load(fn)
+    if (file.exists(fn)) out = read_write_fast(fn)
     if( !is.null(out) ) return(out)
   }
 
@@ -152,7 +152,7 @@ aegis_db_extract = function( vars, spatial_domain, yrs=NULL, dyear=NULL, dyear_i
   }
 
   if (returntype=="list") {
-    save(out, file=fn, compress=TRUE)
+    read_write_fast(data=out, fn=fn )
     return(out)
   }
 
@@ -202,7 +202,7 @@ aegis_db_extract = function( vars, spatial_domain, yrs=NULL, dyear=NULL, dyear_i
     } else {
        out = APS
     }
-    save(out, file=fn, compress=TRUE)
+    read_write_fast(data=out, fn=fn )
     return(out)
   }
 

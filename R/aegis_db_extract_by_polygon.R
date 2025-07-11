@@ -2,13 +2,13 @@
 aegis_db_extract_by_polygon = function( sppoly, spatial_domain="SSE", covfields=NULL, force_matrix=TRUE, redo=FALSE, ... ) {
 
     outputdirectory = getwd()
-    fn = file.path( outputdirectory, paste( "aegis_db_extract_by_polygon", spatial_domain, "rdata", sep="." ) )
+    fn = file.path( outputdirectory, paste( "aegis_db_extract_by_polygon", spatial_domain, "rdz", sep="." ) )
     message ( "\n Temporary file being made in the current work directory:  ", fn, "\n")
 
     out = NULL
 
     if (!redo) {
-      if (file.exists(fn)) load(fn)
+      if (file.exists(fn)) out = read_write_fast(fn)
       if( !is.null(out) ) return(out)
     }
 
@@ -130,7 +130,7 @@ aegis_db_extract_by_polygon = function( sppoly, spatial_domain="SSE", covfields=
     }
 
     out = list(means=means, sds=sds)
-    save(out, file=fn, compress=TRUE)
+    read_write_fast(data=out, fn=fn )
     return( out )
 
 }

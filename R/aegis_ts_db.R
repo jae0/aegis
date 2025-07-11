@@ -2,10 +2,9 @@
   aegis_ts_db = function( db="", ref.year=2008  ) {
 
     if (db %in% c("climate", "climate.redo" ) ) {
-      fn = file.path(  project.datadirectory("aegis"), "data", "climate.rdata")
+      fn = file.path(  project.datadirectory("aegis"), "data", "climate.rdz")
       if (db=="climate") {
-        load(fn)
-        return (climate)
+        return(read_write_fast(fn))
       }
 
       # old method ... manual db updates
@@ -119,7 +118,7 @@
       climate = merge( climate, gulf.stream.front, by="yr", all=T  )
       climate = merge( climate, ss.slope.front, by="yr", all=T  )
 
-      save(climate, file=fn, compress=T )
+      read_write_fast(climate, file=fn )
       return(climate)
     }
 
@@ -141,7 +140,7 @@
       o = readLines( fn )
       print( "Incomplete:: need an automated update process" )
 
-      # save()
+      # read_write_fast()
 
       return()
 
@@ -310,10 +309,9 @@
     if (db %in% c("shrimp.timeseries", "shrimp.timeseries.redo") ) {
       # shrimp: directly contributed by Peter Koeller, but apparently available via VDC
       # data from Peter Koeller's aegis
-      fn = file.path( project.datadirectory("aegis"), "data", "shrimp.rdata" )
+      fn = file.path( project.datadirectory("aegis"), "data", "shrimp.rdz" )
       if (db=="shrimp.timeseries") {
-        load( fn )
-        return ( shrimp )
+        return ( read_write_fast(fn) )
       }
       shrimp = read.csv( file.path( project.datadirectory("aegis"), "data", "ESS_shrimp.csv"), header=T, stringsAsFactors=FALSE, na.strings=c("NA", "NAN", "NaN"))
       names(shrimp) = c("yr", "shrimp.abundance.index", "shrimp.size.sexchange.mm", "shrimp.exploitation.index", "shrimp.size.female", "shrimp.capelin.index" )
@@ -326,17 +324,16 @@
         # ssjuly -- july SST in shrimp fishing areas "shrimp.sst.july"
         # capelin -- abundance of capelin --  a cold-adapted species
 
-      save( shrimp, file=fn, compress=T )
+      read_write_fast( shrimp, file=fn )
       return (shrimp)
     }
 
 
     if (db %in% c("groundfish.timeseries", "groundfish.timeseries.redo" ) ) {
 
-      outfn = file.path( project.datadirectory("aegis"), "data", "groundfish.ts.rdata" )
+      outfn = file.path( project.datadirectory("aegis"), "data", "groundfish.ts.rdz" )
       if ( db=="groundfish.timeseries" ) {
-        load(outfn)
-        return(Z)
+        return(read_write_fast(outfn))
       }
 
       # data from groundfish data series
@@ -360,17 +357,16 @@
       Z = as.data.frame(Z)
       colnames(Z) = paste("groundfish.stratified.mean", vars, sep="." )
       Z$yr = yrs
-      save( Z, file=outfn, compress=T )
+      read_write_fast( Z, file=outfn )
       return (Z)
     }
 
 
     if (db %in% c("species.area", "species.area.redo" )) {
 
-      outfn = file.path( project.datadirectory("aegis"), "data", "species.area.ts.rdata" )
+      outfn = file.path( project.datadirectory("aegis"), "data", "species.area.ts.rdz" )
       if ( db=="species.area" ) {
-        load(outfn)
-        return(res)
+        return(read_write_fast(outfn))
       }
 
 			p = spatial_parameters( spatial_domain="SSE" )
@@ -388,17 +384,16 @@
         res$Npred[i] = mean( H$Npred )
       }
 
-      save( res, file=outfn, compress=T )
+      read_write_fast( res, file=outfn )
       return (res)
     }
 
 
     if (db %in% c("sizespectrum", "sizespectrum.redo" )) {
 
-      outfn = file.path( project.datadirectory("aegis"), "data", "sizespectrum.ts.rdata" )
+      outfn = file.path( project.datadirectory("aegis"), "data", "sizespectrum.ts.rdz" )
       if ( db=="sizespectrum" ) {
-        load(outfn)
-        return(res)
+        return(read_write_fast(outfn))
       }
 
       p = spatial_parameters( spatial_domain="SSE" )
@@ -416,17 +411,16 @@
         res$nss.shannon[i] = mean( H$nss.shannon )
       }
 
-      save( res, file=outfn, compress=T )
+      read_write_fast( res, file=outfn )
       return (res)
     }
 
 
     if (db %in% c("metabolism", "metabolism.redo" )) {
 
-      outfn = file.path( project.datadirectory("aegis"), "data", "metabolism.ts.rdata" )
+      outfn = file.path( project.datadirectory("aegis"), "data", "metabolism.ts.rdz" )
       if ( db=="metabolism" ) {
-        load(outfn)
-        return(res)
+        return(read_write_fast(outfn))
       }
       p = spatial_parameters( spatial_domain="SSE" )
       fns = list.files( file.path( project.datadirectory("aegis"), "data", "SSE","complete" ) )
@@ -444,17 +438,16 @@
         res$tmean[i] = mean( H$tmean )
       }
 
-      save( res, file=outfn, compress=T )
+      read_write_fast( res, file=outfn )
       return (res)
     }
 
 
     if (db %in% c("species.composition", "species.composition.redo" )) {
 
-      outfn = file.path( project.datadirectory("aegis"), "data", "species.composition.ts.rdata" )
+      outfn = file.path( project.datadirectory("aegis"), "data", "species.composition.ts.rdz" )
       if ( db=="species.composition" ) {
-        load(outfn)
-        return(res)
+        return(read_write_fast(outfn))
       }
 
       p = spatial_parameters( spatial_domain="SSE" )
@@ -471,7 +464,7 @@
         #res$pca1[i] = mean( H$pca1 )
         #res$pca2[i] = mean( H$pca2 )
       }
-      save( res, file=outfn, compress=T )
+      read_write_fast( res, file=outfn )
       return (res)
     }
 
@@ -480,10 +473,9 @@
 
     if (db %in% c("snowcrab.timeseries", "snowcrab.timeseries.redo" )) {
 
-      outfn = file.path( project.datadirectory("aegis"), "data", "snowcrab.ts.rdata" )
+      outfn = file.path( project.datadirectory("aegis"), "data", "snowcrab.ts.rdz" )
       if ( db=="snowcrab.timeseries") {
-        load(outfn)
-        return(res)
+        return(read_write_fast(outfn))
       }
 
       p = bio.snowcrab::load.environment()
@@ -579,7 +571,7 @@
       res = merge( res, tmean, by="yr", all=T, sort=T)
       res = merge( res, tsa, by="yr", all=T, sort=T)
 
-      save( res, file=outfn, compress=T )
+      read_write_fast( res, file=outfn )
       return (res)
     }
 
@@ -600,10 +592,9 @@
 
     if (db %in% c("aegis.all", "aegis.all.glue") ) {
 
-      fn = file.path( project.datadirectory("aegis") , "data", "aegis.all.rdata" )
+      fn = file.path( project.datadirectory("aegis") , "data", "aegis.all.rdz" )
       if (db=="aegis.all" ) {
-        load(fn)
-        return (aegis)
+        return(read_write_fast(fn))
       }
 
       # refresh the survey data
@@ -931,7 +922,7 @@
         keyfactors.names =keyfactors.names
       )
 
-    save( aegis , file=fn, compress=T )
+    read_write_fast( aegis , file=fn )
 
     return ( aegis )
   }

@@ -168,11 +168,11 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
 
   if (DS=="stmv_inputs") {
 
-    fn = file.path( project.datadirectory(p$data_root, "aegis_stmv" ), paste( "stmv_inputs", p$selection$type, "rdata", sep="." ) )
+    fn = file.path( project.datadirectory(p$data_root, "aegis_stmv" ), paste( "stmv_inputs", p$selection$type, "rdz", sep="." ) )
     out = NULL
 
     if (!redo) {
-      if (file.exists(fn)) load(fn)
+      if (file.exists(fn)) out = read_write_fast(fn)
       if( !is.null(out) ) return(out)
     }
 
@@ -276,7 +276,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
     )
     PS$data_offset = rep( p$pres*p$pres, nrow(LOCS) )  # force to be density n/km^2
     out = list(input=set, output=list( LOCS=LOCS, COV=PS ))
-    save(out, file=fn, compress=TRUE)
+    read_write_fast(out, file=fn)
     return (out)
   }
 
@@ -294,12 +294,10 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
     projectdir = file.path(p$data_root, "modelled", p$stmv_variables$Y, p$spatial_domain )
 
     if (DS %in% c("predictions")) {
-      P = Pl = Pu = NULL
-      fn = file.path( projectdir, paste("stmv.prediction", ret,  year, "rdata", sep=".") )
-      if (file.exists(fn) ) load(fn)
-      if (ret=="mean") return (P)
-      if (ret=="lb") return( Pl)
-      if (ret=="ub") return( Pu)
+      fn = file.path( projectdir, paste("stmv.prediction", ret,  year, "rdz", sep=".") )
+      out = NULL 
+      if (file.exists(fn) )  out = read_write_fast(fn)
+      return (out)
     }
 
     sreg = setdiff( p$spatial_domain_subareas, p$spatial_domain ) # see  note above
@@ -334,12 +332,12 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
         Pu = spatial_warp( WW0[], L0, L1, p0, p1, "fast", L0i, L1i )
         projectdir_p1 = file.path(p$data_root, "modelled", p1$stmv_variables$Y, p1$spatial_domain )
         dir.create( projectdir_p1, recursive=T, showWarnings=F )
-        fn1_sg = file.path( projectdir_p1, paste("stmv.prediction.mean",  year, "rdata", sep=".") )
-        fn2_sg = file.path( projectdir_p1, paste("stmv.prediction.lb",  year, "rdata", sep=".") )
-        fn3_sg = file.path( projectdir_p1, paste("stmv.prediction.ub",  year, "rdata", sep=".") )
-        save( P, file=fn1_sg, compress=T )
-        save( Pl, file=fn2_sg, compress=T )
-        save( Pu, file=fn3_sg, compress=T )
+        fn1_sg = file.path( projectdir_p1, paste("stmv.prediction.mean",  year, "rdz", sep=".") )
+        fn2_sg = file.path( projectdir_p1, paste("stmv.prediction.lb",  year, "rdz", sep=".") )
+        fn3_sg = file.path( projectdir_p1, paste("stmv.prediction.ub",  year, "rdz", sep=".") )
+        read_write_fast( P, file=fn1_sg )
+        read_write_fast( Pl, file=fn2_sg )
+        read_write_fast( Pu, file=fn3_sg )
         print (fn1_sg)
       }
     }
@@ -360,8 +358,8 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
     if (DS %in% c("stmv.stats")) {
       stats = NULL
       projectdir = file.path(p$data_root, "modelled", p$stmv_variables$Y, p$spatial_domain )
-      fn = file.path( projectdir, paste( "stmv.statistics", "rdata", sep=".") )
-      if (file.exists(fn) ) load(fn)
+      fn = file.path( projectdir, paste( "stmv.statistics", "rdz", sep=".") )
+      if (file.exists(fn) ) stat = read_write_fast(fn)
       return( stats )
     }
 
@@ -392,8 +390,8 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       colnames(stats) = Snames
       projectdir_p1 = file.path(p$data_root, "modelled", p$stmv_variables$Y, p1$spatial_domain )
       dir.create( projectdir_p1, recursive=T, showWarnings=F )
-      fn1_sg = file.path( projectdir_p1, paste("stmv.statistics", "rdata", sep=".") )
-      save( stats, file=fn1_sg, compress=T )
+      fn1_sg = file.path( projectdir_p1, paste("stmv.statistics", "rdz", sep=".") )
+      read_write_fast( stats, file=fn1_sg )
       print (fn1_sg)
     }
     return ("Completed")
@@ -411,8 +409,8 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       IC = NULL
       projectdir = file.path(p$data_root, "modelled", p$stmv_variables$Y, p$spatial_domain )
       dir.create(projectdir, recursive=T, showWarnings=F)
-      outfile =  file.path( projectdir, paste( p$project_name, "complete", p$spatial_domain, "rdata", sep= ".") )
-      if ( file.exists( outfile ) ) load( outfile )
+      outfile =  file.path( projectdir, paste( p$project_name, "complete", p$spatial_domain, "rdz", sep= ".") )
+      if ( file.exists( outfile ) ) IC = read_write_fast( outfile )
       Inames = names(IC)
       if (is.null(varnames)) varnames=Inames
       varnames = intersect( Inames, varnames )
@@ -447,8 +445,8 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       PS = PSlb = PSub = NULL
       projectdir = file.path(p$data_root, "modelled", p1$stmv_variables$Y, p1$spatial_domain )
       dir.create( projectdir, recursive=T, showWarnings=F )
-      outfile =  file.path( projectdir, paste( p$project_name, "complete", p1$spatial_domain, "rdata", sep= ".") )
-      save( IC, file=outfile, compress=T )
+      outfile =  file.path( projectdir, paste( p$project_name, "complete", p1$spatial_domain, "rdz", sep= ".") )
+      read_write_fast( IC, file=outfile )
       print( outfile )
     }
     return( "Complete" )
@@ -462,9 +460,9 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       BL = list()
       for (bvn in varnames ) {
         projectdir = file.path(p$data_root, "modelled", bvn, p$spatial_domain )
-        outfile =  file.path( projectdir, paste( p$project_name, "baseline", ret, p$spatial_domain, "rdata", sep= ".") )
+        outfile =  file.path( projectdir, paste( p$project_name, "baseline", ret, p$spatial_domain, "rdz", sep= ".") )
         TS = NULL
-        load( outfile)
+        TS = read_write_fast( outfile)
         BL[[bvn]] = TS
       }
       return (BL)
@@ -483,20 +481,20 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
         for (i in 1:p$ny ) {
           TS[,i] = stmv_db( p=p1, DS="stmv.prediction", yr=p$yrs[i], ret="mean")
         }
-        outfile =  file.path( projectdir, paste( p$project_name, "baseline", "mean", p1$spatial_domain, "rdata", sep= ".") )
-        save( TS, file=outfile, compress=T )
+        outfile =  file.path( projectdir, paste( p$project_name, "baseline", "mean", p1$spatial_domain, "rdz", sep= ".") )
+        read_write_fast( TS, file=outfile )
         TS = TS[] * NA
         for (i in 1:p$ny ) {
           TS[,i] = stmv_db( p=p1, DS="stmv.prediction", yr=p$yrs[i], ret="lb")
         }
-        outfile =  file.path( projectdir, paste( p$project_name, "baseline", "lb", p1$spatial_domain, "rdata", sep= ".") )
-        save( TS, file=outfile, compress=T )
+        outfile =  file.path( projectdir, paste( p$project_name, "baseline", "lb", p1$spatial_domain, "rdz", sep= ".") )
+        read_write_fast( TS, file=outfile )
         TS = TS[] * NA
         for (i in 1:p$ny ) {
           TS[,i] = stmv_db( p=p1, DS="stmv.prediction", yr=p$yrs[i], ret="ub")
         }
-        outfile =  file.path( projectdir, paste( p$project_name, "baseline", "ub", p1$spatial_domain, "rdata", sep= ".") )
-        save( TS, file=outfile, compress=T )
+        outfile =  file.path( projectdir, paste( p$project_name, "baseline", "ub", p1$spatial_domain, "rdz", sep= ".") )
+        read_write_fast( TS, file=outfile )
       }
     return( "Complete" )
   }

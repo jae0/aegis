@@ -30,6 +30,16 @@
         out[["basename"]] = basename(out[["fullname"]])
         out[["extension"]] = sub( "^(.*\\.|[^.]+)(?=[^.]*)", "", out[["basename"]], perl = TRUE) 
         out[["corename"]] = filename_base = sub( "(.*)\\..*$", "\\1", out[["basename"]] )
+        out[["fullname_without_extension"]] = file.path( out[["dirname"]], out[["corename"]] )
+ 
+        
+        if (!is.null(extension)) {
+            # flag to swap out to new extension
+            out[["fullname_new"]] = paste(out[["fullname_without_extension"]], tolower(extension), sep=".")
+        } else {
+            out[["fullname_new"]] = paste(out[["fullname_without_extension"]], tolower(out[["extension"]]), sep=".") 
+        }
+
 
         if (force_lower_case_extension) {
             out[["extension"]] = tolower(out[["extension"]])
@@ -44,10 +54,11 @@
             # tests :
             filenames( "C:/Data/SCRIPTS/R/TextMining/myData/test.rds" )  
             filenames( "C:\\Data\\SCRIPTS\\R\\TextMining\\myData/test.rds" )  
-            filenames( "/home/jae/tmp/TextMining/myData/test.rds" )  
+            filenames( "/home/jae/tmp/TextMining/myData/test.rds" )   
             filenames( "/home/jae/tmp/TextMining/myData/test.#d_" )   # strange characters ok
             filenames( "/home/jae/tmp/TextMining/myData/test._d*" )  # strange characters ok
             filenames( "/home/jae/tmp/TextMining/myData/test!._d%" )  # strange characters ok
+            filenames( "/home/jae/tmp/TextMining/myData/test!._d%", extension="ggg" ) # replace extension with ggg
             filenames( "/home/jae/tmp/Text Mining/my Data/test!._d%", clean=TRUE )  
         }
 
