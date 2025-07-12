@@ -1,5 +1,10 @@
-read_write_fast = function ( fn, data=NULL, compress="", file=NULL, filetype=NULL, 
-     compression_level=7,  ascii=FALSE, force_lower_case_extension=TRUE, override_extension=FALSE, ...)  {
+read_write_fast = function ( fn="", data=NULL, compress="", file=NULL, filetype=NULL, 
+     compression_level=7,  ascii=FALSE, force_lower_case_extension=TRUE, override_extension=FALSE, 
+     sqlquery=NULL, 
+     oracle.server=oracle.snowcrab.server, 
+     oracle.user=oracle.snowcrab.user, 
+     oracle.password=oracle.snowcrab.password, 
+     ...)  {
      
     # required params for some functions below:
     version=NULL
@@ -9,6 +14,7 @@ read_write_fast = function ( fn, data=NULL, compress="", file=NULL, filetype=NUL
     
     # decompose file name
     FN = filenames(fn )  #, force_lower_case_extension=force_lower_case_extension, clean=TRUE )  
+    if (!is.null(sqlquery)) filetype = "sql"
 
     if (is.null(filetype)) filetype = FN[["extension"]]
     filetype = tolower(filetype)
@@ -52,28 +58,45 @@ read_write_fast = function ( fn, data=NULL, compress="", file=NULL, filetype=NUL
         if ( filetype %in% c("rdata", "rda")) {
             env = new.env()
             o = try( load(fn, env)[1], silent=TRUE )  
-            if (!inherits(o, "try-error"))  return(env[[o]])
         }
 
         if ( filetype == "rds") {
             o = try( readRDS(fn), silent=TRUE )  
-            if (!inherits(o, "try-error"))  return( o )
         }
         if ( filetype %in% c("rdz") ) {
             o = try( qs::qread(fn ), silent=TRUE)
-            if (!inherits(o, "try-error"))  return( o )
         }
 
         if ( filetype %in% c("csv", "txt", "dat", "gz", "bz2") ) {
             # note: can read in URLs too 
             o = try( data.table::fread(fn, ... ), silent=TRUE )  
-            if (!inherits(o, "try-error"))  return( o )
         }
         
+        if ( filetype %in% c("hdf", "h5") ) {
+            message("HDF5 Method not tested yet ...")
+            # h5f = rhdf5::H5Fopen(fn)
+            # o = try( rhdf5::h5read(fn, "data"),  silent=TRUE )  
+            o = try( rhdf5::h5dump(fn),  silent=TRUE )  
+        }
+
+        if (filetype %in% c("sql") ) {
+            if (is.null(sqlquery)) sqlquery = readLines( fn )
+            con=ROracle::dbConnect(
+                DBI::dbDriver("Oracle"), 
+                dbname=oracle.snowcrab.server, 
+                username=oracle.snowcrab.user, 
+                password=oracle.snowcrab.password, 
+                believeNRows=FALSE
+            )
+            o = try( ROracle::dbGetQuery( con, sqlquery ),  silent=TRUE )
+            ROracle::dbDisconnect(con)
+        }
+
         if ( filetype == "fst") {
             o = try(.Internal(unserialize(fst::decompress_fst(readBin(fn, "raw", file.size(fn))), refhook ) ))
-            if (!inherits(o, "try-error"))  return( o )
         }
+
+        if (!inherits(o, "try-error"))  return( o )
  
         if (inherits(o, "try-error")) {
 
@@ -171,6 +194,9 @@ read_write_fast = function ( fn, data=NULL, compress="", file=NULL, filetype=NUL
         return(fn)
     }
 
+    if (filetype %in% c("csv", "dat", "txt", "gz") ) {
+        data.table::fwrite(data, file=fn, ...)   # data.table::fwrite have other options (including append, compress, etc) .. using fwrite directly is probably better
+    }
  
 
     if ( filetype == "direct_serial_connection" ) {
@@ -180,8 +206,29 @@ read_write_fast = function ( fn, data=NULL, compress="", file=NULL, filetype=NUL
         return(fn)
     }
 
-    if (filetype %in% c("csv", "dat", "txt", "gz") ) {
-        data.table::fwrite(data, file=fn, ...)   # data.table::fwrite have other options (including append, compress, etc) .. using fwrite directly is probably better
+
+    if (filetype %in% c("hdf", "h5") ) {
+        message("HDF5 Method not tested yet ...")
+        rhdf5::h5save( data, fn )
+        # rhdf5::h5createFile( fn )
+        # rhdf5::createGroup( fn, "data" )
+        # rhdf5::h5write( data, fn, "data",  write.attributes=TRUE)
+        return(fn)
+    }
+
+    if (filetype %in% c("sql") ) {
+        if (is.null(sqlquery)) stop("sqlquery needs to be sent")
+        con=ROracle::dbConnect(
+            DBI::dbDriver("Oracle"), 
+            dbname=oracle.server, 
+            username=oracle.user, 
+            password=oracle.password, 
+            believeNRows=FALSE
+        )
+        data = ROracle::dbGetQuery( con, sqlquery )
+        ROracle::dbDisconnect(con)
+        qs::qsave( x=data, file=fn, preset="high", nthreads=floor(parallel::detectCores()-1L), ... )  
+        return(fn)
     }
 
     stop( "Error: filetype and/or compression not recognized?" )
