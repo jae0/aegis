@@ -1,5 +1,8 @@
 
   applyMean = function( f, method="fast", newnames=NULL, ... ) {
+
+    message("This functionality is deprecated ... use data.table() instead as it is faster and more compact.")
+
     cnames= c("id", "x", "w" )
 
     if (is.null( newnames )) newnames=names(f)

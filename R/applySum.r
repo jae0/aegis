@@ -1,5 +1,8 @@
 
   applySum = function( f, method="fast", newnames=NULL ) {
+
+    message("Deprecated .. use data.table() .. faster and simpler.")
+    
     cnames= c("id", "x", "w" )
 
     if (is.null( newnames )) newnames=names(f)

@@ -1,6 +1,8 @@
 
   applySummary = function( f, newnames=NULL, ... ) {
 
+    message("Deprecated .. use data.table() .. faster and simpler.")
+    
     # return mean, sd, count by category
 
     cnames= c("id", "x", "w" )
