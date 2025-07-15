@@ -1,5 +1,8 @@
 
   xtab.2way = function( xval, factors ) {
+    
+    message("Deprecated, use data.table() instead")
+
     k = median( xval, na.rm=TRUE ) # rescale for floating point math
     v =  as.matrix( xtabs( as.integer( xval * k ) ~ factors[,1] + factors[,2] ) /k )
     rn = rownames(v)
