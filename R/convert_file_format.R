@@ -1,9 +1,12 @@
-convert_file_format = function( convert_from="rds", convert_to="rdz", directory=NULL, fn=NULL, delete_original=FALSE, recursive=FALSE, ask=TRUE, dry_run=TRUE, skip_if_already_exists=TRUE ) {
+convert_file_format = function( convert_from=NULL, convert_to="rdz", directory=NULL, fn=NULL, 
+    delete_original=FALSE, recursive=FALSE, ask=TRUE, dry_run=TRUE, skip_if_already_exists=TRUE ) {
 
     if (!is.null(fn)) {
         if (!file.exists(fn))  stop("file not found")
 
         FN = filenames( fn, extension=convert_to )
+
+        if (!is.null(convert_from)) convert_from = FN[["extension"]]
 
         message(fn)
 
@@ -117,8 +120,12 @@ convert_file_format = function( convert_from="rds", convert_to="rdz", directory=
 
         list.files("~/tmp/")
 
+        convert_file_format(fn="/home/bio.data/aegis/groundfish/data/local/gsstratum.rdz", convert_from="rdata" ) # test
+        convert_file_format(fn="/home/bio.data/aegis/groundfish/data/local/gsstratum.rdz", convert_from="rdata", delete_original=FALSE, skip_if_already_exists=FALSE, dry_run=FALSE, ask=FALSE) # do it
 
         convert_file_format(directory="/home/bio.data/bio.snowcrab", convert_from="rdata", delete_original=TRUE, recursive=TRUE, ask=FALSE, dry_run=FALSE, skip_if_already_exists=TRUE)
+        convert_file_format(directory="/home/bio.data/aegis/survey/modelled", convert_from="rdata", delete_original=TRUE, recursive=TRUE, ask=FALSE, dry_run=FALSE, skip_if_already_exists=FALSE)
+
     }
 
 }

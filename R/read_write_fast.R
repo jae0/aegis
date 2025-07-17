@@ -71,13 +71,30 @@ read_write_fast = function ( fn="", data=NULL, compress="", file=NULL, filetype=
             # note: can read in URLs too 
             o = try( data.table::fread(fn, ... ), silent=TRUE )  
         }
-        
+
+        if ( filetype %in% c("xls", "xlsx" ) ) {
+            # install.packages("openxlsx2")
+            # library(openxlsx2) 
+            o = try( openxlsx2::read_xlsx(file=fn, ... ), silent=TRUE )  
+        }
+
+        if ( filetype %in% c("dbf" ) ) {
+            o = try( foreign::read.dbf(file=fn, ... ), silent=TRUE )  
+        }
+
+        if ( filetype %in% c("shp" ) ) {
+            # note st_write/st_read can write to databases directly: dsn="PG:dbname=postgis"
+            o = try( sp::st_read(dsn=fn, ... ), silent=TRUE )   
+        }
+
         if ( filetype %in% c("hdf", "h5") ) {
             message("HDF5 Method not tested yet ...")
             # h5f = rhdf5::H5Fopen(fn)
             # o = try( rhdf5::h5read(fn, "data"),  silent=TRUE )  
             o = try( rhdf5::h5dump(fn),  silent=TRUE )  
         }
+
+
 
         if (filetype %in% c("sql") ) {
             if (is.null(sqlquery)) sqlquery = readLines( fn )
@@ -196,9 +213,23 @@ read_write_fast = function ( fn="", data=NULL, compress="", file=NULL, filetype=
 
     if (filetype %in% c("csv", "dat", "txt", "gz") ) {
         data.table::fwrite(data, file=fn, ...)   # data.table::fwrite have other options (including append, compress, etc) .. using fwrite directly is probably better
+        return(fn)
     }
  
+    if ( filetype %in% c("xls", "xlsx" ) ) {
+        openxlsx2::write_xlsx(x=data, file=fn, ... ) 
+        return(fn)
+    }
 
+    if ( filetype %in% c("dbf" ) ) {
+        foreign::write.dbf(data, file=fn, ... ) 
+        return(fn)
+    }
+
+    if ( filetype %in% c("shp" ) ) {
+        sp::st_write(data, dsn=fn, ... )  # note st_write/st_read can write to databases directly: dsn="PG:dbname=postgis"
+    }
+    
     if ( filetype == "direct_serial_connection" ) {
         con = file(fn, "wb" )
         on.exit(close(con))

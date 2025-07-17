@@ -4,7 +4,7 @@
     region = aegis.polygons::polygon_internal_code( region )
     out = NULL
     for (reg in region) {
-     poly = read.table( aegis.polygons::polygon_file(reg), header=FALSE)
+      poly = data.table::fread( aegis.polygons::polygon_file(reg) )
       names(poly) =c("lon", "lat")
 
       a = NULL
