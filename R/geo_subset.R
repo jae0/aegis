@@ -78,13 +78,13 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
       #\\ NOTE::: snowcrab baseline == SSE baseline, except it is a subset
       region = aegis.polygons::polygon_internal_code( "cfaall" )
       if (length(region) > 0) {
-        y = read.table( aegis.polygons::polygon_file(region[1]), header=FALSE)
+        y = data.table::fread( aegis.polygons::polygon_file(region[1]) )
         names(y) =c("lon", "lat")
         pbnd = pts2poly(y)
       }
       if (length(region) > 1) {
         for (i in 2:length(region) ) {
-          y = read.table( aegis.polygons::polygon_file(region[i]), header=FALSE)
+          y = data.table::fread( aegis.polygons::polygon_file(region[i]) )
           names(y) =c("lon", "lat")
           pbnd = st_union( st_buffer(pbnd, 0.0001), st_buffer( pts2poly(y), 0.0001) )
         
