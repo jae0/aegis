@@ -11,7 +11,16 @@ read_write_fast = function ( data=NULL, fn=NULL, file=NULL, compress="", filetyp
     refhook=NULL
 
     if ( class(fn) == "NULL") {
-        if (class(file) == "character") fn = file
+        if (class(file) == "NULL"){
+            if (class(data) == "character") {
+                fn = data
+                data = NULL
+            }
+        }
+        if (class(file) == "character") {
+            fn = file
+            file = NULL
+        }
     }
 
     if ( !(class(fn) == "character")) {
