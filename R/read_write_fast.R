@@ -1,4 +1,4 @@
-read_write_fast = function ( fn="", data=NULL, compress="", file=NULL, filetype=NULL, 
+read_write_fast = function ( data=NULL, fn=NULL, file=NULL, compress="", filetype=NULL, 
      compression_level=7,  ascii=FALSE, force_lower_case_extension=TRUE, override_extension=FALSE, 
      sqlquery=NULL, 
      oracle.server=oracle.snowcrab.server, 
@@ -10,10 +10,16 @@ read_write_fast = function ( fn="", data=NULL, compress="", file=NULL, filetype=
     version=NULL
     refhook=NULL
 
-    if (!is.null(file)) fn = file
-    
+    if ( class(fn) == "NULL") {
+        if (class(file) == "character") fn = file
+    }
+
+    if ( !(class(fn) == "character")) {
+        stop( "file=... or fn=... need to passed")
+    }
+
     # decompose file name
-    FN = filenames(fn )  #, force_lower_case_extension=force_lower_case_extension, clean=TRUE )  
+    FN = filenames( fn )  #, force_lower_case_extension=force_lower_case_extension, clean=TRUE )  
     if (!is.null(sqlquery)) filetype = "sql"
 
     if (is.null(filetype)) filetype = FN[["extension"]]
