@@ -230,7 +230,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
       pts = st_as_sf( set[, c("lon", "lat")], coords=c("lon","lat"), crs=crs_lonlat ),
       polys = st_transform( coastline_db( p=p ), crs_lonlat )
     )
-    onland = which (is.finite(inside))
+    onland = which (inside)
     if (length(onland)>0) set = set[-onland, ]
 
     set$tiyr = lubridate::decimal_date( set$timestamp )

@@ -149,7 +149,7 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
 
       if ( spatial_domain == "snowcrab" ) {
         #\\ NOTE::: snowcrab baseline == SSE baseline, except it is a subset
-        jj = polygon_inside( Z[ inside,c(1:2) ], region="cfaall", planar=TRUE, proj.type=ps$aegis_proj4string_planar_km )
+        jj = polygon_inside( Z[ inside,c(1:2) ], region="cfaall", planar=TRUE, proj.type=ps$aegis_proj4string_planar_km, method="sp" )
         if (length( jj) > 0) inside = inside[ jj ]
 
         # filter out area 4X
