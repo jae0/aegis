@@ -6,7 +6,7 @@ st_points_in_polygons = function( pts, polys, varname=NULL, method="sp_direct" )
 
   proj4string = projection_proj4string("lonlat_wgs84")
 
-  if (method =="sp_direct") {
+  if (method %in% c("sp", "sp_direct") ) {
     # no varname method
     require(sp)
     require(sf)
@@ -66,7 +66,7 @@ st_points_in_polygons = function( pts, polys, varname=NULL, method="sp_direct" )
 
 
   # using sf and a slightly more complex call
-  if (method=="sf_fast") {
+  if (method %in% c("sf", "sf_fast", "sf_intersects" ) ) {
     # 8.2 min
  
     require(sf)
@@ -102,8 +102,9 @@ st_points_in_polygons = function( pts, polys, varname=NULL, method="sp_direct" )
 
 
   if (method=="sf_join") { 
-    # using sf and a slightly more complex call .. slow, do  not use
-
+    
+    # using sf and a slightly more complex call via a join .. slower
+    
     # 35.7 min
     require(sf)
     if (!inherits(pts, "sf")  ) {
