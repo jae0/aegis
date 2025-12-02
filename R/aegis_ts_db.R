@@ -530,7 +530,7 @@
       #Z$yr = yrs
 
       # fishery data
-      res = bio.snowcrab::fishery_data( toget="aggregated" )
+      res = bio.snowcrab::fishery_data( toget="summary_annual" )
 
       res$landings = res$landings / 1000
       res$effort = res$effort / 1000
