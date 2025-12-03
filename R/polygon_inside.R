@@ -33,9 +33,17 @@
         }
       } else {
         if (planar) {
-          names(x) = c("plon", "plat")
+          if (exists("plon", x)) {
+            x = x[ , c("plon", "plat")]
+          } else {
+            names(x) = c("plon", "plat")
+          }
         } else {
-          names(x) = c("lon", "lat")
+          if (exists("lon", x)) {
+            x = x[, c("lon", "lat")]
+          } else {
+            names(x) = c("lon", "lat")
+          }
         }
       }
 
