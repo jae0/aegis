@@ -1,4 +1,6 @@
 
+Sys.chmod("0002")
+
 pkgsInstalled = .packages(all.available = TRUE)
 
 if (!"remotes" %in% pkgsInstalled ) {
