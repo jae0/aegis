@@ -23,11 +23,15 @@
         } else {
           names(x) = c("lon", "lat")
         }
-      }
-
-      if (inherits(x, "Spatial")) {
+      } else if (inherits(x, "Spatial")) {
         x = coordinates(x)
         x = as.data.table(x)
+        if (planar) {
+          names(x) = c("plon", "plat")
+        } else {
+          names(x) = c("lon", "lat")
+        }
+      } else {
         if (planar) {
           names(x) = c("plon", "plat")
         } else {
