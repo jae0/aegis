@@ -5,6 +5,11 @@ line.intersection.2d = function( p1a, p1b, p2a, p2b ) {
   
   line1 = explicit.to.implicit.2d.line( p1a, p1b )
   line2 = explicit.to.implicit.2d.line( p2a, p2b )
+  
+  if (any(!is.finite(line1)) | any(!is.finite(line2))) {
+    p = NULL 
+    return(p)
+  }
 
 #%  Set up and solve a linear system.
   a = rbind( line1, line2)

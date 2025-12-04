@@ -228,7 +228,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
     crs_lonlat = st_crs(projection_proj4string("lonlat_wgs84"))
     inside = st_points_in_polygons(
       pts = st_as_sf( set[, c("lon", "lat")], coords=c("lon","lat"), crs=crs_lonlat ),
-      polys = st_transform( coastline_db( p=p ), crs_lonlat )
+      polys = st_transform( coastline_db( p=p ), crs_lonlat ),
     )
     onland = which (inside)
     if (length(onland)>0) set = set[-onland, ]

@@ -3,9 +3,9 @@
 non_convex_hull = function( xy, plot=FALSE, lengthscale=NULL, method="voronoi", lenprob=0.9 ) {
 
   # best that xy be planar (km)
-  bb = sf::st_bbox( xy)
-  xr = bb["xmax"] - bb["xmin"]
-  yr = bb["ymax"] - bb["ymin"]
+
+  xr = diff(range(xy[,1]))
+  yr = diff(range(xy[,2]))
 
   lsc = min(c(xr, yr))  
 
@@ -18,8 +18,10 @@ non_convex_hull = function( xy, plot=FALSE, lengthscale=NULL, method="voronoi", 
       require(igraph)
 
       if( is.null(lengthscale) ) lengthscale = signif( lsc/100, 2 ) 
-      
-      xy = st_coordinates(xydata)
+
+      if (inherits(xy, "sf")) {     
+        xy = st_coordinates(xy)
+      }
       xy = unique(xy)
 
       o = ashape( xy[,1], xy[,2], alpha=lengthscale )
@@ -27,7 +29,7 @@ non_convex_hull = function( xy, plot=FALSE, lengthscale=NULL, method="voronoi", 
       ograph = graph.edgelist( u, directed = FALSE)
       cutg = ograph - E(ograph)[1]
       ends = names(which(degree(cutg) == 1))
-      path = get.shortest.paths(cutg, ends[1], ends[2])[[1]]
+      path = shortest_paths(cutg, ends[1], ends[2])[[1]]
       pathX = as.numeric(V(ograph)[path[[1]]]$name)
       pathX = c(pathX, pathX[1])
       if (0) {
@@ -43,8 +45,10 @@ non_convex_hull = function( xy, plot=FALSE, lengthscale=NULL, method="voronoi", 
   if (method=="voronoi" ) {
       
     if( is.null(lengthscale) ) lengthscale = signif( min(c(xr, yr)) / 100, 2 ) 
-
+    xy= data.frame(xy)
     xy$uid = 1:nrow(xy)
+
+    xy = st_as_sf(xy, coords=c("X", "Y") )
     xy_raster = stars::st_rasterize( xy["uid"], dx=lengthscale, dy=lengthscale )
     xy_pts = sf::st_as_sf( xy_raster, as_points=TRUE, na.rm=FALSE )
     xy_pts = xy_pts[ which(is.finite(xy_pts$uid)), ]

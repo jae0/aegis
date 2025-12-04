@@ -22,12 +22,23 @@
         xrange = range( c(p1a[1], p1b[1] ) ) 
         xrange2 = range( pfocus[1], p.test[i,1] )
         
-        p.intersection = line.intersection.2d ( p1a, p1b, pfocus, p.test[i,] )
+        p.intersection = try( line.intersection.2d ( p1a, p1b, pfocus, p.test[i,] ) )
         
+        if ( is.null( p.intersection ) ) {
+          break()
+          # next()
+        }
+        if ( any(!is.finite(p.intersection)) ) {
+          message("this should not happen .. some defaults have changed ?")
+          browser()
+          stop()
+        }
+
         if ( p.intersection[1] >= xrange[1] & p.intersection[1] <= xrange[2] & 
              p.intersection[1] >= xrange2[1] & p.intersection[1] <= xrange2[2] ) {
           i.test = i.test * 0  
         }
+
         if (i.test == 0) break()
      }
 

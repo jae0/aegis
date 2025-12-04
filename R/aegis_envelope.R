@@ -1,4 +1,11 @@
-aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returntype="sf", proj4string=NULL, hull_lengthscale=NULL ) {
+aegis_envelope = function( 
+    xy, 
+    method="non_convex_hull", 
+    spbuffer=NULL, 
+    returntype="sf", 
+    proj4string=NULL, 
+    hull_lengthscale=NULL 
+  ) {
 
   # obtain boundary of a bunch of points .. expect spatial points
   drange = range( c( diff(range( xy[,1] )), diff(range(xy[,2] )) ) )
@@ -47,9 +54,10 @@ aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returnty
   }
 
   if (method=="concave.hull") {
+    
     v = concave.hull( xy, ub=hull_lengthscale)
-    if ( any( !is.finite(v) )) next()
-    bnd = (
+  
+     bnd = (
 #      st_sfc( st_multipoint( xy ), crs=st_crs(proj4string) )
       st_sfc( st_multipoint( xy ) )
       %>% st_buffer(spbuffer)
@@ -65,8 +73,8 @@ aegis_envelope = function( xy, method="non_convex_hull", spbuffer=NULL, returnty
 
   if (method=="non_convex_hull") {
     v = non_convex_hull( xy, lengthscale=hull_lengthscale  )
-    if ( any( !is.finite(v) )) next()
-    bnd = (
+  
+     bnd = (
 #      st_sfc( st_multipoint( xy ), crs=st_crs(proj4string) )
       st_sfc( st_multipoint( xy ) )
       %>% st_buffer(spbuffer)

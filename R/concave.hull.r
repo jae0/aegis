@@ -17,7 +17,7 @@
     if ( nsets == 3) return( pts )
 
     # initiate list with the first few points
-    convex.hull <- spatstat::convexhull.xy( pts )
+    convex.hull <- spatstat.geom::convexhull.xy( pts )
 
     p0i = which.min( convex.hull$bdry[[1]]$y )
     if (random.start) {
@@ -31,13 +31,13 @@
     finished = F
     while ( ! finished ) {
       if (nrow(hull)==3) pts = rbind( pts.start, pts)  # return pts.start after a few steps
-      pts.new=NULL
-      pts.new = nearest.sorted.angles( pts, hull, k, eps=pi/10, ub=ub ) # eps determines the acute angle solutions to ignore
+      pts.new=NULL 
+      pts.new = nearest.sorted.angles( plist=pts, hull=hull, k=k, eps=pi/10, ub=ub ) # eps determines the acute angle solutions to ignore
       if (is.null(pts.new) ) {
         kadd = k
         while (is.null(pts.new) ) {
           kadd = kadd + 1
-          pts.new = nearest.sorted.angles( pts, hull, k=kadd, eps=pi/10, ub=ub )
+          pts.new = nearest.sorted.angles(plist=pts, hull=hull, k=kadd, eps=pi/10, ub=ub )
           if ((kadd-k) > 10) stop()
         }
       }

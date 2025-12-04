@@ -1,15 +1,15 @@
 
-st_points_in_polygons = function( pts, polys, varname=NULL, method="sp_direct" ) {
+st_points_in_polygons = function( pts, polys, varname=NULL, method="sf_fast" ) {
   #// drop in replacement
   # using over from sp is defunct ... eg:
   # timings based upon full bathymetry lookup
 
   proj4string = projection_proj4string("lonlat_wgs84")
 
-  if (method %in% c("sp", "sp_direct") ) {
+  if (method %in% c("sp", "sp_direct", "point.in.polygon") ) {
     # no varname method
     require(sp)
-    require(sf)
+    require(sf) 
 
     if (inherits(pts, "sf"))  {
       pts_crs = st_crs(pts)
@@ -26,10 +26,15 @@ st_points_in_polygons = function( pts, polys, varname=NULL, method="sp_direct" )
     }
  
     o = point.in.polygon(pts[,1], pts[,2], polys[,1], polys[,2]) 
+    i = which(o!=0)  # inside
+
+    if (!is.null(varname)) { 
+      stop( "this method does not return varname")
+    }
 
     out = rep(FALSE, length(o))
-    out[which(o!=0)] = TRUE
-
+    out[i] = TRUE  # no varname
+    
     return( out ) # match each datum to an area
   }
 
