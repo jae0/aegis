@@ -4,8 +4,15 @@ non_convex_hull = function( xy, plot=FALSE, lengthscale=NULL, method="voronoi", 
 
   # best that xy be planar (km)
 
-  xr = diff(range(xy[,1]))
-  yr = diff(range(xy[,2]))
+  if (inherits(xy, "sf")) {
+    bb = sf::st_bbox( xy)
+    xr = bb["xmax"] - bb["xmin"]
+    yr = bb["ymax"] - bb["ymin"]
+     
+  } else {
+    xr = diff(range(xy[,1]))
+    yr = diff(range(xy[,2]))
+  }
 
   lsc = min(c(xr, yr))  
 
@@ -45,11 +52,17 @@ non_convex_hull = function( xy, plot=FALSE, lengthscale=NULL, method="voronoi", 
   if (method=="voronoi" ) {
       
     if( is.null(lengthscale) ) lengthscale = signif( min(c(xr, yr)) / 100, 2 ) 
-    xy= data.frame(xy)
-    xy$uid = 1:nrow(xy)
+    
+    if (!inherits(xy, "sf")) {
+      xy= data.frame(xy)
+      xy$uid = 1:nrow(xy)
+      xy = st_as_sf(xy, coords=c("X", "Y") )
+    } else {
+      xy$uid = 1:nrow(xy)
+    }
 
-    xy = st_as_sf(xy, coords=c("X", "Y") )
-    xy_raster = stars::st_rasterize( xy["uid"], dx=lengthscale, dy=lengthscale )
+
+   xy_raster = stars::st_rasterize( xy["uid"], dx=lengthscale, dy=lengthscale )
     xy_pts = sf::st_as_sf( xy_raster, as_points=TRUE, na.rm=FALSE )
     xy_pts = xy_pts[ which(is.finite(xy_pts$uid)), ]
     xy_pts = unique(xy_pts)
