@@ -62,15 +62,19 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
     bnd = st_transform(bnd, crs=st_crs(Z) ) 
  
     if (exists("z", Z, )) {
-      inside = which( st_points_in_polygons( Z, bnd) & Z$z < z_range[2] & Z$z > z_range[1] )
+      inside = which( 
+          st_points_in_polygons( Z, bnd, method="sp::point.in.polygon" ) & 
+          Z$z < z_range[2] & 
+          Z$z > z_range[1] 
+      )
     } else {
-      inside = which( st_points_in_polygons( Z, bnd)  )
+      inside = which( st_points_in_polygons( Z, bnd, method="sp::point.in.polygon")  )  # fastest .. can use "sf" only as well with method="sf_fast" ..
     }
 
     if ( spatial_domain == "SSE.mpa" ) {
       bnd = polygon_db( polyid="scotia.fundy.with.buffer" )
       bnd = st_transform(bnd, crs=st_crs(Z) ) 
-      jj = which( st_points_in_polygons( Z[inside,], bnd)  )
+      jj = which( st_points_in_polygons( Z[inside,], bnd, method="sp::point.in.polygon" )  )
       if (length( jj) > 0) inside = inside[ jj]
     }
 
@@ -94,7 +98,7 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
       pbnd = st_make_valid(  pbnd  )
       pbnd = st_transform(pbnd, crs=st_crs(Z) ) 
 
-      tokeep = which( st_points_in_polygons( Z, pbnd) )
+      tokeep = which( st_points_in_polygons( Z, pbnd), method="sp::point.in.polygon" )
       
       # filter out area 4X
       cfa4x = as.data.frame( cbind(
@@ -149,7 +153,7 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
 
       if ( spatial_domain == "snowcrab" ) {
         #\\ NOTE::: snowcrab baseline == SSE baseline, except it is a subset
-        jj = polygon_inside( Z[ inside,c(1:2) ], region="cfaall", planar=TRUE, proj.type=ps$aegis_proj4string_planar_km, method="sp" )
+        jj = polygon_inside( Z[ inside,c(1:2) ], region="cfaall", planar=TRUE, proj.type=ps$aegis_proj4string_planar_km )
         if (length( jj) > 0) inside = inside[ jj ]
 
         # filter out area 4X

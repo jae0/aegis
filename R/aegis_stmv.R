@@ -229,6 +229,7 @@ aegis_stmv = function( DS=NULL, p=NULL, year=NULL, ret="mean", varnames=NULL, co
     inside = st_points_in_polygons(
       pts = st_as_sf( set[, c("lon", "lat")], coords=c("lon","lat"), crs=crs_lonlat ),
       polys = st_transform( coastline_db( p=p ), crs_lonlat ),
+      method = "sp::point.in.polygon"
     )
     onland = which (inside)
     if (length(onland)>0) set = set[-onland, ]

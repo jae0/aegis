@@ -6,8 +6,16 @@ st_points_in_polygons = function( pts, polys, varname=NULL, method="sf_fast" ) {
 
   proj4string = projection_proj4string("lonlat_wgs84")
 
-  if (method %in% c("sp", "sp_direct", "point.in.polygon") ) {
-    # no varname method
+  if (method %in% c("sp::point.in.polygon") ) {
+
+    # this is fastest if varname is not needed 
+    # for this use case, .. as convention, make method explicit in call:
+    # method="sp::point.in.polygon"
+
+    if (!is.null(varname)) { 
+      stop( "this method does not return varname .. it is fast because there is no join")
+    }
+    
     require(sp)
     require(sf) 
 
@@ -26,15 +34,10 @@ st_points_in_polygons = function( pts, polys, varname=NULL, method="sf_fast" ) {
     }
  
     o = point.in.polygon(pts[,1], pts[,2], polys[,1], polys[,2]) 
-    i = which(o!=0)  # inside
-
-    if (!is.null(varname)) { 
-      stop( "this method does not return varname")
-    }
-
-    out = rep(FALSE, length(o))
-    out[i] = TRUE  # no varname
     
+    out = rep(FALSE, length(o))
+    out[which(o!=0)] = TRUE  # inside
+
     return( out ) # match each datum to an area
   }
 
