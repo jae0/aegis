@@ -36,18 +36,8 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
  
   if (method=="sf") {
 
-    pts2poly = function(x) {
-      require(sf)
-      out = (
-        st_multipoint( as.matrix(x) )
-        %>% st_sfc( crs=st_crs(projection_proj4string("lonlat_wgs84")) )
-        %>% st_cast("POLYGON" )
-        %>% st_make_valid()
-      )
-      return(out)
-    }
+  
 
-    bnd = pts2poly(corners)
 
     if (!inherits(Z, "sf")) {
       if (exists("lon", Z)) {
@@ -59,6 +49,7 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
       }
     }
 
+    bnd = sf_pts2poly(corners)
     bnd = st_transform(bnd, crs=st_crs(Z) ) 
  
     if (exists("z", Z )) {
@@ -80,21 +71,9 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
 
     if ( spatial_domain == "snowcrab" ) {
       #\\ NOTE::: snowcrab baseline == SSE baseline, except it is a subset
-      region = aegis.polygons::polygon_internal_code( "cfaall" )
-      if (length(region) > 0) {
-        y = data.table::fread( aegis.polygons::polygon_file(region[1]) )
-        names(y) =c("lon", "lat")
-        pbnd = pts2poly(y)
-      }
-      if (length(region) > 1) {
-        for (i in 2:length(region) ) {
-          y = data.table::fread( aegis.polygons::polygon_file(region[i]) )
-          names(y) =c("lon", "lat")
-          pbnd = st_union( st_buffer(pbnd, 0.0001), st_buffer( pts2poly(y), 0.0001) )
-        
-        }
-      }
-
+      y = data.table::fread( aegis.polygons::polygon_file("cfaall" ) )
+      names(y) =c("lon", "lat")
+      pbnd = sf_pts2poly(y)
       pbnd = st_make_valid(  pbnd  )
       pbnd = st_transform(pbnd, crs=st_crs(Z) ) 
 
