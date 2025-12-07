@@ -78,11 +78,7 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
       pbnd = st_make_valid(  pbnd  )
       pbnd = st_transform(pbnd, crs=st_crs(Z) ) 
 
-<<<<<<< HEAD
-      tokeep = which( st_points_in_polygons( Z, pbnd, method="sp::point.in.polygon" ))
-=======
       tokeep = which( st_points_in_polygons( Z, pbnd, method="sp::point.in.polygon" ) )
->>>>>>> c0f275f (tidy)
       
       # filter out area 4X
       cfa4x = as.data.frame( cbind(
