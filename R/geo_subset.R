@@ -3,7 +3,8 @@ geo_subset = function( spatial_domain, Z, method="sf" ) {
 
   #\\ filter locations based upon depths and location of spatial_domain
   #\\ most are in planar coords (so require plon, plat and z {depth} )
-  
+  message ("geo_subset is deprecated, use aegis::filter_by_spatial_domain")
+
   inside = NULL
 
   # trim to extents
