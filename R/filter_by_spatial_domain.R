@@ -18,16 +18,16 @@ filter_by_spatial_domain = function(Z, spatial_domain ) {
   # trim to extents
   ps = spatial_parameters( spatial_domain=spatial_domain ) # obtain internal projection params
 
-  domain_extent =  rbind(
-    c( ps$domain_extent$lon[1], ps$domain_extent$lat[2] ),
-    c( ps$domain_extent$lon[2], ps$domain_extent$lat[2] ),
-    c( ps$domain_extent$lon[2], ps$domain_extent$lat[1] ),
-    c( ps$domain_extent$lon[1], ps$domain_extent$lat[1] ),
-    c( ps$domain_extent$lon[1], ps$domain_extent$lat[2] )
-  )
-
 
   if (inherits( Z, "sf")) {
+
+    domain_extent =  rbind(
+      c( ps$corners$lon[1], ps$corners$lat[2] ),
+      c( ps$corners$lon[2], ps$corners$lat[2] ),
+      c( ps$corners$lon[2], ps$corners$lat[1] ),
+      c( ps$corners$lon[1], ps$corners$lat[1] ),
+      c( ps$corners$lon[1], ps$corners$lat[2] )
+    )
 
     bnd = sf_pts2poly(domain_extent)
     bnd = st_transform(bnd, crs=st_crs(Z) ) 
@@ -89,13 +89,11 @@ filter_by_spatial_domain = function(Z, spatial_domain ) {
 
     # faster .. direct
  
-      if (!exists("plon", Z)) {
-        Z = lonlat2planar( Z, proj.type=ps$aegis_proj4string_planar_km ) # convert to internal projection
-      }
-
+      Z = lonlat2planar( Z, proj.type=ps$aegis_proj4string_planar_km ) # convert to internal projection
+      
       i = which(
-        Z$plon[inside] >= ps$domain_extent$plon[1] & Z$plon[inside] <= ps$domain_extent$plon[2] &
-        Z$plat[inside] >= ps$domain_extent$plat[1] & Z$plat[inside] <= ps$domain_extent$plat[2]  
+        Z$plon[inside] >= ps$corners$plon[1] & Z$plon[inside] <= ps$corners$plon[2] &
+        Z$plat[inside] >= ps$corners$plat[1] & Z$plat[inside] <= ps$corners$plat[2]  
       )
       if (length(i) > 0) inside = inside[i]
        
@@ -138,8 +136,9 @@ filter_by_spatial_domain = function(Z, spatial_domain ) {
 
         if (length(i) > 0) inside = inside[i]
        
-        return(inside)
       }
+      
+      return(inside)
   
   }
 
