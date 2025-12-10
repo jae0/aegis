@@ -89,8 +89,10 @@ filter_by_spatial_domain = function(Z, spatial_domain ) {
 
     # faster .. direct
  
-      Z = lonlat2planar( Z, proj.type=ps$aegis_proj4string_planar_km ) # convert to internal projection
-      
+      if (exists("lon", Z)) {
+        Z = lonlat2planar( Z, proj.type=ps$aegis_proj4string_planar_km ) # convert to internal projection
+      }
+
       i = which(
         Z$plon[inside] >= ps$corners$plon[1] & Z$plon[inside] <= ps$corners$plon[2] &
         Z$plat[inside] >= ps$corners$plat[1] & Z$plat[inside] <= ps$corners$plat[2]  
@@ -99,6 +101,9 @@ filter_by_spatial_domain = function(Z, spatial_domain ) {
        
       if ( spatial_domain == "SSE.mpa" ) {
         bnd = polygon_db( polyid="scotia.fundy.with.buffer" )
+        bnd = data.table( st_coordinates(bnd) )
+        names(bnd ) = c("lon", "lat", "l1", "l2")
+
         bnd = lonlat2planar( bnd, proj.type=ps$aegis_proj4string_planar_km ) # convert to internal projection
         i = which( sp::point.in.polygon( Z$plon[inside], Z$plat[inside], bnd$plon, bnd$plat) != 0 )
         if (length( i) > 0) inside = inside[ i ]
