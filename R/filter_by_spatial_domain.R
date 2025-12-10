@@ -88,7 +88,6 @@ filter_by_spatial_domain = function(Z, spatial_domain ) {
   } else {
 
     # faster .. direct
-browser()
 
       if (!exists("plon", Z)) {
         if (exists("lon", Z)) {
