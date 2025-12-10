@@ -83,14 +83,17 @@ filter_by_spatial_domain = function(Z, spatial_domain ) {
 
   } else if (inherits( Z, "Spatial")) {
          
-    return(stop("This method not yet implenented" ))
+    return(stop("This method not yet implemented" ))
 
   } else {
 
     # faster .. direct
- 
-      if (exists("lon", Z)) {
-        Z = lonlat2planar( Z, proj.type=ps$aegis_proj4string_planar_km ) # convert to internal projection
+browser()
+
+      if (!exists("plon", Z)) {
+        if (exists("lon", Z)) {
+          Z = lonlat2planar( Z, proj.type=ps$aegis_proj4string_planar_km ) # convert to internal projection
+        }
       }
 
       i = which(
@@ -103,7 +106,6 @@ filter_by_spatial_domain = function(Z, spatial_domain ) {
         bnd = polygon_db( polyid="scotia.fundy.with.buffer" )
         bnd = data.table( st_coordinates(bnd) )
         names(bnd ) = c("lon", "lat", "l1", "l2")
-
         bnd = lonlat2planar( bnd, proj.type=ps$aegis_proj4string_planar_km ) # convert to internal projection
         i = which( sp::point.in.polygon( Z$plon[inside], Z$plat[inside], bnd$plon, bnd$plat) != 0 )
         if (length( i) > 0) inside = inside[ i ]
@@ -137,7 +139,7 @@ filter_by_spatial_domain = function(Z, spatial_domain ) {
         if (length( dd6) > 0) inside = inside[- dd6 ]
 
         #\\ NOTE::: snowcrab baseline == SSE baseline, except it is a subset
-        i = polygon_inside( Z[ inside, c(1:2) ], region="cfaall", planar=TRUE, proj.type=ps$aegis_proj4string_planar_km )
+        i = polygon_inside( Z[ inside, c("plon", "plat") ], region="cfaall", planar=TRUE, proj.type=ps$aegis_proj4string_planar_km )
 
         if (length(i) > 0) inside = inside[i]
        

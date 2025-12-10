@@ -7,7 +7,7 @@ st_points_in_polygons = function( pts, polys, varname=NULL, method="sf_fast" ) {
   proj4string = projection_proj4string("lonlat_wgs84")
 
   if (method %in% c("sp::point.in.polygon") ) {
-
+    
     # this is fastest if varname is not needed 
     # for this use case, .. as convention, make method explicit in call:
     # method="sp::point.in.polygon"
@@ -33,7 +33,7 @@ st_points_in_polygons = function( pts, polys, varname=NULL, method="sf_fast" ) {
       # coords expected lon/lat or plon/plats
     }
  
-    o = point.in.polygon(pts[,1], pts[,2], polys[,1], polys[,2]) 
+    o = sp::point.in.polygon(pts[,1], pts[,2], polys[,1], polys[,2]) 
     
     out = rep(FALSE, length(o))
     out[which(o!=0)] = TRUE  # inside
