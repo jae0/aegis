@@ -1,6 +1,6 @@
 
 
-non_convex_hull = function( xy, plot=FALSE, lengthscale=NULL, method="voronoi", lenprob=0.9 ) {
+non_convex_hull = function( xy, plot=FALSE, lengthscale=NULL, method="voronoi", non_convex_hull_lenprob=0.9 ) {
 
   # best that xy be planar (km)
 
@@ -73,7 +73,7 @@ non_convex_hull = function( xy, plot=FALSE, lengthscale=NULL, method="voronoi", 
 
     lens = st_length(st_cast(sf_triangles, "LINESTRING"))
     units(lens) = NULL
-    lenll = max( quantile(lens, lenprob), lengthscale  )
+    lenll = max( quantile(lens, non_convex_hull_lenprob), lengthscale  )
  
     sfu = sf_triangles[ which(lens <= lenll) ]
     sfu = st_union( sfu )
