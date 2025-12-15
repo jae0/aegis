@@ -1,6 +1,6 @@
 
 
-aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_type="polygons",  
+aegis_mesh = function( pts, boundary=NULL, hull_boundary_ratio=0.1, spbuffer=0, resolution=100, output_type="polygons",  
   hull_lengthscale=NULL, fraction_cv=1.0, fraction_todrop=1/10, nAU_min=5, count_time=FALSE,
   areal_units_constraint_ntarget=1, areal_units_constraint_nmin=1, tus="none", verbose=FALSE, using_density_based_removal=FALSE 
 ) {
@@ -76,9 +76,10 @@ aegis_mesh = function( pts, boundary=NULL, spbuffer=0, resolution=100, output_ty
     M = M[ which(M$count > 0), ]
     M_xy = st_coordinates( M ) 
 
-    if ( is.null(boundary)) boundary="non_convex_hull"
+    if ( is.null(boundary)) boundary="st_concave_hull"
+
     if ( is.character(boundary) ) {
-      bnd = aegis_envelope( xy=M_xy, method=boundary, spbuffer=spbuffer,  hull_lengthscale=hull_lengthscale )
+      bnd = aegis_envelope( xy=M_xy, hull_boundary_ratio=hull_boundary_ratio  )
       st_crs(bnd) = pts_crs
     } else {
       bnd = st_transform(boundary, pts_crs)

@@ -1,9 +1,12 @@
 aegis_envelope = function( 
     xy, 
-    method="non_convex_hull", 
+    method="st_concave_hull", 
     spbuffer=NULL, 
     returntype="sf", 
     proj4string=NULL, 
+    xy_crs=NULL,
+    hull_tolerance=NULL,  
+    hull_boundary_ratio=0.1,
     hull_lengthscale=NULL 
   ) {
 
@@ -53,6 +56,7 @@ aegis_envelope = function(
       # plot(bnd)
   }
 
+ 
   if (method=="concave.hull") {
     
     v = concave.hull( xy, ub=hull_lengthscale)
@@ -86,6 +90,21 @@ aegis_envelope = function(
       %>% st_make_valid()
     )
       # plot(bnd)
+  }
+
+
+  if (method=="st_concave_hull") {
+
+    bnd = (
+        st_combine(xy)
+        %>% st_concave_hull( ratio=hull_boundary_ratio, allow_holes=FALSE )  
+        %>% st_sfc(crs = xy_crs)
+        %>% st_cast("POLYGON" )
+        %>% st_simplify(dTolerance=hull_tolerance)
+        %>% st_union()
+        %>% st_make_valid()
+      )
+
   }
 
 
