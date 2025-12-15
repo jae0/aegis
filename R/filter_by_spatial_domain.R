@@ -9,7 +9,7 @@ filter_by_spatial_domain = function(Z, spatial_domain ) {
       canada.east = c( 0, 5000 ),
       SSE.mpa = c( 0, 2000 ),
       SSE = c( 0, 800 ), 
-      snowcrab = c( 20, 450 )
+      snowcrab = c( 10, 350 )
     )
     inside = inside[ which( Z$z < z_range[2] & Z$z > z_range[1] ) ]
   }  
