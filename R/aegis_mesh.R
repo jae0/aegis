@@ -1,6 +1,6 @@
 
 
-aegis_mesh = function( pts, boundary=NULL, hull_boundary_ratio=0.1, spbuffer=0, resolution=100, output_type="polygons",  
+aegis_mesh = function( pts, boundary=NULL, hull_boundary_ratio=0.1, resolution=100, output_type="polygons",  
   hull_lengthscale=NULL, fraction_cv=1.0, fraction_todrop=1/10, nAU_min=5, count_time=FALSE,
   areal_units_constraint_ntarget=1, areal_units_constraint_nmin=1, tus="none", verbose=FALSE, using_density_based_removal=FALSE 
 ) {
@@ -19,7 +19,6 @@ aegis_mesh = function( pts, boundary=NULL, hull_boundary_ratio=0.1, spbuffer=0, 
     sp::proj4string(meuse) = CRS("+init=epsg:28992")
     pts = as(meuse, "sf")
     boundary=NULL
-    spbuffer=25
     resolution=100
     output_type="polygons"
     hull_lengthscale=50
@@ -30,11 +29,11 @@ aegis_mesh = function( pts, boundary=NULL, hull_boundary_ratio=0.1, spbuffer=0, 
     tus="none"
 
     res = aegis_mesh( pts=pts, hull_lengthscale=50 ) # 0 snap buffer
-    res = aegis_mesh( pts=pts, hull_lengthscale=50, spbuffer=25 ) # 50m snap buffer
-    res = aegis_mesh( pts=pts, hull_lengthscale=25, resolution=1, spbuffer=25, output_type="grid" )
+    res = aegis_mesh( pts=pts, hull_lengthscale=50 ) # 50m snap buffer
+    res = aegis_mesh( pts=pts, hull_lengthscale=25, resolution=1 output_type="grid" )
     res = aegis_mesh( pts=pts, hull_lengthscale=25, resolution=1, output_type="grid.count" )
-    res = aegis_mesh( pts=pts, hull_lengthscale=25, resolution=1, spbuffer=25 )
-    res = aegis_mesh( pts=pts, hull_lengthscale=25, resolution=5, spbuffer=25, areal_units_constraint_ntarget=1 )
+    res = aegis_mesh( pts=pts, hull_lengthscale=25, resolution=1 )
+    res = aegis_mesh( pts=pts, hull_lengthscale=25, resolution=5 areal_units_constraint_ntarget=1 )
 
     mypalette = colorRampPalette(c("darkblue","blue3", "green", "yellow", "orange","red3", "darkred"), space = "Lab")(100)
 
@@ -84,7 +83,7 @@ aegis_mesh = function( pts, boundary=NULL, hull_boundary_ratio=0.1, spbuffer=0, 
     } else {
       bnd = st_transform(boundary, pts_crs)
     }
-    bnd = st_buffer( bnd, spbuffer )
+    bnd = st_buffer( bnd, hull_lengthscale )
 
     if (0) {
       plot(bnd, reset=FALSE)
