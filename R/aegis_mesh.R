@@ -30,7 +30,7 @@ aegis_mesh = function( pts, boundary=NULL, hull_boundary_ratio=0.1, resolution=1
 
     res = aegis_mesh( pts=pts, hull_lengthscale=50 ) # 0 snap buffer
     res = aegis_mesh( pts=pts, hull_lengthscale=50 ) # 50m snap buffer
-    res = aegis_mesh( pts=pts, hull_lengthscale=25, resolution=1 output_type="grid" )
+    res = aegis_mesh( pts=pts, hull_lengthscale=25, resolution=1, output_type="grid" )
     res = aegis_mesh( pts=pts, hull_lengthscale=25, resolution=1, output_type="grid.count" )
     res = aegis_mesh( pts=pts, hull_lengthscale=25, resolution=1 )
     res = aegis_mesh( pts=pts, hull_lengthscale=25, resolution=5 areal_units_constraint_ntarget=1 )
