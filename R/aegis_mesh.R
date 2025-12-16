@@ -1,8 +1,21 @@
 
 
-aegis_mesh = function( pts, boundary=NULL, hull_boundary_ratio=0.1, resolution=100, output_type="polygons",  
-  hull_lengthscale=NULL, fraction_cv=1.0, fraction_todrop=1/10, nAU_min=5, count_time=FALSE,
-  areal_units_constraint_ntarget=1, areal_units_constraint_nmin=1, tus="none", verbose=FALSE, using_density_based_removal=FALSE 
+aegis_mesh = function( 
+  pts, 
+  boundary=NULL, 
+  hull_boundary_ratio=0.1, 
+  resolution=100, 
+  output_type="polygons",  
+  hull_lengthscale=NULL, 
+  fraction_cv=1.0, 
+  fraction_todrop=1/10, 
+  nAU_min=5, 
+  count_time=FALSE,
+  areal_units_constraint_ntarget=1, 
+  areal_units_constraint_nmin=1, 
+  tus="none", 
+  verbose=FALSE, 
+  using_density_based_removal=FALSE 
 ) {
 
 # fraction_cv = 1 means  ~ poisson
@@ -75,15 +88,14 @@ aegis_mesh = function( pts, boundary=NULL, hull_boundary_ratio=0.1, resolution=1
     M = M[ which(M$count > 0), ]
     M_xy = st_coordinates( M ) 
 
-    if ( is.null(boundary)) boundary="st_concave_hull"
-
-    if ( is.character(boundary) ) {
-      bnd = aegis_envelope( xy=M_xy, hull_boundary_ratio=hull_boundary_ratio  )
-      st_crs(bnd) = pts_crs
-    } else {
+    if ( !is.null(boundary) ) {
       bnd = st_transform(boundary, pts_crs)
-    }
-    bnd = st_buffer( bnd, hull_lengthscale )
+    } else {
+      bnd = aegis_envelope( xy=M_xy, hull_boundary_ratio=hull_boundary_ratio )
+      bnd = st_buffer( bnd, hull_lengthscale )
+      st_crs(bnd) = pts_crs
+    }  
+    
 
     if (0) {
       plot(bnd, reset=FALSE)
@@ -111,8 +123,6 @@ aegis_mesh = function( pts, boundary=NULL, hull_boundary_ratio=0.1, resolution=1
     while(!finished) {
 
       AU = tessellate( M_xy[M_tokeep,], outformat="sf", crs=pts_crs) # centroids via voronoi
-      AU = st_as_sf(AU)
-   #   AU = st_sf( st_intersection( AU, bnd ) ) # crop
 
       if(0) {
         x11();

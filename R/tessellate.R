@@ -1,6 +1,8 @@
 
-tessellate = function(xy, outformat="sf", method="sf", crs=NULL ) {
+tessellate = function(xy, outformat="sf", method="sf", crs=NULL, jitter=TRUE, boundary=NULL ) {
   # create a tiled geometry
+
+  xy = jitter(xy)
 
   if (anyDuplicated(xy)) message("duplicates found, they should be dropped before being sent to tesselate")
 
@@ -34,6 +36,8 @@ tessellate = function(xy, outformat="sf", method="sf", crs=NULL ) {
     sfpoly = st_make_valid(sfpoly[o])
     if (!is.null(crs)) st_crs(sfpoly) = crs
   }
+
+  if (!is.null(boundary)) sfpoly = st_sf( st_intersection( sfpoly, boundary ) ) # crop
 
   if (outformat=="sf") return( sfpoly )
   if (outformat=="sp") return( as(sfpoly, "Spatial") )
