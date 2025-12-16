@@ -35,10 +35,14 @@ tessellate = function(xy, outformat="sf", method="sf", crs=NULL, jitter=TRUE, bo
     o = unlist(st_intersects(mp, sfpoly)) # find the unique sort of polygons to points
     sfpoly = st_make_valid(sfpoly[o])
     if (!is.null(crs)) st_crs(sfpoly) = crs
+
   }
+
 
   if (!is.null(boundary)) sfpoly = st_sf( st_intersection( sfpoly, boundary ) ) # crop
 
+  sfpoly = st_sf(sfpoly)
+  
   if (outformat=="sf") return( sfpoly )
   if (outformat=="sp") return( as(sfpoly, "Spatial") )
 

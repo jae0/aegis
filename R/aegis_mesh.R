@@ -122,7 +122,7 @@ aegis_mesh = function(
     finished = FALSE
     while(!finished) {
 
-      AU = tessellate( M_xy[M_tokeep,], outformat="sf", crs=pts_crs) # centroids via voronoi
+      AU = tessellate( M_xy[M_tokeep,], outformat="sf", crs=pts_crs, boundary=bnd) # centroids via voronoi
 
       if(0) {
         x11();
@@ -240,7 +240,7 @@ aegis_mesh = function(
       # print( M_tokeep)
     }
 
-    AU = tessellate(M_xy[M_tokeep,], outformat="sf", crs=pts_crs) # centroids via voronoi
+    AU = tessellate(M_xy[M_tokeep,], outformat="sf", crs=pts_crs, boundary=bnd) # centroids via voronoi
     AU = st_sf( st_intersection( AU, bnd ) ) # crop
     message( "After tesselation, there are:  ", nrow(AU), " areal units." )
 
