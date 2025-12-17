@@ -21,6 +21,9 @@ aegis_lookup = function(
 ) {
 
 
+setDT(M)
+
+
  if (0) {
    # testing using snow data 
     p = bio.snowcrab::snowcrab_parameters(
@@ -33,7 +36,7 @@ aegis_lookup = function(
 
     M = snowcrab.db( p=p, DS="biological_data" )  
    
-    M = M[ which( M$yr %in% 2011:2015 ) ,]  # reduce data size
+    M = M[ which( M$yr %in% 2011:2015 ) ,]  # reduce data size  # data.table
     dim(M)
 
     sppoly = areal_units( p=p )  # poly to estimate a surface 
@@ -45,7 +48,7 @@ aegis_lookup = function(
      pL = p
       variable_name=list( "predictions" )
       # LUT = NULL    # look up table from which to obtain results
-      LOCS = M[, c("lon", "lat", "timestamp")]   # look up locations for which results are desired
+      LOCS = M[, .(lon, lat, timestamp)]   # look up locations for which results are desired
       LUT_AU=NULL   # areal units associated with LUT
       LOCS_AU=sppoly 
       project_class="core"   # "project_class" to look up from 
@@ -71,14 +74,14 @@ aegis_lookup = function(
       )
 
     # lookup raw data
-    o0 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat")],  LUT=LUT,
+    o0 = aegis_lookup(  pL=pL, LOCS=M[, .(lon, lat)],  LUT=LUT,
       project_class="core", output_format="points" , variable_name=c("z.mean" ),
       returntype="sf" 
     ) 
     plot(M[["z"]] ~ o0[["z.mean"]])
 
     # same as above but return as vector
-    o1 = aegis_lookup( pL = pL, LOCS=M[, c("lon", "lat")],  LUT=LUT,
+    o1 = aegis_lookup( pL = pL, LOCS=M[, .(lon, lat)],  LUT=LUT,
       project_class="core", output_format="points" ,  variable_name=c( "z.mean" ),
       returntype="vector"
     ) 
@@ -90,19 +93,19 @@ aegis_lookup = function(
         DS="complete",
         pL=pL )
 
-    o2 = aegis_lookup( pL = pL, LOCS=M[, c("lon", "lat")],  LUT=LUT,  
+    o2 = aegis_lookup( pL = pL, LOCS=M[, .(lon, lat)],  LUT=LUT,  
       project_class="stmv", output_format="points" ,   variable_name=c( "z", "dZ", "ddZ") 
     ) 
     plot(M[["z"]] ~ o2[["z"]])
 
     # spatial averaging to areal unit
     # this one is slow .. could be sped up if used 
-    o3 = aegis_lookup( pL = pL, LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly, LUT=LUT,  
+    o3 = aegis_lookup( pL = pL, LOCS=M[, .(lon, lat)],  LOCS_AU=sppoly, LUT=LUT,  
       project_class="stmv", output_format="areal_units" ,  variable_name=c( "z", "dZ", "ddZ") 
     ) 
 
     # spatial averaging by areal unit
-    o4 = aegis_lookup( pL = pL, LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly,  LUT=LUT,  
+    o4 = aegis_lookup( pL = pL, LOCS=M[, .(lon, lat)],  LOCS_AU=sppoly,  LUT=LUT,  
       project_class="core", output_format="areal_units" ,   variable_name=c( "z.mean", "z.sd", "z.n") 
     ) 
 
@@ -115,7 +118,7 @@ aegis_lookup = function(
         pL=pL 
       )
 
-    o5 = aegis_lookup( pL = pL, LOCS=M[, c("lon", "lat")],  LUT=LUT,
+    o5 = aegis_lookup( pL = pL, LOCS=M[, .(lon, lat)],  LUT=LUT,
       project_class="carstm", output_format="points", variable_name=list( "predictions" ), statvars=c("mean", "sd"), space_resolution=min(p$pres)
     ) 
     plot(M[["z"]] ~ o5)
@@ -130,12 +133,12 @@ aegis_lookup = function(
             pL=pL 
           )
 
-        o5r = aegis_lookup( pL = pL, LOCS=M[, c("lon", "lat")],  LUT=LUT,
+        o5r = aegis_lookup( pL = pL, LOCS=M[, .(lon, lat)],  LUT=LUT,
           project_class="carstm", output_format="points", variable_name=list( c( "space", "re_total") ), statvars=c("mean", "sd"), space_resolution=min(p$pres)
         ) 
     }
     # slow 
-    o6 = aegis_lookup( pL = pL, LOCS=M[, c("lon", "lat")],  LOCS_AU=sppoly, LUT=LUT,
+    o6 = aegis_lookup( pL = pL, LOCS=M[, .(lon, lat)],  LOCS_AU=sppoly, LUT=LUT,
       project_class="carstm", output_format="areal_units", variable_name=list( "predictions"  ), statvars=c("mean", "sd"), space_resolution=min(p$pres) /2
     ) 
 
@@ -177,27 +180,27 @@ aegis_lookup = function(
           )
 
  
-    # o1 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")],   LUT=LUT,
+    # o1 = aegis_lookup(  pL=pL, LOCS=M[, .(lon, lat, timestamp)],   LUT=LUT,
     #   project_class="core", output_format="points" , variable_name=c( "pca1"), space_resolution=2  
     # ) 
 
-    # o1 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")],     LUT=LUT,
+    # o1 = aegis_lookup(  pL=pL, LOCS=M[, .(lon, lat, timestamp)],     LUT=LUT,
     #   project_class="core", output_format="points" , variable_name=c( "pca1"), space_resolution=2  
     # ) 
 
-    # o2 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")],     LUT=LUT,
+    # o2 = aegis_lookup(  pL=pL, LOCS=M[, .(lon, lat, timestamp)],     LUT=LUT,
     #   project_class="stmv", output_format="points" ,   variable_name=c( "pca1") 
     # ) 
 
-    # o3 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly,   LUT=LUT,
+    # o3 = aegis_lookup(  pL=pL, LOCS=M[, .(lon, lat, timestamp)], LOCS_AU=sppoly,   LUT=LUT,
     #   project_class="core", output_format="areal_units" ,  variable_name=list( "pca1",  "pca2", "ca1", "ca2" )
     # ) 
  
-    o4 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")],   LUT=LUT,
+    o4 = aegis_lookup(  pL=pL, LOCS=M[, .(lon, lat, timestamp)],   LUT=LUT,
       project_class="carstm", output_format="points", variable_name=list( "predictions" ), statvars=c("mean", "sd")
     ) 
 
-    o5 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly,    LUT=LUT,
+    o5 = aegis_lookup(  pL=pL, LOCS=M[, .(lon, lat, timestamp)], LOCS_AU=sppoly,    LUT=LUT,
       project_class="carstm", output_format="areal_units" , variable_name=list( "predictions" ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
     ) 
 
@@ -229,24 +232,24 @@ aegis_lookup = function(
           )
 
  
-    # o1 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")],    LUT=LUT, 
+    # o1 = aegis_lookup(  pL=pL, LOCS=M[, .(lon, lat, timestamp)],    LUT=LUT, 
     #   project_class="core", output_format="points" ,  variable_name=c( "t.mean", "t.sd", "t.n"), space_resolution=2  
     # ) 
 
-    # o2 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")],    LUT=LUT,  
+    # o2 = aegis_lookup(  pL=pL, LOCS=M[, .(lon, lat, timestamp)],    LUT=LUT,  
     #   project_class="stmv", output_format="points" ,  variable_name=c( "t") 
     # ) 
 
-    # o3 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly,    LUT=LUT,
+    # o3 = aegis_lookup(  pL=pL, LOCS=M[, .(lon, lat, timestamp)], LOCS_AU=sppoly,    LUT=LUT,
     #   project_class="core", output_format="areal_units" ,  variable_name=list( "t.mean",  "t.sd", "t.n"  )
     # ) 
  
-    o4 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")], LUT=LUT,
+    o4 = aegis_lookup(  pL=pL, LOCS=M[, .(lon, lat, timestamp)], LUT=LUT,
       project_class="carstm", output_format="points", variable_name=list( "predictions" ), statvars=c("mean", "sd")
     ) 
     plot(M$t ~o4 )
 
-    o5 = aegis_lookup(  pL=pL, LOCS=M[, c("lon", "lat", "timestamp")], LOCS_AU=sppoly,  LUT=LUT,
+    o5 = aegis_lookup(  pL=pL, LOCS=M[, .(lon, lat, timestamp)], LOCS_AU=sppoly,  LUT=LUT,
       project_class="carstm", output_format="areal_units" , variable_name=list( "predictions" ), statvars=c("mean", "sd"), space_resolution=min(p$pres)/2
     ) 
 
@@ -272,13 +275,18 @@ aegis_lookup = function(
  
   }  ## END consistency checks
 
+
+
   require(stars)
 
   # -----------
   if (is.null(LUT)) stop("LUT is required")
-  
+ 
+
   i = attributes(LUT)
-  
+
+  setDT(LUT)
+
   if (is.null(pL)) {
      if ("pL" %in% names(i)) pL = i[["pL"]]
   }
@@ -329,12 +337,10 @@ aegis_lookup = function(
     
     if ( pL$dimensionality == "space" ) {
         if ( space_resolution != pL$pres ) {
-          setDT(LUT)
           # regrid to another resolution
           LUT$plon = trunc(LUT$plon / space_resolution + 1 ) * space_resolution
           LUT$plat = trunc(LUT$plat / space_resolution + 1 ) * space_resolution
           LUT = LUT[, setNames(.(mean( get(variable_name), na.rm=TRUE) ), variable_name), by=list(plon, plat) ]
-          setDF(LUT)
         }
         attr(LUT, "space_resolution") = space_resolution
         attr(LUT, "pL") = pL
@@ -344,21 +350,17 @@ aegis_lookup = function(
     if (pL$dimensionality == "space-time"  ) {
     
         if ( time_resolution != pL$tres ) {
-          setDT(LUT)
           LUT$yr = trunc( (LUT$yr + LUT$dyear )/ time_resolution + 1 ) * time_resolution
         }
         if ( space_resolution != pL$pres ) {
           # regrid to another resolution
-          setDT(LUT)
           LUT$plon = trunc(LUT$plon / space_resolution + 1 ) * space_resolution
           LUT$plat = trunc(LUT$plat / space_resolution + 1 ) * space_resolution
         }
         if ( time_resolution != pL$tres | space_resolution != pL$pres ) {
-          setDT(LUT)
           LUT = LUT[, setNames(.(mean( get(variable_name), na.rm=TRUE) ), variable_name), by=list(plon, plat, yr ) ]
           LUT$timestamp = lubridate::date_decimal( LUT$yr, tz=tz )
         }
-        setDF(LUT)
         attr(LUT, "space_resolution") = space_resolution
         attr(LUT, "time_resolution") = time_resolution
         attr(LUT, "pL") = pL
@@ -367,21 +369,17 @@ aegis_lookup = function(
     if (pL$dimensionality == "space-time-cyclic")  {
     
         if ( time_resolution != pL$tres ) {
-          setDT(LUT)
           LUT$dyear = trunc(LUT$dyear / time_resolution + 1 ) * time_resolution
         }
         if ( space_resolution != pL$pres ) {
           # regrid to another resolution
-          setDT(LUT)
           LUT$plon = trunc(LUT$plon / space_resolution + 1 ) * space_resolution
           LUT$plat = trunc(LUT$plat / space_resolution + 1 ) * space_resolution
         }
         if ( time_resolution != pL$tres | space_resolution != pL$pres ) {
-          setDT(LUT)
           LUT = LUT[, setNames(.(mean( get(variable_name), na.rm=TRUE) ), variable_name), by=list(plon, plat, yr, dyear) ]
           LUT$timestamp = lubridate::date_decimal( LUT$yr+LUT$dyear, tz=tz )
         }
-        setDF(LUT)
         attr(LUT, "space_resolution") = space_resolution
         attr(LUT, "time_resolution") = time_resolution
         attr(LUT, "pL") = pL
@@ -411,8 +409,8 @@ aegis_lookup = function(
       Sorigin = c( plon_range[1], plat_range[1] )
 
       ii = match( 
-          array_map( "xy->1", LOCS[, c("tplon","tplat")], dims=Sdims, res=Sres, origin=Sorigin ),
-          array_map( "xy->1", LUT[,c("plon","plat")], dims=Sdims, res=Sres, origin=Sorigin )
+          array_map( "xy->1", LOCS[, .(tplon,tplat)], dims=Sdims, res=Sres, origin=Sorigin ),
+          array_map( "xy->1", LUT[, .(plon,plat)], dims=Sdims, res=Sres, origin=Sorigin )
       )
 
       LOCS$tplon = LOCS$tplat  = NULL
@@ -421,7 +419,7 @@ aegis_lookup = function(
       for (vnm in variable_name) {
         if ( vnm %in% names(LUT )) {
           LOCS[[vnm]] = NA  
-          LOCS[[vnm]] = LUT[ ii, vnm ]
+          LOCS[[vnm]] = LUT[[vnm]][ii]
         } 
       } 
 
@@ -474,7 +472,7 @@ aegis_lookup = function(
 
 
       variable_name = intersect( names(LUT), variable_name )
-      LUT = LUT[, variable_name]
+      LUT = LUT[, ..variable_name]
       LU_map =  st_points_in_polygons( pts=LUT, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
 
       if (!exists("AUID", LOCS ))  LOCS[["AUID"]]  = st_points_in_polygons( pts=LOCS, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
@@ -654,13 +652,13 @@ aegis_lookup = function(
 
       ii = match( 
         paste(
-          array_map( "xy->1", LOCS[, c("tplon","tplat")], dims=Sdims, res=Sres, origin=Sorigin ), 
-          array_map( "ts->1", LOCS[, c("yr", "tdyear")], dims=Tdims, res=Tres, origin=Torigin ), 
+          array_map( "xy->1", LOCS[, .(tplon,tplat)], dims=Sdims, res=Sres, origin=Sorigin ), 
+          array_map( "ts->1", LOCS[, .(yr, tdyear)], dims=Tdims, res=Tres, origin=Torigin ), 
           sep="_"
         ), 
         paste( 
-          array_map( "xy->1", LUT[,c("plon","plat")], dims=Sdims, res=Sres, origin=Sorigin ), 
-          array_map( "ts->1", LUT[,c("yr", "dyear")], dims=Tdims, res=Tres, origin=Torigin ), 
+          array_map( "xy->1", LUT[, .(plon,plat)], dims=Sdims, res=Sres, origin=Sorigin ), 
+          array_map( "ts->1", LUT[, .(yr, dyear)], dims=Tdims, res=Tres, origin=Torigin ), 
           sep="_" 
         ) 
       )
@@ -671,7 +669,7 @@ aegis_lookup = function(
       for (vnm in variable_name) {
         if ( vnm %in% names(LUT )) {
           LOCS[[vnm]] = NA
-          LOCS[[vnm]] = LUT[ ii, vnm ]
+          LOCS[[vnm]] = LUT[[vnm]][ ii ]
 
         } 
 
@@ -714,13 +712,13 @@ aegis_lookup = function(
 
       LU_map = paste( 
         st_points_in_polygons( pts=LUT, polys=LOCS_AU[, "AUID"], varname= "AUID" ), 
-        array_map( "ts->1", LUT[,c("yr", "dyear")], dims=Tdims, res=Tres, origin=Torigin ), 
+        array_map( "ts->1", LUT[, .(yr, dyear)], dims=Tdims, res=Tres, origin=Torigin ), 
         sep="_"
       )
 
       LOCS_map =  paste( 
         st_points_in_polygons( pts=LOCS, polys = LOCS_AU[, "AUID"], varname= "AUID" ),  
-        array_map( "ts->1", LOCS[, c("yr", "tdyear")], dims=Tdims, res=Tres, origin=Torigin ), 
+        array_map( "ts->1", LOCS[, .(yr, tdyear)], dims=Tdims, res=Tres, origin=Torigin ), 
         sep="_"
       )
   
@@ -935,13 +933,13 @@ aegis_lookup = function(
 
       ii = match( 
         paste(
-          array_map( "xy->1", LOCS[, c("tplon","tplat")], dims=Sdims, res=Sres, origin=Sorigin ), 
-          array_map( "ts->1", LOCS[, c("yr", "tdyear")], dims=Tdims, res=Tres, origin=Torigin ), 
+          array_map( "xy->1", LOCS[, .(tplon,tplat)], dims=Sdims, res=Sres, origin=Sorigin ), 
+          array_map( "ts->1", LOCS[, .(yr, tdyear)], dims=Tdims, res=Tres, origin=Torigin ), 
           sep="_"
         ), 
         paste( 
-          array_map( "xy->1", LUT[,c("plon","plat")], dims=Sdims, res=Sres, origin=Sorigin ), 
-          array_map( "ts->1", LUT[,c("yr", "dyear")], dims=Tdims, res=Tres, origin=Torigin ), 
+          array_map( "xy->1", LUT[, .(plon,plat)], dims=Sdims, res=Sres, origin=Sorigin ), 
+          array_map( "ts->1", LUT[, .(yr, dyear)], dims=Tdims, res=Tres, origin=Torigin ), 
           sep="_" 
         ) 
       )
@@ -952,7 +950,7 @@ aegis_lookup = function(
       for (vnm in variable_name) {
         if ( vnm %in% names(LUT )) {
           LOCS[[vnm]] = NA  
-          LOCS[[vnm]] = LUT[ ii, vnm ]
+          LOCS[[vnm]] = LUT[[vnm]][ ii ]
         } 
       }
 
@@ -997,7 +995,7 @@ aegis_lookup = function(
 
       LU_map = paste( 
         st_points_in_polygons( pts=LUT, polys=LOCS_AU[, "AUID"], varname= "AUID" ), 
-        array_map( "ts->1", st_drop_geometry( LUT) [,c("yr", "dyear")], dims=Tdims, res=Tres, origin=Torigin), 
+        array_map( "ts->1", st_drop_geometry( LUT) [, c("yr", "dyear")], dims=Tdims, res=Tres, origin=Torigin), 
         sep="_"
       )
 
@@ -1006,7 +1004,6 @@ aegis_lookup = function(
         array_map( "ts->1", st_drop_geometry(LOCS)[ , c("yr", "dyear") ], dims=Tdims, res=Tres, origin=Torigin), 
         sep="_"
       )
-
 
       LUT = setDT(st_drop_geometry(LUT))
 
@@ -1072,7 +1069,7 @@ aegis_lookup = function(
 
       ll = cbind( 
         ii, 
-        array_map( "ts->2", LOCS_DF[, c("yr", "dyear")], dims=c(ny, nw), res=c( 1, 1/nw ), origin=c( yr0, 0) ) 
+        array_map( "ts->2", LOCS_DF[, .(yr, dyear)], dims=c(ny, nw), res=c( 1, 1/nw ), origin=c( yr0, 0) ) 
       )
       LOCS_DF = NULL
 
@@ -1146,8 +1143,8 @@ aegis_lookup = function(
       LOCS_DF = LOCS
       if (inherits(LOCS_DF, "sf")) LOCS_DF = st_drop_geometry(LOCS_DF)
 
-      TIMESTAMP_index1 = array_map( "ts->year_index", LOCS_DF[, "yr"], dims=c(ny ), res=c( 1  ), origin=c( yr0 ) )
-      TIMESTAMP_index2 = array_map( "ts->2", LOCS_DF[, c("yr", "dyear")], dims=c(ny, nw), res=c( 1, 1/nw ), origin=c( yr0, 0) )
+      TIMESTAMP_index1 = array_map( "ts->year_index", LOCS_DF[["yr"]], dims=c(ny ), res=c( 1  ), origin=c( yr0 ) )
+      TIMESTAMP_index2 = array_map( "ts->2", LOCS_DF[, .(yr, dyear)], dims=c(ny, nw), res=c( 1, 1/nw ), origin=c( yr0, 0) )
       
       if (any( TIMESTAMP_index1 < 0)) {
         TIMESTAMP_index1[ which( TIMESTAMP_index1 <= 0 ) ] = NA
