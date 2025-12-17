@@ -21,7 +21,6 @@ aegis_lookup = function(
 ) {
 
 
-setDT(M)
 
 
  if (0) {
@@ -285,7 +284,6 @@ setDT(M)
 
   i = attributes(LUT)
 
-  setDT(LUT)
 
   if (is.null(pL)) {
      if ("pL" %in% names(i)) pL = i[["pL"]]
@@ -338,6 +336,7 @@ setDT(M)
     if ( pL$dimensionality == "space" ) {
         if ( space_resolution != pL$pres ) {
           # regrid to another resolution
+          setDT(LUT)
           LUT$plon = trunc(LUT$plon / space_resolution + 1 ) * space_resolution
           LUT$plat = trunc(LUT$plat / space_resolution + 1 ) * space_resolution
           LUT = LUT[, setNames(.(mean( get(variable_name), na.rm=TRUE) ), variable_name), by=list(plon, plat) ]
@@ -358,6 +357,7 @@ setDT(M)
           LUT$plat = trunc(LUT$plat / space_resolution + 1 ) * space_resolution
         }
         if ( time_resolution != pL$tres | space_resolution != pL$pres ) {
+         setDT(LUT)
           LUT = LUT[, setNames(.(mean( get(variable_name), na.rm=TRUE) ), variable_name), by=list(plon, plat, yr ) ]
           LUT$timestamp = lubridate::date_decimal( LUT$yr, tz=tz )
         }
@@ -377,6 +377,8 @@ setDT(M)
           LUT$plat = trunc(LUT$plat / space_resolution + 1 ) * space_resolution
         }
         if ( time_resolution != pL$tres | space_resolution != pL$pres ) {
+         
+          setDT(LUT)
           LUT = LUT[, setNames(.(mean( get(variable_name), na.rm=TRUE) ), variable_name), by=list(plon, plat, yr, dyear) ]
           LUT$timestamp = lubridate::date_decimal( LUT$yr+LUT$dyear, tz=tz )
         }
@@ -408,6 +410,7 @@ setDT(M)
       Sres = c(space_resolution, space_resolution)
       Sorigin = c( plon_range[1], plat_range[1] )
 
+      setDT(LUT)
       ii = match( 
           array_map( "xy->1", LOCS[, .(tplon,tplat)], dims=Sdims, res=Sres, origin=Sorigin ),
           array_map( "xy->1", LUT[, .(plon,plat)], dims=Sdims, res=Sres, origin=Sorigin )
@@ -472,7 +475,7 @@ setDT(M)
 
 
       variable_name = intersect( names(LUT), variable_name )
-      LUT = LUT[, ..variable_name]
+      LUT = LUT[, variable_name]
       LU_map =  st_points_in_polygons( pts=LUT, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
 
       if (!exists("AUID", LOCS ))  LOCS[["AUID"]]  = st_points_in_polygons( pts=LOCS, polys=LOCS_AU[, "AUID"], varname= "AUID" ) 
@@ -481,6 +484,7 @@ setDT(M)
       setDT(LUT)
       for (vnm in variable_name) {
         if ( vnm %in% names(LUT )) {  
+          
           # LUT_regridded = tapply( st_drop_geometry(LUT)[, vnm], LU_map, FUN=FUNC, na.rm=TRUE )
           LUT_regridded = LUT[, setNames(.(mean( get(vnm), na.rm=TRUE) ), vnm), by=.(LU_map) ]
           LOCS[[ vnm ]] = LUT_regridded[ match( LOCS$AUID, LUT_regridded$LU_map ), vnm, with=FALSE ]
@@ -649,7 +653,7 @@ setDT(M)
       Sdims = c(length(plons), length(plats))
       Sres = c(space_resolution, space_resolution)
       Sorigin = c( plon_range[1], plat_range[1] )
-
+      setDT(LUT)
       ii = match( 
         paste(
           array_map( "xy->1", LOCS[, .(tplon,tplat)], dims=Sdims, res=Sres, origin=Sorigin ), 
@@ -709,10 +713,9 @@ setDT(M)
 
       if (! inherits(LOCS$timestamp, "POSIXct") )  LOCS$timestamp =  lubridate::date_decimal( LOCS$timestamp, tz=tz )
       if (! exists("yr", LOCS) ) LOCS$yr = lubridate::year(LOCS$timestamp) 
-
       LU_map = paste( 
         st_points_in_polygons( pts=LUT, polys=LOCS_AU[, "AUID"], varname= "AUID" ), 
-        array_map( "ts->1", LUT[, .(yr, dyear)], dims=Tdims, res=Tres, origin=Torigin ), 
+        array_map( "ts->1", LUT[, c("yr", "dyear")], dims=Tdims, res=Tres, origin=Torigin ), 
         sep="_"
       )
 
@@ -930,7 +933,7 @@ setDT(M)
       Sdims = c(length(plons), length(plats))
       Sres = c(space_resolution, space_resolution)
       Sorigin = c( plon_range[1], plat_range[1] )
-
+      setDT(LUT)
       ii = match( 
         paste(
           array_map( "xy->1", LOCS[, .(tplon,tplat)], dims=Sdims, res=Sres, origin=Sorigin ), 
