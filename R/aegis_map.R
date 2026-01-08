@@ -87,7 +87,7 @@
         }
         if (depthcontours) {
 
-          isobs = aegis.bathymetry::isobath_db( spatial_domain=spatial_domain, depths=c( 100, 200, 300, 400, 500, 600, 700 ) )
+          isobs = aegis.bathymetry::isobath_db( spatial_domain=spatial_domain, depths=c( 100, 200, 300, 400, 500 ) )
 
           isobs = st_transform( isobs, crs=st_crs(projection_map_proj4string) )
           
