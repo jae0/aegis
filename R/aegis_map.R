@@ -87,7 +87,7 @@
         }
         if (depthcontours) {
 
-          isobs = isobath_db( spatial_domain=spatial_domain, depths=c( 100, 200, 300, 400, 500 ) )
+          isobs = isobath_db( spatial_domain=pp$spatial_domain, depths=c( 100, 200, 300, 400, 500 ) )
 
           isobs = as( isobs, "Spatial")
           isobs = st_transform( isobs, crs=st_crs(projection_map_proj4string) )
