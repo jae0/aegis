@@ -3,7 +3,8 @@ projection_proj4string = function(x) {
     # for examples, see:
     # http://www.progonos.com/furuti/MapProj/Normal/TOC/cartTOC.html
     out  = switch( x,
-      lonlat_wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs",
+      lonlat_wgs84 = "EPSG:4326",
+      lonlat  = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs",
       utm19		= "+proj=utm +ellps=WGS84 +zone=19 +units=km ",
       utm20             = "+proj=utm +ellps=WGS84 +zone=20 +units=km ",
       utm21             = "+proj=utm +ellps=WGS84 +zone=21 +units=km ",
