@@ -88,6 +88,7 @@
         if (depthcontours) {
 
           isobs = isobath_db( spatial_domain=pp$spatial_domain, depths=c( 100, 200, 300, 400, 500 ) )
+          st_crs(isobs) = st_crs( projection_proj4string("lonlat_wgs84")  )
 
           isobs = st_transform( isobs, crs=st_crs(projection_map_proj4string) )
           isobs = as( isobs, "Spatial")
@@ -99,15 +100,15 @@
 
           if (length(depths1) > 0 ) {
             for ( i in depths1 ) {
-              spl = as( as( isobs[i,], "Spatial"), "SpatialLines") 
-              sp.lines( spl, col = rgb(0.2,0.2,0.2,0.5), cex=0.5 )
+              spl = as( isobs[i,], "SpatialLines") 
+              sp.lines( spl, col = rgb(0.2,0.2,0.2,0.5), lwd=0.5, cex=0.5 )
             }
           }
 
           if (length(depths2) > 0 ) {
             for ( i in depths2 ) {
-              spl = as( as( isobs[i,], "Spatial"), "SpatialLines") 
-              sp.lines( spl, col = rgb(0.3,0.3,0.3,0.5), cex=0.5 )
+              spl = as( isobs[i,], "SpatialLines") 
+              sp.lines( spl, col = rgb(0.3,0.3,0.3,0.5), lwd=0.5, cex=0.5 )
             }
           }
         }
